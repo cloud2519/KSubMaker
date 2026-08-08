@@ -256,6 +256,7 @@ class Transcriber:
         vad_filter: bool = True,
         word_timestamps: bool = True,
         condition_on_previous_text: bool = False,
+        initial_prompt: str | None = None,
         duration_seconds: float | None = None,
         allow_download: bool = False,
         token: CancellationToken | None = None,
@@ -285,11 +286,26 @@ class Transcriber:
         if token is not None:
             token.raise_if_cancelled()
 
+        # -----------------------------------------------------------------------
+        # initial_prompt & VAD speech_pad_ms 최적화:
+        # 1) initial_prompt: 음성 인식 디코더의 초기 문맥(맞춤법/띄어쓰기)을 잡아주어
+        #    동일 단어 중복 반복(할루시네이션) 및 어휘 오인식률을 대폭 낮춥니다.
+        # 2) 원문 언어별(ko, ja 등) 분기: 원음 언어에 맞는 힌트를 주어 타 언어 간섭을 방지합니다.
+        # 3) vad_parameters (speech_pad_ms=400): 문장 끝 발음/어미가 잘려나가는 것을 예방합니다.
+        # -----------------------------------------------------------------------
+        if initial_prompt is None:
+            if language == "ko":
+                initial_prompt = "한국어 자막입니다. 띄어쓰기와 맞춤법을 준수합니다."
+            elif language == "ja":
+                initial_prompt = "日本語の字幕です。"
+
         options: dict[str, Any] = {
             "beam_size": max(1, int(beam_size)),
             "vad_filter": bool(vad_filter),
+            "vad_parameters": dict(speech_pad_ms=400) if vad_filter else None,
             "word_timestamps": bool(word_timestamps),
             "condition_on_previous_text": bool(condition_on_previous_text),
+            "initial_prompt": initial_prompt,
             # None means "detect"; faster-whisper treats the empty string as an error.
             "language": None if not language or language == "auto" else language,
         }
