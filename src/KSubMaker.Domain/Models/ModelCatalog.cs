@@ -14,6 +14,9 @@ public static class ModelIds
     public const string WhisperLargeV3 = "whisper-large-v3";
     public const string WhisperLargeV3Turbo = "whisper-large-v3-turbo";
 
+    /// <summary>Japanese-only. Never recommended automatically — see the catalog entry.</summary>
+    public const string WhisperKotobaV2 = "kotoba-whisper-v2.0";
+
     public const string TranslationNllb600M = "nllb-200-distilled-600M";
     public const string TranslationNllb13B = "nllb-200-distilled-1.3B";
 
@@ -280,6 +283,37 @@ public sealed class ModelCatalog
             },
             License = "MIT (모델 가중치: OpenAI Whisper, MIT)",
             Description = "large-v3에 가까운 정확도에 약 4배 빠른 속도. VRAM 8GB 환경의 기본값입니다."
+        };
+
+        // Japanese-only, and deliberately not part of SelectWhisper. The recommendation runs before
+        // anything has been transcribed, so it cannot know the source language; steering a user
+        // there automatically would hand them a model that is *worse* on every other language.
+        // It is an explicit choice for someone who knows their folder is Japanese.
+        //
+        // The file set is the same five names as the large-v3 generation, so it needs no new
+        // layout handling — the whole entry is data.
+        yield return new ModelDescriptor
+        {
+            Id = ModelIds.WhisperKotobaV2,
+            Kind = ModelKind.Whisper,
+            DisplayName = "Kotoba-Whisper v2.0 — 일본어 전용 (CTranslate2)",
+            RepositoryId = "kotoba-tech/kotoba-whisper-v2.0-faster",
+            IncludePattern = ModelFileSelector.AnyFile,
+            EssentialFilePattern = ModelFileSelector.Ct2EssentialFile,
+            Layout = ModelPayloadLayout.Directory,
+            FallbackFiles = WhisperV3Files(),
+            ApproxSizeBytes = 1_516_480_096L, // 1,446 MiB
+            VramGbByComputeType = new Dictionary<ComputeType, double>
+            {
+                [ComputeType.Float16] = 3.0,
+                [ComputeType.Int8Float16] = 1.9,
+                [ComputeType.Int8] = 1.8
+            },
+            License = "MIT (모델 가중치: Kotoba Technologies, MIT)",
+            Description =
+                "일본어 음성에 특화된 Whisper 파인튜닝. large-v3의 절반 크기로 더 빠릅니다. " +
+                "일본어 영상에만 쓰세요 — 다른 언어에서는 정확도가 떨어집니다. " +
+                "distil 계열이라 단어 단위 타임스탬프 정밀도가 large-v3보다 낮을 수 있습니다."
         };
 
         yield return new ModelDescriptor
