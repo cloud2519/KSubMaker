@@ -1,0 +1,61 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+publish/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+
+## NuGet
+*.nupkg
+packages/
+
+## Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+
+## Runtime payload that must never be committed (see AGENTS.md)
+tools/ffmpeg/
+tools/python/
+tools/llama/
+# Leading slash: repo root only. An unanchored `models/` matches **any** directory of that name at
+# any depth, which silently excluded src/KSubMaker.Domain/Models, src/KSubMaker.Infrastructure/Models
+# and tests/KSubMaker.IntegrationTests/Models — ModelCatalog.cs, HttpModelManager.cs and friends.
+# The old clone never noticed: ignore rules do not apply to files git is already tracking, so it
+# only surfaced when the repository was re-initialised and those eight files went missing.
+/models/
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.onnx
+
+## Local databases, caches and logs
+*.db
+*.db-shm
+*.db-wal
+logs/
+*.log
+
+## Installer output
+installer/Output/
+
+## pytest-cov 산출물
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/

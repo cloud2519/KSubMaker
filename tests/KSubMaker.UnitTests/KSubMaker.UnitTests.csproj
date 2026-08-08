@@ -1,0 +1,100 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>KSubMaker.UnitTests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
+    <!--
+      The suite deliberately asserts on Korean text, so the invariant-globalization switch must stay
+      off (it is already off in Directory.Build.props) and the test host has to keep the ko-KR data.
+    -->
+    <NoWarn>$(NoWarn);CA1861;xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\KSubMaker.Domain\KSubMaker.Domain.csproj" />
+    <ProjectReference Include="..\..\src\KSubMaker.Application\KSubMaker.Application.csproj" />
+    <ProjectReference Include="..\..\src\KSubMaker.Infrastructure\KSubMaker.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\KSubMaker.WorkerProtocol\KSubMaker.WorkerProtocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="FluentAssertions" />
+  </ItemGroup>
+
+  <!--
+    The error-code parity test reads the Python source that mirrors ErrorCodes. Copying it next to
+    the test assembly makes the test independent of the working directory the runner happens to use.
+  -->
+  <ItemGroup>
+    <None Include="..\..\worker\ksubmaker_worker\errors.py"
+          Link="WorkerSource\errors.py"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    The WPF shell targets net10.0-windows and cannot be referenced from a suite that has to run on
+    Linux, so its packaging inputs are copied instead. That is enough to keep the win32 manifest and
+    the property that embeds it under test.
+  -->
+  <ItemGroup>
+    <None Include="..\..\src\KSubMaker.App\app.manifest"
+          Link="AppPackaging\app.manifest"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\src\KSubMaker.App\KSubMaker.App.csproj"
+          Link="AppPackaging\KSubMaker.App.csproj.xml"
+          CopyToOutputDirectory="PreserveNewest" />
+
+    <!--
+      Strings.Designer.cs is maintained by hand (AGENTS.md §8), so nothing but a test keeps it in
+      step with the .resx it claims to be generated from.
+    -->
+    <None Include="..\..\src\KSubMaker.App\Resources\Strings.resx"
+          Link="AppPackaging\Strings.resx.xml"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\src\KSubMaker.App\Resources\Strings.Designer.cs"
+          Link="AppPackaging\Strings.Designer.cs.txt"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Verbatim Hugging Face tree listings. ModelFileSelectorTests and ModelCatalogFixtureTests replay
+    them so the file-selection rule and every catalog number are checked with no network at all.
+  -->
+  <ItemGroup>
+    <None Include="..\fixtures\huggingface\*.json"
+          Link="HuggingFaceListings\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Shared with worker/tests/test_translatable_parity.py. Both languages have to give the same
+    answer for "is there anything to translate in this cue?" and for the mostly-blank threshold, so
+    the cases live in one file that neither side owns.
+  -->
+  <ItemGroup>
+    <None Include="..\fixtures\translation\*.json"
+          Link="TranslationFixtures\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Every shipped PowerShell / Inno Setup script, copied verbatim so ScriptEncodingTests can check
+    its first three bytes. The glob is deliberate: a newly added script is covered automatically.
+  -->
+  <ItemGroup>
+    <None Include="..\..\scripts\*.ps1"
+          Link="ShippedScripts\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\installer\*.iss"
+          Link="ShippedScripts\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>KSubMaker.Infrastructure</RootNamespace>
+
+    <!--
+      Deliberately net10.0 and not net10.0-windows: everything Windows specific in this assembly
+      (registry, GlobalMemoryStatusEx) is guarded by OperatingSystem.IsWindows(), which keeps the
+      unit tests runnable on a Linux CI agent.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KSubMaker.Domain\KSubMaker.Domain.csproj" />
+    <ProjectReference Include="..\KSubMaker.Application\KSubMaker.Application.csproj" />
+    <ProjectReference Include="..\KSubMaker.WorkerProtocol\KSubMaker.WorkerProtocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <!-- Design-time only: needed for IDesignTimeDbContextFactory and `dotnet ef migrations`. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+
+    <!--
+      Microsoft.Win32.Registry is intentionally NOT referenced as a package: on net10.0 the registry
+      API already ships in Microsoft.NETCore.App, and adding the 5.0.0 compatibility package only
+      drags in a vulnerable System.Security.Cryptography.Xml (NU1903) plus an NU1510 warning.
+      All registry calls are guarded with OperatingSystem.IsWindows().
+    -->
+  </ItemGroup>
+
+</Project>

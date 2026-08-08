@@ -1,0 +1,44 @@
+[
+  {
+    "type": "file",
+    "oid": "c7d9f3332a950355d5a77d85000f05e6f45435ea",
+    "size": 1477,
+    "path": ".gitattributes"
+  },
+  {
+    "type": "file",
+    "oid": "68a6ff5e20f337a8b4e27e4ea4cca73afb9a40fb",
+    "size": 2005,
+    "path": "README.md"
+  },
+  {
+    "type": "file",
+    "oid": "242aa06a480a7b5509375c645097e87af5136774",
+    "size": 2257,
+    "path": "config.json"
+  },
+  {
+    "type": "file",
+    "oid": "89243526876c43bec8c06b4acd15713e45a79691",
+    "size": 1527906378,
+    "lfs": {
+      "oid": "9b45e1009dcc4ab601eff815b61d80e60ce3fd8c74c1a14f4a282258286b51ae",
+      "size": 1527906378,
+      "pointerSize": 135
+    },
+    "xetHash": "4f4fbde9ef3dc7957f5a4474dd7399bf1d4f87ff951e6e4ce5c366d2ad91f427",
+    "path": "model.bin"
+  },
+  {
+    "type": "file",
+    "oid": "7818adb6de9fa3064d3ff81226fdd675be1f6344",
+    "size": 2203239,
+    "path": "tokenizer.json"
+  },
+  {
+    "type": "file",
+    "oid": "c9074644d9d1205686f16d411564729461324b75",
+    "size": 459861,
+    "path": "vocabulary.txt"
+  }
+]

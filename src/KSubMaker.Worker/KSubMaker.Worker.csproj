@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>KSubMaker.Worker</RootNamespace>
+
+    <!--
+      Deliberately *not* net10.0-windows. The Job Object interop is guarded with
+      OperatingSystem.IsWindows() so the whole host can be compiled, unit tested and
+      smoke-tested from Linux/CI, while still getting the "kill the whole tree" guarantee
+      on the platform the product actually ships on.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KSubMaker.Domain\KSubMaker.Domain.csproj" />
+    <ProjectReference Include="..\KSubMaker.Application\KSubMaker.Application.csproj" />
+    <ProjectReference Include="..\KSubMaker.WorkerProtocol\KSubMaker.WorkerProtocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+
+</Project>

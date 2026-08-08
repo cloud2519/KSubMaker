@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+    <RootNamespace>KSubMaker.App</RootNamespace>
+    <AssemblyName>KSubMaker.App</AssemblyName>
+
+    <!--
+      The WPF shell is the only assembly in the solution that cannot run outside Windows.
+      EnableWindowsTargeting (Directory.Build.props) still lets it be restored and compiled on the
+      Linux verification agent, which is what keeps this project inside the normal CI build.
+    -->
+
+    <!--
+      Carries longPathAware (매우 긴 경로), PerMonitorV2 DPI awareness and the asInvoker trust level.
+      A manifest is the only way to declare any of those for a WPF process; the WinForms-only
+      <ApplicationHighDpiMode> property that used to sit here did nothing in a UseWindowsForms=false
+      project. The manifest itself explains what each entry is for.
+    -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KSubMaker.Domain\KSubMaker.Domain.csproj" />
+    <ProjectReference Include="..\KSubMaker.Application\KSubMaker.Application.csproj" />
+    <ProjectReference Include="..\KSubMaker.Infrastructure\KSubMaker.Infrastructure.csproj" />
+    <ProjectReference Include="..\KSubMaker.Worker\KSubMaker.Worker.csproj" />
+    <ProjectReference Include="..\KSubMaker.WorkerProtocol\KSubMaker.WorkerProtocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Strings.Designer.cs is checked in and maintained by hand: the build agent has no Visual Studio
+      to run the single-file generator. The Generator/LastGenOutput metadata is kept so that opening
+      the project in Visual Studio regenerates the same file instead of creating a second one.
+    -->
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DependentUpon>Strings.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+</Project>

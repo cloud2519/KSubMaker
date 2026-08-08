@@ -1,0 +1,80 @@
+[
+  {
+    "type": "file",
+    "oid": "52373fe24473b1aa44333d318f578ae6bf04b49b",
+    "size": 1570,
+    "path": ".gitattributes"
+  },
+  {
+    "type": "file",
+    "oid": "d1bbe803440ca7f70248f7d0f9361abe91e0eddf",
+    "size": 19333,
+    "path": "LICENSE.model.md"
+  },
+  {
+    "type": "file",
+    "oid": "5d6b4f77cf4db7474ab7b5c87a66ae015c7eb3f5",
+    "size": 14328,
+    "path": "README.md"
+  },
+  {
+    "type": "file",
+    "oid": "caabe03149031fc83c5c898c774f9a851ba91f1f",
+    "size": 189,
+    "path": "config.json"
+  },
+  {
+    "type": "file",
+    "oid": "1d058c1fd1b770694a184e7bf07808d30b0deb18",
+    "size": 5486790876,
+    "lfs": {
+      "oid": "ab2ad0bf0f95aedfd8e79373d122f2e5e417690b28f5dbcc7671aff43eeaf073",
+      "size": 5486790876,
+      "pointerSize": 135
+    },
+    "xetHash": "30742223533bed401bc19477d846dea6647e7ec6d85311ee2324e04b763cc566",
+    "path": "model.bin"
+  },
+  {
+    "type": "file",
+    "oid": "dc2262d3e1d375b235eb71c24119c8e73f85d4ad",
+    "size": 4852054,
+    "lfs": {
+      "oid": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a",
+      "size": 4852054,
+      "pointerSize": 132
+    },
+    "xetHash": "5a49bb827da480c22c5bfab7f453b923b8e7f4624f3d1f1672e130e59f6016aa",
+    "path": "sentencepiece.bpe.model"
+  },
+  {
+    "type": "file",
+    "oid": "af6771314c673db7660640e91062e5fee96eeb2a",
+    "size": 5921176,
+    "path": "shared_vocabulary.json"
+  },
+  {
+    "type": "file",
+    "oid": "02fba84e401dd2017999a39cac2c1278591c3a03",
+    "size": 3548,
+    "path": "special_tokens_map.json"
+  },
+  {
+    "type": "file",
+    "oid": "c91ed1bb9994f98ddde1204a58cc5f7c5bd386f9",
+    "size": 17331176,
+    "lfs": {
+      "oid": "e316b82de11d0f951f370943b3c438311629547285129b0b81dadabd01bca665",
+      "size": 17331176,
+      "pointerSize": 133
+    },
+    "xetHash": "0202f54e596c03be98c5a537e9214967476071dce868ac20a7a42ad57fdd1f7b",
+    "path": "tokenizer.json"
+  },
+  {
+    "type": "file",
+    "oid": "742aa330eae62f661fe28ff3fdd1d216d1481294",
+    "size": 564,
+    "path": "tokenizer_config.json"
+  }
+]

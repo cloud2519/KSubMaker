@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ksubmaker-worker"
+version = "1.0.0"
+description = "KSubMaker AI worker: faster-whisper transcription + Korean translation over a JSON-lines stdio protocol."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "KSubMaker" }]
+keywords = ["whisper", "subtitles", "translation", "korean", "srt"]
+
+# Heavy inference dependencies are declared here but imported lazily inside the functions that
+# need them, so the module tree imports (and the test suite runs) on a machine with none of them.
+dependencies = [
+    "faster-whisper>=1.1",
+    "ctranslate2>=4.5",
+    "transformers>=4.44",
+    "sentencepiece",
+    "huggingface-hub>=0.26",
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[project.scripts]
+ksubmaker-worker = "ksubmaker_worker.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ksubmaker_worker*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["error::DeprecationWarning:ksubmaker_worker.*"]

@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Neutral (Korean) UI strings. Every user-visible sentence in the WPF shell comes from here so a
+    second language only needs Strings.<culture>.resx next to this file — no XAML or C# change.
+  -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>KSubMaker</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>저장</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>찾아보기</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>새로 고침</value>
+  </data>
+  <data name="NotAvailable" xml:space="preserve">
+    <value>없음</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>알 수 없음</value>
+  </data>
+  <data name="Available" xml:space="preserve">
+    <value>사용 가능</value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>사용 불가</value>
+  </data>
+  <data name="Dash" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="DialogTitleError" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="DialogTitleWarning" xml:space="preserve">
+    <value>경고</value>
+  </data>
+  <data name="DialogTitleInfo" xml:space="preserve">
+    <value>알림</value>
+  </data>
+  <data name="DialogTitleConfirm" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="SingleInstanceTitle" xml:space="preserve">
+    <value>KSubMaker 실행 중</value>
+  </data>
+  <data name="SingleInstanceMessage" xml:space="preserve">
+    <value>KSubMaker가 이미 실행 중입니다. 작업 표시줄에서 기존 창을 확인하세요.</value>
+  </data>
+  <data name="StartupFailedTitle" xml:space="preserve">
+    <value>시작 실패</value>
+  </data>
+  <data name="StartupFailedMessage" xml:space="preserve">
+    <value>프로그램을 시작하지 못했습니다. 자세한 내용은 로그 파일을 확인하세요.</value>
+  </data>
+  <data name="UnexpectedErrorTitle" xml:space="preserve">
+    <value>예기치 않은 오류</value>
+  </data>
+  <data name="UnexpectedErrorMessage" xml:space="preserve">
+    <value>예기치 않은 오류가 발생했습니다. 계속 사용할 수 있지만 문제가 반복되면 '로그 보기'에서 기록을 확인하세요.</value>
+  </data>
+  <data name="ShutdownFailedMessage" xml:space="preserve">
+    <value>종료 처리 중 문제가 발생했습니다.</value>
+  </data>
+  <data name="MainWindowTitle" xml:space="preserve">
+    <value>KSubMaker · 한국어 자막 생성기</value>
+  </data>
+  <data name="TargetFolderLabel" xml:space="preserve">
+    <value>대상 폴더</value>
+  </data>
+  <data name="SelectFolderButton" xml:space="preserve">
+    <value>폴더 선택</value>
+  </data>
+  <data name="IncludeSubfoldersLabel" xml:space="preserve">
+    <value>하위 폴더 포함</value>
+  </data>
+  <data name="IncludeHiddenFoldersLabel" xml:space="preserve">
+    <value>숨김 폴더 포함</value>
+  </data>
+  <data name="SkipIfKoreanSubtitleLabel" xml:space="preserve">
+    <value>이미 한국어 자막이 있으면 건너뛰기</value>
+  </data>
+  <data name="ScanButton" xml:space="preserve">
+    <value>파일 검색</value>
+  </data>
+  <data name="ScanCancelButton" xml:space="preserve">
+    <value>검색 중단</value>
+  </data>
+  <data name="StartButton" xml:space="preserve">
+    <value>시작</value>
+  </data>
+  <data name="PauseButton" xml:space="preserve">
+    <value>일시정지</value>
+  </data>
+  <data name="StopButton" xml:space="preserve">
+    <value>중단</value>
+  </data>
+  <data name="RetryButton" xml:space="preserve">
+    <value>재시도</value>
+  </data>
+  <data name="CancelJobButton" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="RemoveCompletedButton" xml:space="preserve">
+    <value>완료 항목 제거</value>
+  </data>
+  <data name="RemoveSelectedButton" xml:space="preserve">
+    <value>선택 항목 제거</value>
+  </data>
+  <data name="OpenOutputFolderButton" xml:space="preserve">
+    <value>결과 폴더 열기</value>
+  </data>
+  <data name="OpenSourceFolderButton" xml:space="preserve">
+    <value>원본 위치 열기</value>
+  </data>
+  <data name="OpenLogButton" xml:space="preserve">
+    <value>로그 보기</value>
+  </data>
+  <data name="SettingsButton" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="ModelsButton" xml:space="preserve">
+    <value>모델 관리</value>
+  </data>
+  <data name="SelectAllButton" xml:space="preserve">
+    <value>전체 선택</value>
+  </data>
+  <data name="ClearSelectionButton" xml:space="preserve">
+    <value>선택 해제</value>
+  </data>
+  <data name="ColumnSelected" xml:space="preserve">
+    <value>선택</value>
+  </data>
+  <data name="ColumnFileName" xml:space="preserve">
+    <value>파일명</value>
+  </data>
+  <data name="ColumnDuration" xml:space="preserve">
+    <value>길이</value>
+  </data>
+  <data name="ColumnStatus" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="ColumnStage" xml:space="preserve">
+    <value>현재 단계</value>
+  </data>
+  <data name="ColumnProgress" xml:space="preserve">
+    <value>진행률</value>
+  </data>
+  <data name="ColumnStageProgress" xml:space="preserve">
+    <value>단계 진행률</value>
+  </data>
+  <data name="ColumnRemaining" xml:space="preserve">
+    <value>남은 시간</value>
+  </data>
+  <data name="ColumnSpeed" xml:space="preserve">
+    <value>처리 속도</value>
+  </data>
+  <data name="ColumnDetectedLanguage" xml:space="preserve">
+    <value>감지 언어</value>
+  </data>
+  <data name="ColumnModel" xml:space="preserve">
+    <value>모델</value>
+  </data>
+  <data name="ColumnOutputPath" xml:space="preserve">
+    <value>결과 경로</value>
+  </data>
+  <data name="ColumnError" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="JobTooltipPathLabel" xml:space="preserve">
+    <value>경로</value>
+  </data>
+  <data name="JobTooltipStatusLabel" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="QueueStateLabel" xml:space="preserve">
+    <value>큐 상태</value>
+  </data>
+  <data name="CountTotalLabel" xml:space="preserve">
+    <value>전체</value>
+  </data>
+  <data name="CountPendingLabel" xml:space="preserve">
+    <value>대기</value>
+  </data>
+  <data name="CountRunningLabel" xml:space="preserve">
+    <value>진행</value>
+  </data>
+  <data name="CountCompletedLabel" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="CountFailedLabel" xml:space="preserve">
+    <value>실패</value>
+  </data>
+  <data name="GpuLabel" xml:space="preserve">
+    <value>GPU</value>
+  </data>
+  <data name="QueueStateIdle" xml:space="preserve">
+    <value>대기 중</value>
+  </data>
+  <data name="QueueStateRunning" xml:space="preserve">
+    <value>실행 중</value>
+  </data>
+  <data name="QueueStatePausing" xml:space="preserve">
+    <value>일시정지 준비 중</value>
+  </data>
+  <data name="QueueStatePaused" xml:space="preserve">
+    <value>일시정지됨</value>
+  </data>
+  <data name="QueueStateStopping" xml:space="preserve">
+    <value>중단하는 중</value>
+  </data>
+  <data name="JobStatusPending" xml:space="preserve">
+    <value>대기</value>
+  </data>
+  <data name="JobStatusProbing" xml:space="preserve">
+    <value>정보 확인</value>
+  </data>
+  <data name="JobStatusExtractingAudio" xml:space="preserve">
+    <value>음성 추출</value>
+  </data>
+  <data name="JobStatusTranscribing" xml:space="preserve">
+    <value>음성 인식</value>
+  </data>
+  <data name="JobStatusTranslating" xml:space="preserve">
+    <value>번역</value>
+  </data>
+  <data name="JobStatusWritingSubtitle" xml:space="preserve">
+    <value>자막 저장</value>
+  </data>
+  <data name="JobStatusCompleted" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="JobStatusFailed" xml:space="preserve">
+    <value>실패</value>
+  </data>
+  <data name="JobStatusCancelled" xml:space="preserve">
+    <value>취소됨</value>
+  </data>
+  <data name="JobStatusPaused" xml:space="preserve">
+    <value>일시정지</value>
+  </data>
+  <data name="JobStageNone" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="JobStageProbing" xml:space="preserve">
+    <value>파일 정보 확인</value>
+  </data>
+  <data name="JobStageExtractingAudio" xml:space="preserve">
+    <value>음성 추출</value>
+  </data>
+  <data name="JobStageTranscribing" xml:space="preserve">
+    <value>음성 인식</value>
+  </data>
+  <data name="JobStageTranslating" xml:space="preserve">
+    <value>한국어 번역</value>
+  </data>
+  <data name="JobStageWritingSubtitle" xml:space="preserve">
+    <value>자막 파일 저장</value>
+  </data>
+  <data name="JobStageDone" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="ReadyMessage" xml:space="preserve">
+    <value>준비되었습니다.</value>
+  </data>
+  <data name="ScanFolderNotSelected" xml:space="preserve">
+    <value>먼저 대상 폴더를 선택하세요.</value>
+  </data>
+  <data name="ScanFolderMissing" xml:space="preserve">
+    <value>선택한 폴더가 존재하지 않습니다.</value>
+  </data>
+  <data name="ScanningFolderFormat" xml:space="preserve">
+    <value>폴더를 검색하는 중입니다... ({0})</value>
+  </data>
+  <data name="ScanCompletedFormat" xml:space="preserve">
+    <value>영상 {0}개를 찾았습니다. (폴더 {1}개 · {2:0.0}초)</value>
+  </data>
+  <data name="ScanNoFilesFound" xml:space="preserve">
+    <value>선택한 폴더에서 영상 파일을 찾지 못했습니다.</value>
+  </data>
+  <data name="ScanCancelledMessage" xml:space="preserve">
+    <value>검색을 취소했습니다.</value>
+  </data>
+  <data name="ScanFailedFormat" xml:space="preserve">
+    <value>폴더 검색에 실패했습니다. ({0})</value>
+  </data>
+  <data name="ProbingFilesFormat" xml:space="preserve">
+    <value>파일 정보를 확인하는 중입니다... ({0}/{1})</value>
+  </data>
+  <data name="EnqueueSummaryTitle" xml:space="preserve">
+    <value>작업 추가 결과</value>
+  </data>
+  <data name="EnqueueSummaryFormat" xml:space="preserve">
+    <value>새로 추가 {0}건 · 다시 처리 {1}건 · 이미 완료 {2}건 · 변경 없음 {3}건 · 건너뜀 {4}건</value>
+  </data>
+  <data name="QueueBusyCannotScan" xml:space="preserve">
+    <value>작업이 실행 중일 때는 파일을 검색할 수 없습니다.</value>
+  </data>
+  <data name="NoRunnableJobs" xml:space="preserve">
+    <value>시작할 수 있는 작업이 없습니다. 완료·실패·취소된 작업은 [재시도]를 눌러 큐에 다시 넣은 뒤 시작하세요.</value>
+  </data>
+  <data name="StartedMessage" xml:space="preserve">
+    <value>작업을 시작했습니다.</value>
+  </data>
+  <data name="PauseRequestedMessage" xml:space="preserve">
+    <value>현재 작업을 마친 뒤 일시정지합니다.</value>
+  </data>
+  <data name="StopRequestedMessage" xml:space="preserve">
+    <value>작업을 중단했습니다.</value>
+  </data>
+  <data name="ConfirmStopRunning" xml:space="preserve">
+    <value>실행 중인 작업을 중단할까요? 진행 중이던 파일은 다음에 이어서 처리할 수 있습니다.</value>
+  </data>
+  <data name="NoSelectionMessage" xml:space="preserve">
+    <value>먼저 목록에서 항목을 선택하세요.</value>
+  </data>
+  <data name="SelectionNotCancellableMessage" xml:space="preserve">
+    <value>선택한 작업은 취소할 수 있는 상태가 아닙니다. 이미 완료·실패·취소된 작업은 취소할 수 없습니다.</value>
+  </data>
+  <data name="SelectionNotRetryableMessage" xml:space="preserve">
+    <value>선택한 작업은 다시 시도할 수 있는 상태가 아닙니다. 완료·실패·취소·일시정지된 작업만 다시 시도할 수 있습니다.</value>
+  </data>
+  <data name="SelectionNotStartableMessage" xml:space="preserve">
+    <value>선택한 작업은 시작할 수 있는 상태가 아닙니다. 대기·일시정지된 작업만 시작할 수 있고, 완료·실패·취소된 작업은 [재시도]를 눌러 큐에 다시 넣은 뒤 시작하세요.</value>
+  </data>
+  <data name="SelectionNotEligibleMessage" xml:space="preserve">
+    <value>선택한 작업은 지금 이 동작을 수행할 수 있는 상태가 아닙니다.</value>
+  </data>
+  <data name="RetryDoneFormat" xml:space="preserve">
+    <value>{0}건을 다시 대기열에 넣었습니다.</value>
+  </data>
+  <data name="CancelDoneFormat" xml:space="preserve">
+    <value>{0}건을 취소했습니다.</value>
+  </data>
+  <data name="RemoveCompletedConfirm" xml:space="preserve">
+    <value>완료된 항목을 목록에서 제거할까요? 이미 만들어진 자막 파일은 삭제되지 않습니다.</value>
+  </data>
+  <data name="RemoveCompletedDoneFormat" xml:space="preserve">
+    <value>완료된 항목 {0}건을 목록에서 제거했습니다.</value>
+  </data>
+  <data name="RemoveSelectedConfirmTitle" xml:space="preserve">
+    <value>선택 항목 제거</value>
+  </data>
+  <data name="RemoveSelectedConfirmFormat" xml:space="preserve">
+    <value>선택한 작업 {0}건을 목록에서 제거할까요?&#xA;&#xA;각 작업의 캐시(체크포인트, 추출된 오디오)도 함께 삭제됩니다.&#xA;원본 영상 파일과 이미 만들어진 자막(.srt) 파일은 삭제되지 않습니다.</value>
+  </data>
+  <data name="RemoveSelectedDoneFormat" xml:space="preserve">
+    <value>선택한 항목 {0}건을 캐시와 함께 제거했습니다.</value>
+  </data>
+  <data name="RemoveSelectedPartialFormat" xml:space="preserve">
+    <value>{0}건을 제거했습니다. {1}건은 아직 실행 중이라 제거하지 못했습니다.</value>
+  </data>
+  <data name="RemoveSelectedRunningSkipped" xml:space="preserve">
+    <value>실행 중인 작업이 제때 멈추지 않아 일부 항목을 제거하지 못했습니다. 작업이 멈춘 뒤 다시 시도하세요.</value>
+  </data>
+  <data name="OutputNotReadyMessage" xml:space="preserve">
+    <value>아직 결과 자막 파일이 없습니다.</value>
+  </data>
+  <data name="SourceNotFoundMessage" xml:space="preserve">
+    <value>원본 파일을 찾을 수 없습니다.</value>
+  </data>
+  <data name="OpenFolderFailedMessage" xml:space="preserve">
+    <value>폴더를 열지 못했습니다. 경로가 올바른지 확인하세요.</value>
+  </data>
+  <data name="HardwareDetectingMessage" xml:space="preserve">
+    <value>하드웨어를 확인하는 중입니다...</value>
+  </data>
+  <data name="HardwareDetectFailedMessage" xml:space="preserve">
+    <value>하드웨어 정보를 가져오지 못했습니다.</value>
+  </data>
+  <data name="GpuNotDetected" xml:space="preserve">
+    <value>NVIDIA GPU 없음 · CPU 모드</value>
+  </data>
+  <data name="GpuSummaryFormat" xml:space="preserve">
+    <value>{0} · VRAM {1:0.#}GB · CUDA {2}</value>
+  </data>
+  <data name="LoadFailedFormat" xml:space="preserve">
+    <value>작업 목록을 불러오지 못했습니다. ({0})</value>
+  </data>
+  <data name="SelectFolderDialogTitle" xml:space="preserve">
+    <value>영상이 있는 폴더를 선택하세요</value>
+  </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="TabRecognition" xml:space="preserve">
+    <value>음성 인식</value>
+  </data>
+  <data name="TabTranslation" xml:space="preserve">
+    <value>번역</value>
+  </data>
+  <data name="TabSubtitle" xml:space="preserve">
+    <value>자막 · 출력</value>
+  </data>
+  <data name="TabExecution" xml:space="preserve">
+    <value>실행</value>
+  </data>
+  <data name="TabPaths" xml:space="preserve">
+    <value>경로 · 로그</value>
+  </data>
+  <data name="TabSystem" xml:space="preserve">
+    <value>시스템 정보</value>
+  </data>
+  <data name="SourceLanguageGroup" xml:space="preserve">
+    <value>입력 언어</value>
+  </data>
+  <data name="SourceLanguageAuto" xml:space="preserve">
+    <value>자동 감지</value>
+  </data>
+  <data name="SourceLanguageManual" xml:space="preserve">
+    <value>직접 선택</value>
+  </data>
+  <data name="WhisperModelGroup" xml:space="preserve">
+    <value>Whisper 모델</value>
+  </data>
+  <data name="WhisperModelAuto" xml:space="preserve">
+    <value>자동 추천 사용</value>
+  </data>
+  <data name="WhisperModelManual" xml:space="preserve">
+    <value>직접 선택</value>
+  </data>
+  <data name="RecommendationLabel" xml:space="preserve">
+    <value>권장 설정</value>
+  </data>
+  <data name="ComputeTypeLabel" xml:space="preserve">
+    <value>연산 정밀도 (compute type)</value>
+  </data>
+  <data name="ComputeTypeAuto" xml:space="preserve">
+    <value>자동 (권장값 사용)</value>
+  </data>
+  <data name="BeamSizeLabel" xml:space="preserve">
+    <value>빔 크기 (beam size)</value>
+  </data>
+  <data name="VadFilterLabel" xml:space="preserve">
+    <value>무음 구간 제거(VAD) 사용</value>
+  </data>
+  <data name="WordTimestampsLabel" xml:space="preserve">
+    <value>단어 단위 타임스탬프 사용</value>
+  </data>
+  <data name="ConditionOnPreviousTextLabel" xml:space="preserve">
+    <value>이전 문맥 참조 (긴 영상에서 자막이 반복될 수 있음)</value>
+  </data>
+  <data name="TranslationEngineGroup" xml:space="preserve">
+    <value>번역 엔진</value>
+  </data>
+  <data name="TranslationEngineDedicated" xml:space="preserve">
+    <value>전용 번역 모델 (NLLB)</value>
+  </data>
+  <data name="TranslationEngineLlm" xml:space="preserve">
+    <value>로컬 LLM</value>
+  </data>
+  <data name="TranslationEngineFake" xml:space="preserve">
+    <value>테스트용 가짜 엔진</value>
+  </data>
+  <data name="TranslationModelLabel" xml:space="preserve">
+    <value>번역 모델</value>
+  </data>
+  <data name="LlmModelLabel" xml:space="preserve">
+    <value>LLM 모델</value>
+  </data>
+  <data name="ModelAutoOption" xml:space="preserve">
+    <value>자동 (권장 모델 사용)</value>
+  </data>
+  <data name="LlmAutoOption" xml:space="preserve">
+    <value>자동 (권장 로컬 LLM 사용)</value>
+  </data>
+  <data name="TranslationStyleLabel" xml:space="preserve">
+    <value>번역 스타일</value>
+  </data>
+  <data name="TranslationStyleNatural" xml:space="preserve">
+    <value>자연스러운 한국어</value>
+  </data>
+  <data name="TranslationStyleLiteral" xml:space="preserve">
+    <value>직역에 가깝게</value>
+  </data>
+  <data name="TranslationStylePolite" xml:space="preserve">
+    <value>존댓말 우선</value>
+  </data>
+  <data name="TranslationStyleCasual" xml:space="preserve">
+    <value>반말 유지</value>
+  </data>
+  <data name="TranslationStylePreserve" xml:space="preserve">
+    <value>원문 말투 유지</value>
+  </data>
+  <data name="BatchGroup" xml:space="preserve">
+    <value>번역 배치 크기</value>
+  </data>
+  <data name="BatchMaxItemsLabel" xml:space="preserve">
+    <value>배치당 최대 자막 수</value>
+  </data>
+  <data name="BatchMaxCharsLabel" xml:space="preserve">
+    <value>배치당 최대 글자 수</value>
+  </data>
+  <data name="BatchMaxSecondsLabel" xml:space="preserve">
+    <value>배치당 최대 길이 (초)</value>
+  </data>
+  <data name="ContextLinesLabel" xml:space="preserve">
+    <value>문맥으로 넘길 이전 줄 수</value>
+  </data>
+  <data name="GlossaryGroup" xml:space="preserve">
+    <value>고유명사 사전</value>
+  </data>
+  <data name="GlossaryHint" xml:space="preserve">
+    <value>등록한 원문 용어는 항상 같은 한국어로 번역됩니다. 인명·지명·작품명처럼 일관성이 중요한 낱말에 사용하세요.</value>
+  </data>
+  <data name="GlossarySourceHeader" xml:space="preserve">
+    <value>원문</value>
+  </data>
+  <data name="GlossaryTargetHeader" xml:space="preserve">
+    <value>한국어</value>
+  </data>
+  <data name="GlossaryAddButton" xml:space="preserve">
+    <value>추가</value>
+  </data>
+  <data name="GlossaryRemoveButton" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="GlossarySourceRequired" xml:space="preserve">
+    <value>원문 용어를 입력하세요.</value>
+  </data>
+  <data name="GlossaryTargetRequired" xml:space="preserve">
+    <value>한국어 번역을 입력하세요.</value>
+  </data>
+  <data name="GlossaryDuplicateFormat" xml:space="preserve">
+    <value>이미 등록된 원문 용어입니다: {0}</value>
+  </data>
+  <data name="GlossaryNoSelection" xml:space="preserve">
+    <value>삭제할 항목을 먼저 선택하세요.</value>
+  </data>
+  <data name="SubtitleSourceDialogTitle" xml:space="preserve">
+    <value>자막 원본 선택</value>
+  </data>
+  <data name="SubtitleSourceHint" xml:space="preserve">
+    <value>내장 자막 트랙의 언어 표기는 없거나 틀린 경우가 많습니다. 실제 내용에 맞는 트랙을 직접 고르세요.</value>
+  </data>
+  <data name="SubtitleSourceMenuItem" xml:space="preserve">
+    <value>자막 원본 선택…</value>
+  </data>
+  <data name="ColumnSubtitleSource" xml:space="preserve">
+    <value>자막 원본</value>
+  </data>
+  <data name="SubtitleSourceDefault" xml:space="preserve">
+    <value>기본(음성 인식)</value>
+  </data>
+  <data name="SubtitleSourceAudioDefault" xml:space="preserve">
+    <value>음성 인식 (기본 오디오 트랙)</value>
+  </data>
+  <data name="SubtitleSourceAudioFormat" xml:space="preserve">
+    <value>음성 인식 · {0}</value>
+  </data>
+  <data name="SubtitleSourceEmbeddedFormat" xml:space="preserve">
+    <value>내장 자막 · {0}</value>
+  </data>
+  <data name="SubtitleSourceAudioShortFormat" xml:space="preserve">
+    <value>음성 #{0}</value>
+  </data>
+  <data name="SubtitleSourceEmbeddedShortFormat" xml:space="preserve">
+    <value>내장 자막 #{0}</value>
+  </data>
+  <data name="SubtitleSourceMessageFormat" xml:space="preserve">
+    <value>{0}의 자막을 무엇으로부터 만들지 선택하세요.</value>
+  </data>
+  <data name="SubtitleSourceUseSettingHint" xml:space="preserve">
+    <value>설정 화면의 기존 자막 처리 방식을 따릅니다.</value>
+  </data>
+  <data name="SubtitleSourceProbeFailed" xml:space="preserve">
+    <value>파일의 트랙 정보를 읽지 못했습니다.</value>
+  </data>
+  <data name="SubtitleSourceNoTracks" xml:space="preserve">
+    <value>선택할 수 있는 오디오·자막 트랙이 없습니다.</value>
+  </data>
+  <data name="SubtitleSourceJobRunning" xml:space="preserve">
+    <value>실행 중인 작업의 자막 원본은 바꿀 수 없습니다. 작업을 취소하거나 끝난 뒤에 다시 선택하세요.</value>
+  </data>
+  <data name="SubtitleSourceChangedFormat" xml:space="preserve">
+    <value>자막 원본을 변경했습니다: {0}</value>
+  </data>
+  <data name="AskPerFileTitle" xml:space="preserve">
+    <value>기존 자막이 있는 파일</value>
+  </data>
+  <data name="AskPerFileMessageFormat" xml:space="preserve">
+    <value>{0}에는 이미 자막이 있습니다. ({1}/{2}) 이 파일의 자막 원본을 선택하세요.</value>
+  </data>
+  <data name="AskPerFileDoneFormat" xml:space="preserve">
+    <value>기존 자막이 있는 파일 {0}건 중 {1}건의 자막 원본을 지정했습니다.</value>
+  </data>
+  <data name="ExistingSubtitleGroup" xml:space="preserve">
+    <value>기존 자막 처리 방식</value>
+  </data>
+  <data name="ExistingSubtitleAlways" xml:space="preserve">
+    <value>항상 새로 음성 인식</value>
+  </data>
+  <data name="ExistingSubtitleSkipExternal" xml:space="preserve">
+    <value>같은 이름의 자막이 있으면 건너뛰기</value>
+  </data>
+  <data name="ExistingSubtitleUseEmbedded" xml:space="preserve">
+    <value>내장 자막을 번역해서 사용</value>
+  </data>
+  <data name="ExistingSubtitleCompleteKorean" xml:space="preserve">
+    <value>한국어 자막이 있으면 완료로 처리</value>
+  </data>
+  <data name="ExistingSubtitleAsk" xml:space="preserve">
+    <value>파일마다 확인</value>
+  </data>
+  <data name="OutputConflictGroup" xml:space="preserve">
+    <value>결과 파일 충돌 처리</value>
+  </data>
+  <data name="OutputConflictSkip" xml:space="preserve">
+    <value>건너뛰기</value>
+  </data>
+  <data name="OutputConflictOverwrite" xml:space="preserve">
+    <value>덮어쓰기</value>
+  </data>
+  <data name="OutputConflictNumbered" xml:space="preserve">
+    <value>번호를 붙여 새 파일 만들기</value>
+  </data>
+  <data name="OutputSuffixLabel" xml:space="preserve">
+    <value>결과 파일 접미사</value>
+  </data>
+  <data name="OutputSuffixHint" xml:space="preserve">
+    <value>예: ko → 영상이름.ko.srt</value>
+  </data>
+  <data name="SubtitleFormatGroup" xml:space="preserve">
+    <value>자막 서식</value>
+  </data>
+  <data name="MaxLinesPerCueLabel" xml:space="preserve">
+    <value>자막 한 개의 최대 줄 수</value>
+  </data>
+  <data name="MaxCharsPerLineLabel" xml:space="preserve">
+    <value>한 줄 최대 글자 수</value>
+  </data>
+  <data name="MinCueDurationLabel" xml:space="preserve">
+    <value>최소 표시 시간 (초)</value>
+  </data>
+  <data name="MaxCueDurationLabel" xml:space="preserve">
+    <value>최대 표시 시간 (초)</value>
+  </data>
+  <data name="MinCueGapLabel" xml:space="preserve">
+    <value>자막 사이 최소 간격 (ms)</value>
+  </data>
+  <data name="MergeShortCuesLabel" xml:space="preserve">
+    <value>너무 짧은 자막 합치기</value>
+  </data>
+  <data name="ProcessingStrategyGroup" xml:space="preserve">
+    <value>작업 처리 방식</value>
+  </data>
+  <data name="StrategyAuto" xml:space="preserve">
+    <value>자동 (하드웨어에 맞춰 선택)</value>
+  </data>
+  <data name="StrategyA" xml:space="preserve">
+    <value>방식 A · 파일 단위 순차 처리</value>
+  </data>
+  <data name="StrategyB" xml:space="preserve">
+    <value>방식 B · 전체 음성 인식 후 번역</value>
+  </data>
+  <data name="StrategyC" xml:space="preserve">
+    <value>방식 C · 인식과 번역 동시 진행</value>
+  </data>
+  <data name="MaxParallelCpuLabel" xml:space="preserve">
+    <value>최대 병렬 CPU 작업 수 (0 = 자동)</value>
+  </data>
+  <data name="AudioPrefetchDepthLabel" xml:space="preserve">
+    <value>음성 미리 추출 개수 (0 = 사용 안 함)</value>
+  </data>
+  <data name="AudioPrefetchDepthHint" xml:space="preserve">
+    <value>다음 파일의 음성을 미리 뽑아 두어 GPU가 쉬지 않게 합니다. 음성 추출은 CPU·디스크만 쓰므로 인식·번역과 겹쳐도 서로 방해하지 않습니다. 1이면 대개 충분합니다 — 더 늘려도 속도는 같고 임시 파일만 늘어납니다(영상 1시간당 약 115MB). 원본이 느린 디스크나 네트워크 드라이브에 있을 때만 올리세요.</value>
+  </data>
+  <data name="AutoRetryLabel" xml:space="preserve">
+    <value>복구 가능한 오류는 한 번 자동으로 재시도</value>
+  </data>
+  <data name="FakeAiModeLabel" xml:space="preserve">
+    <value>Fake AI 모드 (모델 없이 파이프라인만 점검)</value>
+  </data>
+  <data name="ScanDefaultsGroup" xml:space="preserve">
+    <value>검색 기본값</value>
+  </data>
+  <data name="ReprocessCompletedLabel" xml:space="preserve">
+    <value>이미 완료된 파일도 다시 처리</value>
+  </data>
+  <data name="RetryFailedOnlyLabel" xml:space="preserve">
+    <value>실패한 파일만 다시 처리</value>
+  </data>
+  <data name="PathsGroup" xml:space="preserve">
+    <value>폴더</value>
+  </data>
+  <data name="CacheDirectoryLabel" xml:space="preserve">
+    <value>캐시 폴더</value>
+  </data>
+  <data name="ModelDirectoryLabel" xml:space="preserve">
+    <value>모델 폴더</value>
+  </data>
+  <data name="LogDirectoryLabel" xml:space="preserve">
+    <value>로그 폴더</value>
+  </data>
+  <data name="PathDefaultHint" xml:space="preserve">
+    <value>비워 두면 기본 위치(%LOCALAPPDATA%\KSubMaker)를 사용합니다.</value>
+  </data>
+  <data name="LoggingGroup" xml:space="preserve">
+    <value>로그</value>
+  </data>
+  <data name="LogLevelLabel" xml:space="preserve">
+    <value>로그 수준</value>
+  </data>
+  <data name="MaskPathsLabel" xml:space="preserve">
+    <value>로그에서 파일 경로 가리기</value>
+  </data>
+  <data name="LogLevelTrace" xml:space="preserve">
+    <value>Trace (가장 상세)</value>
+  </data>
+  <data name="LogLevelDebug" xml:space="preserve">
+    <value>Debug (개발용)</value>
+  </data>
+  <data name="LogLevelInformation" xml:space="preserve">
+    <value>Information (기본)</value>
+  </data>
+  <data name="LogLevelWarning" xml:space="preserve">
+    <value>Warning (경고 이상)</value>
+  </data>
+  <data name="LogLevelError" xml:space="preserve">
+    <value>Error (오류만)</value>
+  </data>
+  <data name="LogLevelFatal" xml:space="preserve">
+    <value>Fatal (치명적 오류만)</value>
+  </data>
+  <data name="SystemInfoGroup" xml:space="preserve">
+    <value>시스템 정보</value>
+  </data>
+  <data name="GpuInfoGroup" xml:space="preserve">
+    <value>GPU 정보</value>
+  </data>
+  <data name="GpuNameLabel" xml:space="preserve">
+    <value>그래픽 카드</value>
+  </data>
+  <data name="VramLabel" xml:space="preserve">
+    <value>VRAM</value>
+  </data>
+  <data name="CudaLabel" xml:space="preserve">
+    <value>CUDA</value>
+  </data>
+  <data name="DriverLabel" xml:space="preserve">
+    <value>드라이버</value>
+  </data>
+  <data name="CpuLabel" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="CoresLabel" xml:space="preserve">
+    <value>논리 코어</value>
+  </data>
+  <data name="RamLabel" xml:space="preserve">
+    <value>메모리</value>
+  </data>
+  <data name="DiskLabel" xml:space="preserve">
+    <value>디스크 여유 공간</value>
+  </data>
+  <data name="DetectionWarningsLabel" xml:space="preserve">
+    <value>감지 경고</value>
+  </data>
+  <data name="NoDetectionWarnings" xml:space="preserve">
+    <value>감지 중 경고가 없습니다.</value>
+  </data>
+  <data name="SettingsSavedMessage" xml:space="preserve">
+    <value>설정을 저장했습니다.</value>
+  </data>
+  <data name="SettingsSaveFailedFormat" xml:space="preserve">
+    <value>설정을 저장하지 못했습니다. ({0})</value>
+  </data>
+  <data name="SettingsLoadFailedFormat" xml:space="preserve">
+    <value>설정을 불러오지 못했습니다. ({0})</value>
+  </data>
+  <data name="SelectCacheFolderTitle" xml:space="preserve">
+    <value>캐시 폴더 선택</value>
+  </data>
+  <data name="SelectModelFolderTitle" xml:space="preserve">
+    <value>모델 폴더 선택</value>
+  </data>
+  <data name="SelectLogFolderTitle" xml:space="preserve">
+    <value>로그 폴더 선택</value>
+  </data>
+  <data name="LanguageAuto" xml:space="preserve">
+    <value>자동 감지</value>
+  </data>
+  <data name="LanguageEn" xml:space="preserve">
+    <value>영어</value>
+  </data>
+  <data name="LanguageJa" xml:space="preserve">
+    <value>일본어</value>
+  </data>
+  <data name="LanguageZh" xml:space="preserve">
+    <value>중국어</value>
+  </data>
+  <data name="LanguageKo" xml:space="preserve">
+    <value>한국어</value>
+  </data>
+  <data name="LanguageEs" xml:space="preserve">
+    <value>스페인어</value>
+  </data>
+  <data name="LanguageFr" xml:space="preserve">
+    <value>프랑스어</value>
+  </data>
+  <data name="LanguageDe" xml:space="preserve">
+    <value>독일어</value>
+  </data>
+  <data name="LanguageRu" xml:space="preserve">
+    <value>러시아어</value>
+  </data>
+  <data name="LanguagePt" xml:space="preserve">
+    <value>포르투갈어</value>
+  </data>
+  <data name="LanguageIt" xml:space="preserve">
+    <value>이탈리아어</value>
+  </data>
+  <data name="LanguageVi" xml:space="preserve">
+    <value>베트남어</value>
+  </data>
+  <data name="LanguageTh" xml:space="preserve">
+    <value>태국어</value>
+  </data>
+  <data name="LanguageId" xml:space="preserve">
+    <value>인도네시아어</value>
+  </data>
+  <data name="LanguageHi" xml:space="preserve">
+    <value>힌디어</value>
+  </data>
+  <data name="LanguageAr" xml:space="preserve">
+    <value>아랍어</value>
+  </data>
+  <data name="LanguageTr" xml:space="preserve">
+    <value>튀르키예어</value>
+  </data>
+  <data name="LanguageNl" xml:space="preserve">
+    <value>네덜란드어</value>
+  </data>
+  <data name="LanguagePl" xml:space="preserve">
+    <value>폴란드어</value>
+  </data>
+  <data name="LanguageSv" xml:space="preserve">
+    <value>스웨덴어</value>
+  </data>
+  <data name="ModelsWindowTitle" xml:space="preserve">
+    <value>모델 관리</value>
+  </data>
+  <data name="ModelColumnName" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="ModelColumnKind" xml:space="preserve">
+    <value>종류</value>
+  </data>
+  <data name="ModelColumnState" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="ModelColumnSize" xml:space="preserve">
+    <value>크기</value>
+  </data>
+  <data name="ModelColumnVram" xml:space="preserve">
+    <value>예상 VRAM</value>
+  </data>
+  <data name="ModelColumnLicense" xml:space="preserve">
+    <value>라이선스</value>
+  </data>
+  <data name="ModelColumnProgress" xml:space="preserve">
+    <value>진행률</value>
+  </data>
+  <data name="ModelKindWhisper" xml:space="preserve">
+    <value>음성 인식</value>
+  </data>
+  <data name="ModelKindTranslation" xml:space="preserve">
+    <value>번역</value>
+  </data>
+  <data name="ModelKindLlm" xml:space="preserve">
+    <value>로컬 LLM</value>
+  </data>
+  <data name="ModelStateInstalled" xml:space="preserve">
+    <value>설치됨</value>
+  </data>
+  <data name="ModelStateNotInstalled" xml:space="preserve">
+    <value>미설치</value>
+  </data>
+  <data name="SettingsModelInstallHint" xml:space="preserve">
+    <value>미설치 모델은 모델 관리 화면에서 내려받은 뒤에만 사용할 수 있습니다.</value>
+  </data>
+  <data name="SettingsMissingModelsTitle" xml:space="preserve">
+    <value>설치되지 않은 모델</value>
+  </data>
+  <data name="SettingsSaveAnywayQuestion" xml:space="preserve">
+    <value>그래도 이 설정을 저장할까요?</value>
+  </data>
+  <data name="ModelStateDownloading" xml:space="preserve">
+    <value>다운로드 중</value>
+  </data>
+  <data name="ModelStatePaused" xml:space="preserve">
+    <value>일시정지</value>
+  </data>
+  <data name="ModelStateVerifying" xml:space="preserve">
+    <value>검증 중</value>
+  </data>
+  <data name="ModelStateDeleting" xml:space="preserve">
+    <value>삭제 중</value>
+  </data>
+  <data name="DownloadButton" xml:space="preserve">
+    <value>다운로드</value>
+  </data>
+  <data name="PauseDownloadButton" xml:space="preserve">
+    <value>일시정지</value>
+  </data>
+  <data name="ResumeDownloadButton" xml:space="preserve">
+    <value>재개</value>
+  </data>
+  <data name="DeleteModelButton" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="VerifyModelButton" xml:space="preserve">
+    <value>검증</value>
+  </data>
+  <data name="OpenModelFolderButton" xml:space="preserve">
+    <value>모델 폴더 열기</value>
+  </data>
+  <data name="ModelNotSelected" xml:space="preserve">
+    <value>먼저 모델을 선택하세요.</value>
+  </data>
+  <data name="ModelRecommendedMark" xml:space="preserve">
+    <value>권장</value>
+  </data>
+  <data name="ModelDeleteConfirmFormat" xml:space="preserve">
+    <value>'{0}' 모델을 삭제할까요? 다운로드한 파일이 모두 지워집니다.</value>
+  </data>
+  <data name="ModelDeletedFormat" xml:space="preserve">
+    <value>'{0}' 모델을 삭제했습니다.</value>
+  </data>
+  <data name="ModelDeleteFailedFormat" xml:space="preserve">
+    <value>'{0}' 모델을 삭제하지 못했습니다. ({1})</value>
+  </data>
+  <data name="ModelVerifyingFormat" xml:space="preserve">
+    <value>'{0}' 모델을 검증하는 중입니다...</value>
+  </data>
+  <data name="ModelVerifyOkFormat" xml:space="preserve">
+    <value>'{0}' 모델 검증에 성공했습니다.</value>
+  </data>
+  <data name="ModelVerifyFailedFormat" xml:space="preserve">
+    <value>'{0}' 모델 검증에 실패했습니다. 다시 다운로드하세요.</value>
+  </data>
+  <data name="ModelDownloadStartedFormat" xml:space="preserve">
+    <value>'{0}' 다운로드를 시작합니다.</value>
+  </data>
+  <data name="ModelDownloadCompletedFormat" xml:space="preserve">
+    <value>'{0}' 다운로드를 완료했습니다.</value>
+  </data>
+  <data name="ModelDownloadPausedFormat" xml:space="preserve">
+    <value>'{0}' 다운로드를 일시정지했습니다. 재개하면 이어받습니다.</value>
+  </data>
+  <data name="ModelDownloadFailedFormat" xml:space="preserve">
+    <value>'{0}' 다운로드에 실패했습니다. ({1})</value>
+  </data>
+  <data name="ModelDownloadProgressFormat" xml:space="preserve">
+    <value>{0} / {1} · {2}</value>
+  </data>
+  <data name="ModelsRefreshFailedFormat" xml:space="preserve">
+    <value>모델 목록을 불러오지 못했습니다. ({0})</value>
+  </data>
+  <data name="ModelsLoadedFormat" xml:space="preserve">
+    <value>모델 {0}개를 확인했습니다.</value>
+  </data>
+  <data name="ModelAlreadyDownloading" xml:space="preserve">
+    <value>이미 다운로드 중인 모델입니다.</value>
+  </data>
+  <data name="ModelNotDownloading" xml:space="preserve">
+    <value>다운로드 중인 모델이 아닙니다.</value>
+  </data>
+  <data name="ModelDescriptionLabel" xml:space="preserve">
+    <value>설명</value>
+  </data>
+  <data name="LogWindowTitle" xml:space="preserve">
+    <value>로그 보기</value>
+  </data>
+  <data name="OpenLogFolderButton" xml:space="preserve">
+    <value>폴더 열기</value>
+  </data>
+  <data name="LogAutoRefreshLabel" xml:space="preserve">
+    <value>2초마다 자동 새로 고침</value>
+  </data>
+  <data name="LogFileLabel" xml:space="preserve">
+    <value>로그 파일</value>
+  </data>
+  <data name="LogEmptyMessage" xml:space="preserve">
+    <value>표시할 로그 파일이 없습니다.</value>
+  </data>
+  <data name="LogReadFailedFormat" xml:space="preserve">
+    <value>로그 파일을 읽지 못했습니다. ({0})</value>
+  </data>
+  <data name="LogTailHintFormat" xml:space="preserve">
+    <value>최근 {0}줄만 표시합니다.</value>
+  </data>
+  <data name="ModelPrepareTitle" xml:space="preserve">
+    <value>모델 다운로드</value>
+  </data>
+  <data name="ModelPrepareHeader" xml:space="preserve">
+    <value>작업을 시작하려면 아래 모델이 필요합니다:</value>
+  </data>
+  <data name="ModelPrepareItemFormat" xml:space="preserve">
+    <value> • {0}: {1} ({2})</value>
+  </data>
+  <data name="ModelPrepareRecommendedSuffix" xml:space="preserve">
+    <value> — 하드웨어 권장</value>
+  </data>
+  <data name="ModelPrepareQuestionFormat" xml:space="preserve">
+    <value>합계 약 {0}를 내려받습니다. 지금 내려받고 시작할까요?</value>
+  </data>
+  <data name="ModelPrepareDeclinedMessage" xml:space="preserve">
+    <value>모델을 내려받지 않아 시작하지 않았습니다. 모델 관리 화면에서 직접 내려받을 수도 있습니다.</value>
+  </data>
+  <data name="ModelPrepareProgressFormat" xml:space="preserve">
+    <value>모델 내려받는 중 ({0}/{1}) {2} — {3:0}%</value>
+  </data>
+  <data name="ModelPrepareCompletedMessage" xml:space="preserve">
+    <value>모델 준비를 마쳤습니다. 작업을 시작합니다.</value>
+  </data>
+  <data name="ModelPrepareCancelledMessage" xml:space="preserve">
+    <value>모델 다운로드를 취소하여 작업을 시작하지 않았습니다.</value>
+  </data>
+  <data name="ModelPrepareFailedFormat" xml:space="preserve">
+    <value>'{0}' 다운로드에 실패하여 작업을 시작하지 않았습니다. ({1})</value>
+  </data>
+  <data name="ModelPrepareUnresolvedMessage" xml:space="preserve">
+    <value>사용할 모델을 정하지 못했습니다. 하드웨어 감지에 실패했을 수 있습니다. 설정 화면에서 모델을 직접 고르세요.</value>
+  </data>
+  <data name="CancelModelPrepareButton" xml:space="preserve">
+    <value>다운로드 취소</value>
+  </data>
+  <data name="ModelUseAfterDownloadTitle" xml:space="preserve">
+    <value>모델 사용 설정</value>
+  </data>
+  <data name="ModelUseAfterDownloadQuestionFormat" xml:space="preserve">
+    <value>'{0}' 다운로드를 완료했습니다.
+
+{1}을(를) 지금부터 이 모델로 설정할까요?
+현재 설정: {2}</value>
+  </data>
+  <data name="ModelUseAfterDownloadAppliedFormat" xml:space="preserve">
+    <value>{0}을(를) '{1}'(으)로 설정했습니다.</value>
+  </data>
+  <data name="ModelUseAfterDownloadEngineNote" xml:space="preserve">
+    <value>번역 엔진도 '{0}'(으)로 함께 바뀝니다. (현재: {1})</value>
+  </data>
+  <data name="ModelUseAfterDownloadAppliedWithEngineFormat" xml:space="preserve">
+    <value>{0}을(를) '{1}'(으)로, 번역 엔진을 '{2}'(으)로 설정했습니다.</value>
+  </data>
+  <data name="ModelUseAfterDownloadFailedFormat" xml:space="preserve">
+    <value>설정을 저장하지 못했습니다. 설정 화면에서 직접 선택하세요. ({0})</value>
+  </data>
+</root>

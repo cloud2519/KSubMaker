@@ -1,0 +1,46 @@
+MIT License
+
+Copyright (c) 2026 KSubMaker contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+
+THIRD-PARTY COMPONENTS / 제3자 구성 요소
+
+The MIT licence above covers the KSubMaker source code in this repository only.
+
+KSubMaker is distributed with, and downloads at runtime, third-party components
+that are covered by their own licences. Two of them impose obligations that
+matter to every user:
+
+  * FFmpeg is shipped as an LGPL-2.1-or-later *shared* build and is invoked as a
+    separate process. Replacing it with a GPL build changes the distribution
+    terms of the whole package.
+
+  * NLLB-200, the default translation model, is licensed under
+    CC-BY-NC-4.0 — non-commercial use only. It is not bundled; the user
+    downloads it explicitly.
+
+위 MIT 라이선스는 이 저장소의 KSubMaker 소스 코드에만 적용됩니다.
+함께 배포되거나 실행 중에 내려받는 제3자 구성 요소의 전체 목록, 각각의 라이선스,
+그리고 지켜야 할 의무는 THIRD_PARTY_NOTICES.md 를 참조하세요.
+
+See THIRD_PARTY_NOTICES.md for the complete list of third-party components,
+their licences and the obligations they carry.

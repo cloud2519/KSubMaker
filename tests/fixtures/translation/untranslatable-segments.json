@@ -1,0 +1,66 @@
+{
+  "$comment": [
+    "One fixture, two implementations. 'translatable' pins the predicate that decides whether a cue",
+    "has anything for a translation engine to do; 'mostlyUntranslated' pins the threshold that",
+    "separates 'a few quirky lines, degrade around them' from 'the engine is broken, fail'.",
+    "Read by KSubMaker.UnitTests.Parity.TranslatableTextParityTests (C#) and",
+    "worker/tests/test_translatable_parity.py (Python). Neither side may answer differently.",
+    "Every 'text' below is a real subtitle cue shape, mostly from Japanese releases."
+  ],
+
+  "translatable": [
+    { "text": "♪",           "expected": false, "why": "song sting, the exact cue that used to fail whole jobs" },
+    { "text": "♪♪♪",         "expected": false, "why": "repeated sting" },
+    { "text": "♬ ～ ♬",       "expected": false, "why": "sting with a drawn-out vowel mark and spaces" },
+    { "text": "～",           "expected": false, "why": "wave dash, a drawn-out vowel with no word" },
+    { "text": "…",           "expected": false, "why": "ellipsis only" },
+    { "text": "...",         "expected": false, "why": "ASCII ellipsis only" },
+    { "text": "。",           "expected": false, "why": "ideographic full stop only" },
+    { "text": "！？",         "expected": false, "why": "fullwidth punctuation only" },
+    { "text": "!?",          "expected": false, "why": "ASCII punctuation only" },
+    { "text": "＊",           "expected": false, "why": "fullwidth asterisk" },
+    { "text": "（）",         "expected": false, "why": "empty fullwidth brackets" },
+    { "text": "「」",         "expected": false, "why": "empty corner brackets" },
+    { "text": "[ ]",         "expected": false, "why": "empty ASCII brackets" },
+    { "text": "-",           "expected": false, "why": "speaker dash" },
+    { "text": "—",           "expected": false, "why": "em dash" },
+    { "text": "★☆★",         "expected": false, "why": "decorative symbols" },
+    { "text": "🎵",           "expected": false, "why": "astral-plane symbol: a surrogate pair in C#, still not a letter" },
+    { "text": "²",           "expected": false, "why": "category No, not a decimal digit — both sides must agree it is not content" },
+    { "text": "Ⅷ",           "expected": false, "why": "category Nl (letter number), not a letter or decimal digit" },
+    { "text": "   ",         "expected": false, "why": "whitespace only" },
+    { "text": "\t\n",        "expected": false, "why": "control characters only" },
+    { "text": "",            "expected": false, "why": "empty" },
+
+    { "text": "こんにちは",      "expected": true,  "why": "Japanese kana" },
+    { "text": "東京",           "expected": true,  "why": "kanji" },
+    { "text": "ｱｲｳ",          "expected": true,  "why": "halfwidth katakana" },
+    { "text": "𠀀",            "expected": true,  "why": "CJK extension B ideograph: outside the BMP, so C# must read runes, not chars" },
+    { "text": "안녕하세요",      "expected": true,  "why": "Hangul" },
+    { "text": "Привет",       "expected": true,  "why": "Cyrillic" },
+    { "text": "Γειά σου",     "expected": true,  "why": "Greek" },
+    { "text": "مرحبا",         "expected": true,  "why": "Arabic" },
+    { "text": "สวัสดี",          "expected": true,  "why": "Thai" },
+    { "text": "hello",        "expected": true,  "why": "Latin" },
+    { "text": "3",            "expected": true,  "why": "a bare decimal digit is still content" },
+    { "text": "第1話",         "expected": true,  "why": "kanji and a digit" },
+    { "text": "♪ 星が見える ♪",  "expected": true,  "why": "symbols wrapped around real dialogue" },
+    { "text": "（笑）",         "expected": true,  "why": "brackets around real text" },
+    { "text": "…そうか。",       "expected": true,  "why": "punctuation around real text" }
+  ],
+
+  "mostlyUntranslated": [
+    { "unusable": 1,  "requested": 30, "expected": false, "why": "the reported bug: one quirky line in a full batch" },
+    { "unusable": 2,  "requested": 30, "expected": false, "why": "still a handful" },
+    { "unusable": 3,  "requested": 6,  "expected": false, "why": "over the ratio but under the four-cue floor" },
+    { "unusable": 1,  "requested": 1,  "expected": false, "why": "a batch halved down to one cue is never 'mostly' anything" },
+    { "unusable": 3,  "requested": 3,  "expected": false, "why": "under the floor even at 100%" },
+    { "unusable": 0,  "requested": 30, "expected": false, "why": "nothing unusable" },
+    { "unusable": 4,  "requested": 0,  "expected": false, "why": "nothing was requested, so nothing can be broken" },
+    { "unusable": 4,  "requested": 8,  "expected": true,  "why": "exactly half, at the floor" },
+    { "unusable": 4,  "requested": 4,  "expected": true,  "why": "a whole small batch came back blank" },
+    { "unusable": 9,  "requested": 10, "expected": true,  "why": "an engine that is not translating" },
+    { "unusable": 15, "requested": 30, "expected": true,  "why": "half of a full batch" },
+    { "unusable": 14, "requested": 30, "expected": false, "why": "just under half of a full batch" }
+  ]
+}

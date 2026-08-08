@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0"
+          xmlns="urn:schemas-microsoft-com:asm.v1"
+          xmlns:ws2="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+
+  <assemblyIdentity version="1.0.0.0" name="KSubMaker.App" type="win32" />
+
+  <!--
+    KSubMaker scans user folders that routinely nest deeper than anyone plans for
+    (시리즈\시즌\에피소드\... under a already-long OneDrive path). Without longPathAware every
+    Win32 path call is capped at MAX_PATH (260 characters) and the symptom is not an error but a
+    file that silently never appears in the scan.
+
+    IMPORTANT: this manifest entry is only half of the requirement. Windows also needs the machine
+    policy switched on:
+
+        HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled = 1  (DWORD, reboot)
+
+    Both are required (Windows 10 1607 or later). Separately, the external executables KSubMaker
+    launches — ffmpeg, ffprobe, the Python worker — have their own manifests, so a very long path
+    can still fail inside them even when the app itself handles it. docs/TROUBLESHOOTING.md §17
+    documents the `subst` workaround for that case.
+  -->
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <ws2:longPathAware>true</ws2:longPathAware>
+
+      <!--
+        WPF renders vector content, so per-monitor V2 is what stops the window from being
+        bitmap-stretched (and blurry) when it is dragged onto a display with a different scale
+        factor. dpiAware is the pre-1703 fallback for the same intent.
+      -->
+      <ws2:dpiAwareness>PerMonitorV2</ws2:dpiAwareness>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
+    </windowsSettings>
+  </application>
+
+  <!--
+    asInvoker: nothing the application does needs administrator rights. Everything it writes goes
+    under %LOCALAPPDATA% (IAppPaths) or next to the user's own video files. Requesting elevation
+    would add a UAC prompt at every launch and would make the output subtitles owned by the
+    administrator account instead of the user.
+  -->
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
+  <!--
+    Declaring the supported OS versions is what makes GetVersionEx and the compatibility shims
+    report the real Windows version instead of pretending to be Windows 8. Windows 10/11 is the
+    only supported target; the 8.1 entry is kept so the app degrades to a normal "unsupported OS"
+    message rather than a compatibility-shimmed one.
+  -->
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 and Windows 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+      <!-- Windows 8.1 -->
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+    </application>
+  </compatibility>
+
+</assembly>

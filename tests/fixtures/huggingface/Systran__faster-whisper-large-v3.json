@@ -1,0 +1,50 @@
+[
+  {
+    "type": "file",
+    "oid": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+    "size": 1519,
+    "path": ".gitattributes"
+  },
+  {
+    "type": "file",
+    "oid": "a84bfa7f20cac02ea5a99efa5eaf687ad58c1caf",
+    "size": 2052,
+    "path": "README.md"
+  },
+  {
+    "type": "file",
+    "oid": "75336feae814999bae6ccccdecf177639ffc6f9d",
+    "size": 2394,
+    "path": "config.json"
+  },
+  {
+    "type": "file",
+    "oid": "e91bbba72de41ca3cdc9a656b17aa9407c7e85b6",
+    "size": 3087284237,
+    "lfs": {
+      "oid": "69f74147e3334731bc3a76048724833325d2ec74642fb52620eda87352e3d4f1",
+      "size": 3087284237,
+      "pointerSize": 135
+    },
+    "xetHash": "28bbcc8f4671df0a8411524f1973dbc978d276b79cac96059a737abadf3c134a",
+    "path": "model.bin"
+  },
+  {
+    "type": "file",
+    "oid": "931c77a740890c46365c7ae0c9d350ba3cca908f",
+    "size": 340,
+    "path": "preprocessor_config.json"
+  },
+  {
+    "type": "file",
+    "oid": "3a5e2ba63acdcac9a19ba56cf9bd27f185bfff61",
+    "size": 2480617,
+    "path": "tokenizer.json"
+  },
+  {
+    "type": "file",
+    "oid": "0adcd01e7c237205d593b707e66dd5d7bc785d2d",
+    "size": 1068114,
+    "path": "vocabulary.json"
+  }
+]
