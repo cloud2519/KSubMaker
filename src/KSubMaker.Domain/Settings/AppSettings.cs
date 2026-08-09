@@ -34,6 +34,13 @@ public sealed class AppSettings
     /// </summary>
     public bool ConditionOnPreviousText { get; set; }
 
+    /// <summary>
+    /// Optional hint prepended to Whisper's decoder context — proper nouns, recurring character
+    /// names, a sample of the register you want. Null or blank keeps the worker's built-in
+    /// per-language hint.
+    /// </summary>
+    public string? InitialPrompt { get; set; }
+
     // ---- translation -----------------------------------------------------
     public TranslationEngineKind TranslationEngine { get; set; } = TranslationEngineKind.LocalTranslationModel;
     public string TranslationModel { get; set; } = "auto";

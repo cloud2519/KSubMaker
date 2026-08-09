@@ -131,6 +131,21 @@ def _reached_stage(store: CheckpointStore, stage: str) -> bool:
     return Stages.ORDER.index(recorded) >= Stages.ORDER.index(stage)
 
 
+def _test_duration(settings: Mapping[str, Any] | None) -> float | None:
+    """``testDurationSeconds`` as a trim length, or ``None`` for "process the whole file".
+
+    Absent, zero and negative all mean the same thing here, and all three reach us — the host
+    defaults the field to 0, an older host omits it entirely.
+    """
+    raw = (settings or {}).get("testDurationSeconds")
+    try:
+        seconds = float(raw)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
+    return seconds if seconds > 0 else None
+
+
 def _optional_int(value: Any) -> int | None:
     if value is None:
         return None
@@ -540,13 +555,12 @@ class CommandHandlers:
 
             # No progress events: this file is not the row the user is watching, and reporting
             # against a job the queue has not started would move the wrong progress bar.
-            test_dur = (command.get("settings") or {}).get("testDurationSeconds", 0)
-            dur = float(test_dur) if test_dur and int(test_dur) > 0 else float(probed.get("durationSeconds") or 0.0)
             self.ffmpeg.extract_audio(
                 video_path,
                 str(audio_path),
                 audio_track_index=command.get("audioTrackIndex"),
-                duration_seconds=dur,
+                duration_seconds=float(probed.get("durationSeconds") or 0.0),
+                trim_seconds=_test_duration(command.get("settings")),
                 token=token,
             )
 
@@ -849,8 +863,13 @@ class CommandHandlers:
         fingerprints: Mapping[str, Mapping[str, Any]],
     ) -> dict[str, Any]:
         video_path = str(command.get("videoPath"))
-        test_dur = (command.get("settings") or {}).get("testDurationSeconds", 0)
-        duration = float(test_dur) if test_dur and int(test_dur) > 0 else float(probed.get("durationSeconds") or 0.0)
+        trim = _test_duration(command.get("settings"))
+
+        # The transcript covers whatever was extracted, so a trimmed run measures its progress —
+        # and reports its durationSeconds — against the trimmed length, not the film's.
+        duration = float(probed.get("durationSeconds") or 0.0)
+        if trim is not None:
+            duration = min(duration, trim) if duration > 0 else trim
 
         if not probed.get("audioTracks"):
             raise WorkerError(
@@ -907,6 +926,7 @@ class CommandHandlers:
                     str(audio_path),
                     audio_track_index=command.get("audioTrackIndex"),
                     duration_seconds=duration,
+                    trim_seconds=trim,
                     token=token,
                     progress=lambda pct: emit.progress(Stages.EXTRACTING_AUDIO, pct),
                 )
@@ -946,7 +966,7 @@ class CommandHandlers:
                 vad_filter=bool(settings.get("vadFilter", True)),
                 word_timestamps=bool(settings.get("wordTimestamps", True)),
                 condition_on_previous_text=bool(settings.get("conditionOnPreviousText", False)),
-                # 호스트/UI에서 전송한 custom initialPrompt 수신 지원
+                # v1.4. None keeps the transcriber's built-in per-language hint.
                 initial_prompt=settings.get("initialPrompt"),
                 duration_seconds=duration,
                 token=token,

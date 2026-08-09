@@ -229,6 +229,7 @@ class FfmpegService:
         *,
         audio_track_index: int | None = None,
         duration_seconds: float | None = None,
+        trim_seconds: float | None = None,
         token: CancellationToken | None = None,
         progress: Callable[[float], None] | None = None,
     ) -> str:
@@ -236,6 +237,18 @@ class FfmpegService:
 
         Writes to ``output_path + '.tmp'`` and ``os.replace``s it into place, so a cancelled or
         crashed run never leaves a truncated wav that a resume would happily transcribe.
+
+        :param duration_seconds: how long the source is. **Read only to turn ffmpeg's ``time=``
+            into a percentage** — it never changes what is written.
+        :param trim_seconds: stop after this many seconds (ffmpeg ``-t``). ``None``/0 extracts the
+            whole track.
+
+        The two are separate on purpose. They were briefly the same parameter, which meant every
+        ordinary extraction ran with ``-t <container duration>``: harmless while the container's
+        figure is accurate, and a silently truncated wav whenever it under-reports — an ASF or a
+        VBR MP3 whose header estimate is short, a stream copied without a rewritten index. The
+        symptom would be "the subtitle stops before the film does", which is close to impossible to
+        trace back to here.
         """
         source = Path(video_path)
         if not source.exists():
@@ -270,8 +283,15 @@ class FfmpegService:
         ]
         if audio_track_index is not None:
             argv += ["-map", f"0:a:{int(audio_track_index)}"]
-        if duration_seconds is not None and duration_seconds > 0:
-            argv += ["-t", f"{duration_seconds:.3f}"]
+        if trim_seconds is not None and trim_seconds > 0:
+            argv += ["-t", f"{trim_seconds:.3f}"]
+
+            # Percentages are against what will actually be written, so a trimmed run still
+            # finishes at 100% instead of stalling at a fraction of the untrimmed length.
+            if duration_seconds and duration_seconds > 0:
+                duration_seconds = min(duration_seconds, trim_seconds)
+            else:
+                duration_seconds = trim_seconds
         argv += [
             "-ac",
             str(TARGET_CHANNELS),

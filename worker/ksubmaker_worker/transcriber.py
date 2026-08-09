@@ -286,13 +286,31 @@ class Transcriber:
         if token is not None:
             token.raise_if_cancelled()
 
-        # -----------------------------------------------------------------------
-        # initial_prompt & VAD speech_pad_ms 최적화:
-        # 1) initial_prompt: 음성 인식 디코더의 초기 문맥(맞춤법/띄어쓰기)을 잡아주어
-        #    동일 단어 중복 반복(할루시네이션) 및 어휘 오인식률을 대폭 낮춥니다.
-        # 2) 원문 언어별(ko, ja 등) 분기: 원음 언어에 맞는 힌트를 주어 타 언어 간섭을 방지합니다.
-        # 3) vad_parameters (speech_pad_ms=400): 문장 끝 발음/어미가 잘려나가는 것을 예방합니다.
-        # -----------------------------------------------------------------------
+        # `initial_prompt` steers the decoder's opening context: orthography, spacing, register.
+        #
+        # **It reaches the first decoding window and nothing after it.** faster-whisper seeds
+        # `all_tokens` with the prompt, then after each window runs
+        #
+        #     if not condition_on_previous_text or temperature > prompt_reset_on_temperature:
+        #         prompt_reset_since = len(all_tokens)
+        #
+        # and `condition_on_previous_text` is off by default here (ADR-010), so the prompt is
+        # dropped from the context the moment the first window finishes. On a two-hour film that
+        # is roughly the first 30 seconds *of speech* — with VAD on, the first couple of minutes
+        # of wall clock.
+        #
+        # Measured on a 2h07m Japanese film, whisper-large-v3 / cuda / float16, three runs per
+        # variant (2026-08-09): the hint changed 15 of 271 lines, every one of them between 53 s
+        # and 138 s, and every change was punctuation (`。` / `、` added). Everything later was
+        # inside the run-to-run noise floor, which is 4–7 lines for this model on this GPU. The
+        # hallucination counters — back-to-back repeats, longest repeat run, lines repeated five
+        # times or more, trailing runaway — came out **identical** with and without it. Whatever
+        # this is worth, it is not "동일 단어 중복 반복을 대폭 낮춘다", which is what the comment
+        # here used to claim.
+        #
+        # `vad_parameters={"speech_pad_ms": 400}` restates faster-whisper's own default. It is
+        # kept so the value is pinned if that default ever moves, not because it changes anything
+        # today: with and against it the transcript differed by one line, below the noise floor.
         if initial_prompt is None:
             if language == "ko":
                 initial_prompt = "한국어 자막입니다. 띄어쓰기와 맞춤법을 준수합니다."

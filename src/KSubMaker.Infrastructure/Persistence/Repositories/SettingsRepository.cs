@@ -72,6 +72,7 @@ public sealed class SettingsRepository(
         settings.VadFilter = GetBool(rows, nameof(settings.VadFilter), settings.VadFilter);
         settings.WordTimestamps = GetBool(rows, nameof(settings.WordTimestamps), settings.WordTimestamps);
         settings.ConditionOnPreviousText = GetBool(rows, nameof(settings.ConditionOnPreviousText), settings.ConditionOnPreviousText);
+        settings.InitialPrompt = GetNullableString(rows, nameof(settings.InitialPrompt));
 
         // ---- translation -----------------------------------------------------
         settings.TranslationEngine = GetEnum(rows, nameof(settings.TranslationEngine), settings.TranslationEngine);
@@ -176,6 +177,7 @@ public sealed class SettingsRepository(
             [nameof(s.VadFilter)] = Write(s.VadFilter),
             [nameof(s.WordTimestamps)] = Write(s.WordTimestamps),
             [nameof(s.ConditionOnPreviousText)] = Write(s.ConditionOnPreviousText),
+            [nameof(s.InitialPrompt)] = s.InitialPrompt ?? string.Empty,
 
             [nameof(s.TranslationEngine)] = s.TranslationEngine.ToString(),
             [nameof(s.TranslationModel)] = s.TranslationModel,
@@ -244,6 +246,17 @@ public sealed class SettingsRepository(
 
     private static string GetString(IReadOnlyDictionary<string, string> rows, string key, string fallback) =>
         rows.TryGetValue(key, out var value) && value is not null ? value : fallback;
+
+    /// <summary>For settings where "not set" is a meaningful third state, not just an empty string.</summary>
+    private static string? GetNullableString(IReadOnlyDictionary<string, string> rows, string key)
+    {
+        if (!rows.TryGetValue(key, out var value) || string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value;
+    }
 
     private bool GetBool(IReadOnlyDictionary<string, string> rows, string key, bool fallback)
     {

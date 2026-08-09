@@ -34,6 +34,8 @@ class FakeFfmpeg:
         self.duration = duration
         self.subtitle_text = subtitle_text
         self.extracted: list[str] = []
+        #: One entry per extraction: the (duration_seconds, trim_seconds) it was asked for.
+        self.lengths: list[tuple[float | None, float | None]] = []
 
     def probe(self, path: str) -> dict[str, Any]:
         return {
@@ -47,7 +49,8 @@ class FakeFfmpeg:
             "container": "matroska",
         }
 
-    def extract_audio(self, video_path, output_path, *, audio_track_index=None, duration_seconds=None, token=None, progress=None):  # noqa: ANN001, ANN201
+    def extract_audio(self, video_path, output_path, *, audio_track_index=None, duration_seconds=None, trim_seconds=None, token=None, progress=None):  # noqa: ANN001, ANN201
+        self.lengths.append((duration_seconds, trim_seconds))
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with wave.open(output_path, "wb") as handle:
             handle.setnchannels(1)
@@ -1274,6 +1277,86 @@ def test_a_trimmed_wav_is_not_mistaken_for_a_full_one(tmp_path: Path, channel) -
     job = CheckpointStore(tmp_path / "cache" / "job-1").load_job()
     assert job is not None
     assert job["audioSettings"]["testDurationSeconds"] == 30
+
+
+@pytest.mark.parametrize("run", ["process", "prefetch"])
+def test_an_ordinary_run_asks_ffmpeg_for_the_whole_track(tmp_path: Path, channel, run: str) -> None:
+    """Neither lane may pass a trim length it only knows as "how long the container claims to be".
+
+    The probed duration is a progress denominator. Handing it to ffmpeg as ``-t`` as well made
+    every normal extraction a trimmed one, correct exactly as long as the container's own figure
+    is — and silently short whenever it is not.
+    """
+    handlers, ffmpeg, _, _ = _handlers()
+
+    if run == "process":
+        handlers.process(_command(tmp_path), CancellationToken("t"))
+    else:
+        handlers.extract_audio(_extract_command(tmp_path), CancellationToken("t"))
+
+    assert ffmpeg.lengths == [(30.0, None)]
+
+
+@pytest.mark.parametrize("run", ["process", "prefetch"])
+def test_a_test_duration_reaches_ffmpeg_as_a_trim(tmp_path: Path, channel, run: str) -> None:
+    handlers, ffmpeg, _, _ = _handlers()
+
+    if run == "process":
+        command = _command(tmp_path)
+    else:
+        command = _extract_command(tmp_path)
+    command["settings"] = dict(command.get("settings") or {}, testDurationSeconds=10)
+
+    if run == "process":
+        handlers.process(command, CancellationToken("t"))
+    else:
+        handlers.extract_audio(command, CancellationToken("t"))
+
+    # The job lane measures the rest of the pipeline against the trimmed length too — the
+    # transcript covers 10 seconds, not 30 — so it has already clamped its denominator. The
+    # prefetch lane has no progress to report and leaves the clamping to extract_audio.
+    expected_denominator = 10.0 if run == "process" else 30.0
+    assert ffmpeg.lengths == [(expected_denominator, 10.0)]
+
+
+def test_the_hosts_initial_prompt_reaches_the_transcriber_and_the_fingerprint(
+    tmp_path: Path, channel
+) -> None:
+    """v1.4. The worker read this field for a while before any host sent it.
+
+    Both halves matter: the prompt changes what Whisper writes, so a transcript made under a
+    different one must not be reused.
+    """
+    handlers, _, transcriber, _ = _handlers()
+
+    command = _command(tmp_path)
+    command["settings"] = dict(command["settings"], initialPrompt="登場人物: 佐藤, 鈴木。")
+    handlers.process(command, CancellationToken("t"))
+
+    assert transcriber.calls[0]["initial_prompt"] == "登場人物: 佐藤, 鈴木。"
+
+    job = CheckpointStore(tmp_path / "cache" / "job-1").load_job()
+    assert job is not None
+    assert job["transcriptionSettings"]["initialPrompt"] == "登場人物: 佐藤, 鈴木。"
+
+
+def test_a_host_that_sends_no_prompt_leaves_the_built_in_hint_alone(
+    tmp_path: Path, channel
+) -> None:
+    """And records ``None``, which is what every pre-1.4 checkpoint already holds.
+
+    Dropping the key instead would have made the fingerprint of every existing cache mismatch and
+    re-run ASR on work that was already correct.
+    """
+    handlers, _, transcriber, _ = _handlers()
+
+    handlers.process(_command(tmp_path), CancellationToken("t"))
+
+    assert transcriber.calls[0]["initial_prompt"] is None
+
+    job = CheckpointStore(tmp_path / "cache" / "job-1").load_job()
+    assert job is not None
+    assert job["transcriptionSettings"]["initialPrompt"] is None
 
 
 def test_a_prefetch_for_a_different_track_is_redone_by_the_job(tmp_path: Path, channel) -> None:

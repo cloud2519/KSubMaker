@@ -40,6 +40,7 @@ public sealed class WorkerProtocolSerializerTests
                 VadFilter = false,
                 WordTimestamps = false,
                 ConditionOnPreviousText = true,
+                InitialPrompt = "登場人物: 佐藤, 鈴木。",
                 TranslationEngine = "local-llm",
                 TranslationModel = "nllb-200-distilled-1.3B",
                 LlmModel = "qwen2.5-7b-instruct-q4km",
@@ -422,11 +423,31 @@ public sealed class WorkerProtocolSerializerTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void The_protocol_version_is_1_3()
+    public void The_protocol_version_is_1_4()
     {
-        // 1.2 was the hardware event's three CUDA fields; 1.3 added the extractAudio command.
+        // 1.2 was the hardware event's three CUDA fields; 1.3 added the extractAudio command;
+        // 1.4 added settings.initialPrompt.
         // The Python mirror asserts the same literal (worker/tests/test_protocol.py).
-        ProtocolConstants.Version.Should().Be("1.3");
+        ProtocolConstants.Version.Should().Be("1.4");
+    }
+
+    [Fact]
+    public void An_unset_initial_prompt_is_left_out_of_the_json_entirely()
+    {
+        // The worker records this field in the transcription fingerprint, and has since before any
+        // host sent it. It reads it with `.get()`, so an absent key and an explicit null are the
+        // same None — but "" is not, and would make every checkpoint a 1.3 host wrote mismatch and
+        // re-run ASR that was already correct. Hence null-in, absent-out, never empty string.
+        var line = WorkerProtocolSerializer.SerializeCommand(new ProcessCommand
+        {
+            JobId = "job-1",
+            VideoPath = "/videos/movie.mkv",
+            OutputPath = "/videos/movie.ko.srt",
+            CheckpointDir = "/cache/job-1",
+            Settings = new WorkerJobSettings()
+        });
+
+        line.Should().NotContain("initialPrompt");
     }
 
     [Fact]

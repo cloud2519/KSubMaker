@@ -40,6 +40,7 @@ public sealed class SettingsRepositoryTests : IDisposable
         VadFilter = false,
         WordTimestamps = false,
         ConditionOnPreviousText = true,
+        InitialPrompt = "登場人物: 佐藤, 鈴木。",
 
         TranslationEngine = TranslationEngineKind.LocalLlm,
         TranslationModel = "nllb-200-distilled-1.3B",

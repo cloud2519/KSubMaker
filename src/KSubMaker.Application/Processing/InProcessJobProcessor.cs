@@ -126,6 +126,7 @@ public sealed class InProcessJobProcessor(
                             VadFilter = settings.VadFilter,
                             WordTimestamps = settings.WordTimestamps,
                             ConditionOnPreviousText = settings.ConditionOnPreviousText,
+                            InitialPrompt = settings.InitialPrompt,
                             DurationSeconds = job.DurationSeconds
                         },
                         new Progress<double>(p => Report(progress, job, JobStage.Transcribing, p)),

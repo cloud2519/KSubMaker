@@ -643,6 +643,12 @@ public sealed class WorkerJobProcessor : IJobProcessor
             WordTimestamps = wordTimestamps,
             ConditionOnPreviousText = settings.ConditionOnPreviousText,
 
+            // Blank and null both mean "use the worker's built-in hint", and only one of them can
+            // be recorded in the transcription fingerprint without churning every cache.
+            InitialPrompt = string.IsNullOrWhiteSpace(settings.InitialPrompt)
+                ? null
+                : settings.InitialPrompt.Trim(),
+
             TranslationEngine = MapEngine(settings.TranslationEngine),
             TranslationModel = Fallback(settings.TranslationModel, "auto"),
             LlmModel = Fallback(settings.LlmModel, "auto"),

@@ -297,6 +297,72 @@ def test_extraction_never_builds_a_shell_string(monkeypatch: pytest.MonkeyPatch,
     assert "shell" not in seen["kwargs"] or seen["kwargs"]["shell"] is False
 
 
+def _captured_argv(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, **kwargs: Any
+) -> list[str]:
+    """Run ``extract_audio`` against a stubbed ffmpeg and return the argv it would have run."""
+    source = tmp_path / "movie.mkv"
+    source.write_bytes(b"x")
+    seen: dict[str, Any] = {}
+
+    class FakePopen:
+        def __init__(self, argv, **popen_kwargs):  # noqa: ANN001, ARG002
+            seen["argv"] = argv
+            self.stderr = _EmptyStream()
+            self.returncode = 0
+
+        def poll(self):  # noqa: ANN201
+            return 0
+
+        def wait(self, timeout=None):  # noqa: ANN001, ANN201, ARG002
+            return 0
+
+    monkeypatch.setattr(subprocess, "Popen", FakePopen)
+    monkeypatch.setattr("os.replace", lambda *_args: None)
+
+    target = tmp_path / "a.wav"
+    target.write_bytes(b"RIFF")
+    (tmp_path / "a.wav.tmp").write_bytes(b"RIFF-data")
+
+    FfmpegService(ffmpeg="/usr/bin/ffmpeg", ffprobe="/usr/bin/ffprobe").extract_audio(
+        str(source), str(target), **kwargs
+    )
+    return list(seen["argv"])
+
+
+def test_the_progress_length_alone_never_trims_the_output(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The one that bit us: ``duration_seconds`` is a denominator, not a length limit.
+
+    While the two were a single parameter, every ordinary extraction ran with
+    ``-t <container duration>``. A container that under-reports its own length — an ASF, a VBR
+    MP3 whose header estimate is short — silently produced a truncated wav, and the only symptom
+    was a subtitle that stopped before the film did.
+    """
+    argv = _captured_argv(monkeypatch, tmp_path, duration_seconds=7200.0)
+
+    assert "-t" not in argv
+
+
+def test_a_test_run_trims_and_measures_itself_against_the_trimmed_length(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    argv = _captured_argv(monkeypatch, tmp_path, duration_seconds=7200.0, trim_seconds=60.0)
+
+    assert argv[argv.index("-t") + 1] == "60.000"
+
+
+@pytest.mark.parametrize("trim", [None, 0, -1.0])
+def test_no_trim_means_the_whole_track(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, trim: float | None
+) -> None:
+    """All three reach us — an older host omits the field, the current one defaults it to 0."""
+    argv = _captured_argv(monkeypatch, tmp_path, duration_seconds=7200.0, trim_seconds=trim)
+
+    assert "-t" not in argv
+
+
 class _EmptyStream:
     def read(self, _size: int = -1) -> bytes:
         return b""
