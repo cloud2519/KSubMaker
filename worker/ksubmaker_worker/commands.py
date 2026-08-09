@@ -81,6 +81,7 @@ def transcription_fingerprint(
         "vadFilter": bool(settings.get("vadFilter", True)),
         "wordTimestamps": bool(settings.get("wordTimestamps", True)),
         "conditionOnPreviousText": bool(settings.get("conditionOnPreviousText", False)),
+        "initialPrompt": settings.get("initialPrompt"),
         # Only meaningful in embeddedSubtitle mode, but recorded unconditionally so the shape of
         # the fingerprint does not depend on the mode.
         "subtitleTrackIndex": _optional_int(command.get("subtitleTrackIndex")),
@@ -940,6 +941,8 @@ class CommandHandlers:
                 vad_filter=bool(settings.get("vadFilter", True)),
                 word_timestamps=bool(settings.get("wordTimestamps", True)),
                 condition_on_previous_text=bool(settings.get("conditionOnPreviousText", False)),
+                # 호스트/UI에서 전송한 custom initialPrompt 수신 지원
+                initial_prompt=settings.get("initialPrompt"),
                 duration_seconds=duration,
                 token=token,
                 on_progress=lambda pct, speed: emit.progress(
