@@ -1249,8 +1249,31 @@ def test_prefetch_records_the_audio_fingerprint_so_the_job_trusts_the_wav(tmp_pa
     job = CheckpointStore(tmp_path / "cache" / "job-1").load_job()
     assert job is not None
     assert job["completedStage"] == Stages.EXTRACTING_AUDIO
-    # Without this the job cannot tell the wav apart from one made off a different track.
-    assert job["audioSettings"] == {"sourceMode": "audio", "audioTrackIndex": 2}
+    # Without this the job cannot tell the wav apart from one made off a different track — or, since
+    # the test-duration limit landed, from one that was trimmed to the first N seconds.
+    assert job["audioSettings"] == {
+        "sourceMode": "audio",
+        "audioTrackIndex": 2,
+        "testDurationSeconds": 0,
+    }
+
+
+def test_a_trimmed_wav_is_not_mistaken_for_a_full_one(tmp_path: Path, channel) -> None:
+    """The test-duration limit cuts the wav short, so it has to be part of the audio fingerprint.
+
+    Without it a run that extracted only the first 30 seconds would leave a wav the next full run
+    happily reuses, and the subtitle would stop a third of the way through the film with nothing
+    saying why.
+    """
+    handlers, _, _, _ = _handlers()
+
+    command = _extract_command(tmp_path)
+    command["settings"] = dict(command.get("settings") or {}, testDurationSeconds=30)
+    handlers.extract_audio(command, CancellationToken("t"))
+
+    job = CheckpointStore(tmp_path / "cache" / "job-1").load_job()
+    assert job is not None
+    assert job["audioSettings"]["testDurationSeconds"] == 30
 
 
 def test_a_prefetch_for_a_different_track_is_redone_by_the_job(tmp_path: Path, channel) -> None:
