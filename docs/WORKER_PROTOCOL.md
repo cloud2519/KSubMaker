@@ -160,7 +160,7 @@ CPU·RAM·디스크는 호스트가 정본입니다. 워커가 답하지 못하�
 | `vadFilter` | bool | `true` | 무음 구간 제거 |
 | `wordTimestamps` | bool | `true` | 단어 단위 타임스탬프. 번역 전 세그먼트 분할에 필요 |
 | `conditionOnPreviousText` | bool | `false` | 기본 꺼짐. [ADR-010](DECISIONS.md#adr-010--condition_on_previous_text는-기본-꺼짐) |
-| `initialPrompt` | string? | `null` | **v1.4.** Whisper 디코더 앞에 붙이는 힌트. 고유명사·등장인물 이름 표기를 고정하는 데 씁니다. `null`이면 워커의 언어별 기본 힌트를 그대로 쓰고, 값이 있으면 **대체**합니다(합치지 않음) |
+| `initialPrompt` | string? | `null` | **v1.4.** Whisper 디코더 앞에 붙이는 힌트. 고유명사·등장인물 이름 표기를 고정하는 데 씁니다. `null`이면 워커의 언어별 기본 힌트를 그대로 쓰고, 값이 있으면 **대체**합니다(합치지 않음). **첫 디코딩 윈도우에만 적용됩니다** — `conditionOnPreviousText`가 꺼져 있으면 faster-whisper가 그 뒤로 프롬프트를 문맥에서 버립니다 |
 | `translationEngine` | string | `"local-translation"` | `local-translation` / `local-llm` / `fake` |
 | `translationModel` | string | `"auto"` | NLLB 모델 id (워커 기본값 `nllb-200-distilled-600M`) |
 | `llmModel` | string | `"auto"` | GGUF 모델 id (워커 기본값 `qwen2.5-3b-instruct-q4km`) |

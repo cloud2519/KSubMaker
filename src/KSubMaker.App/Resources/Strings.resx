@@ -513,7 +513,7 @@
     <value>인식 힌트 (선택)</value>
   </data>
   <data name="InitialPromptHint" xml:space="preserve">
-    <value>등장인물 이름이나 고유명사를 적어두면 그 표기로 받아쓸 확률이 올라갑니다. 비워두면 언어별 기본 힌트를 씁니다.</value>
+    <value>등장인물 이름이나 고유명사의 표기를 잡아줍니다. 다만 Whisper 구조상 영상 도입부에만 적용되며 이후 구간에는 영향을 주지 않습니다. 비워두면 언어별 기본 힌트를 씁니다.</value>
   </data>
   <data name="TranslationEngineGroup" xml:space="preserve">
     <value>번역 엔진</value>

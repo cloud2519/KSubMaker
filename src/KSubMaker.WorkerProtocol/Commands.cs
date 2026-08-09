@@ -98,6 +98,11 @@ public sealed record WorkerJobSettings
     /// <para>Null (the default) keeps the worker's built-in per-language hint. A value replaces it
     /// rather than adding to it, because Whisper's prompt window is small and silently truncating
     /// the user's own hint would be worse than ignoring ours.</para>
+    ///
+    /// <para><b>Reaches the first decoding window only.</b> faster-whisper drops the prompt from
+    /// the context after the first window unless <c>conditionOnPreviousText</c> is on, and it is
+    /// off by default (ADR-010). On a feature-length file that is the opening minutes and nothing
+    /// else — do not expect a name spelled here to hold for two hours.</para>
     /// </summary>
     [JsonPropertyName("initialPrompt")]
     public string? InitialPrompt { get; init; }
