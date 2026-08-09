@@ -104,6 +104,9 @@ public sealed record WorkerJobSettings
     [JsonPropertyName("translationStyle")]
     public string TranslationStyle { get; init; } = "natural";
 
+    [JsonPropertyName("skipTranslationForSameLanguage")]
+    public bool SkipTranslationForSameLanguage { get; init; } = true;
+
     [JsonPropertyName("testDurationSeconds")]
     public int TestDurationSeconds { get; init; } = 0;
 

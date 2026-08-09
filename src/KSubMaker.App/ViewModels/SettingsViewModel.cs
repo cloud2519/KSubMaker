@@ -170,6 +170,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private TranslationStyle _selectedTranslationStyle = TranslationStyle.Natural;
 
     [ObservableProperty]
+    private bool _skipTranslationForSameLanguage = true;
+
+    [ObservableProperty]
     private int _testDurationSeconds = 0;
 
     [ObservableProperty]
@@ -609,6 +612,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         SelectedTranslationModel = Known(TranslationModels, TranslationChoice.Selected(settings));
         SelectedTranslationStyle = settings.TranslationStyle;
+        SkipTranslationForSameLanguage = settings.SkipTranslationForSameLanguage;
         TestDurationSeconds = settings.TestDurationSeconds;
         TranslationBatchMaxItems = settings.TranslationBatchMaxItems;
         TranslationBatchMaxChars = settings.TranslationBatchMaxChars;
@@ -671,6 +675,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         // dropdown exists to make unrepresentable.
         TranslationChoice.Apply(settings, SelectedTranslationModel, _catalog);
         settings.TranslationStyle = SelectedTranslationStyle;
+        settings.SkipTranslationForSameLanguage = SkipTranslationForSameLanguage;
         settings.TestDurationSeconds = Math.Clamp(TestDurationSeconds, 0, 86400);
         settings.TranslationBatchMaxItems = Math.Clamp(TranslationBatchMaxItems, 1, 200);
         settings.TranslationBatchMaxChars = Math.Clamp(TranslationBatchMaxChars, 200, 20_000);

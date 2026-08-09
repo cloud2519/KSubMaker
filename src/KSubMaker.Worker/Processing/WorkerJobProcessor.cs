@@ -647,6 +647,7 @@ public sealed class WorkerJobProcessor : IJobProcessor
             TranslationModel = Fallback(settings.TranslationModel, "auto"),
             LlmModel = Fallback(settings.LlmModel, "auto"),
             TranslationStyle = MapStyle(settings.TranslationStyle),
+            SkipTranslationForSameLanguage = settings.SkipTranslationForSameLanguage,
             TestDurationSeconds = settings.TestDurationSeconds,
 
             BatchMaxItems = settings.TranslationBatchMaxItems,
