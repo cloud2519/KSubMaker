@@ -509,6 +509,12 @@
   <data name="ConditionOnPreviousTextLabel" xml:space="preserve">
     <value>이전 문맥 참조 (긴 영상에서 자막이 반복될 수 있음)</value>
   </data>
+  <data name="InitialPromptLabel" xml:space="preserve">
+    <value>인식 힌트 (선택)</value>
+  </data>
+  <data name="InitialPromptHint" xml:space="preserve">
+    <value>등장인물 이름이나 고유명사를 적어두면 그 표기로 받아쓸 확률이 올라갑니다. 비워두면 언어별 기본 힌트를 씁니다.</value>
+  </data>
   <data name="TranslationEngineGroup" xml:space="preserve">
     <value>번역 엔진</value>
   </data>

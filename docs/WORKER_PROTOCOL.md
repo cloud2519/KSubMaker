@@ -1,4 +1,4 @@
-# 워커 프로토콜 (v1.3)
+# 워커 프로토콜 (v1.4)
 
 호스트(.NET)와 AI 워커(Python)가 주고받는 전체 계약입니다.
 
@@ -28,7 +28,7 @@
      경고만 남기고 무시합니다. 단, `command` 필드가 없으면 `PROTOCOL_ERROR` 이벤트를
      돌려줍니다(호스트가 응답을 기다리고 있을 수 있으므로).
 5. **버전 협상: 주 버전이 다르면 치명적, 부 버전이 다르면 경고.**
-   `ProtocolConstants.Version` == `protocol.PROTOCOL_VERSION` == `"1.3"`.
+   `ProtocolConstants.Version` == `protocol.PROTOCOL_VERSION` == `"1.4"`.
 6. **비유한 부동소수는 금지.** `allow_nan=False`. `NaN`/`Infinity`는 JSON이 아니고
    `System.Text.Json`이 거부합니다. `speed` 필드에 `NaN` 하나가 들어가면 그 이벤트 전체가
    파싱 불가능해집니다. 직렬화가 실패하면 워커는 값을 `null`로 정화해 **다시 시도**합니다 —
@@ -67,7 +67,7 @@
 | --- | --- | --- | --- |
 | `command` | string | ✔ | 판별자. 아래 12개 중 하나 |
 | `requestId` | string | ✔ | 상관관계 키. 기본값은 `Guid.NewGuid().ToString("n")` |
-| `protocolVersion` | string | ✔ | 호스트의 프로토콜 버전. 기본 `"1.3"` |
+| `protocolVersion` | string | ✔ | 호스트의 프로토콜 버전. 기본 `"1.4"` |
 
 > **현재 호스트가 실제로 보내는 명령은 `hello`, `detectHardware`, `process`, `extractAudio`,
 > `cancel`, `shutdown` 여섯입니다.** `probe`, `listModels`, `downloadModel`, `cancelDownload`,
@@ -160,6 +160,7 @@ CPU·RAM·디스크는 호스트가 정본입니다. 워커가 답하지 못하�
 | `vadFilter` | bool | `true` | 무음 구간 제거 |
 | `wordTimestamps` | bool | `true` | 단어 단위 타임스탬프. 번역 전 세그먼트 분할에 필요 |
 | `conditionOnPreviousText` | bool | `false` | 기본 꺼짐. [ADR-010](DECISIONS.md#adr-010--condition_on_previous_text는-기본-꺼짐) |
+| `initialPrompt` | string? | `null` | **v1.4.** Whisper 디코더 앞에 붙이는 힌트. 고유명사·등장인물 이름 표기를 고정하는 데 씁니다. `null`이면 워커의 언어별 기본 힌트를 그대로 쓰고, 값이 있으면 **대체**합니다(합치지 않음) |
 | `translationEngine` | string | `"local-translation"` | `local-translation` / `local-llm` / `fake` |
 | `translationModel` | string | `"auto"` | NLLB 모델 id (워커 기본값 `nllb-200-distilled-600M`) |
 | `llmModel` | string | `"auto"` | GGUF 모델 id (워커 기본값 `qwen2.5-3b-instruct-q4km`) |

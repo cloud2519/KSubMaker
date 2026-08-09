@@ -91,6 +91,17 @@ public sealed record WorkerJobSettings
     [JsonPropertyName("conditionOnPreviousText")]
     public bool ConditionOnPreviousText { get; init; }
 
+    /// <summary>
+    /// <b>v1.4.</b> Text prepended to Whisper's decoder context to steer spelling and register —
+    /// proper nouns, a series' recurring names, the fact that this is dialogue and not narration.
+    ///
+    /// <para>Null (the default) keeps the worker's built-in per-language hint. A value replaces it
+    /// rather than adding to it, because Whisper's prompt window is small and silently truncating
+    /// the user's own hint would be worse than ignoring ours.</para>
+    /// </summary>
+    [JsonPropertyName("initialPrompt")]
+    public string? InitialPrompt { get; init; }
+
     /// <summary><c>local-translation</c>, <c>local-llm</c> or <c>fake</c>.</summary>
     [JsonPropertyName("translationEngine")]
     public string TranslationEngine { get; init; } = "local-translation";

@@ -174,8 +174,9 @@ def test_wire_names_match_the_csharp_constants() -> None:
     # 1.1: settings.outputConflictPolicy + process.subtitleLanguage.
     # 1.2: hardware.cudaDeviceDetected / cudaLibrariesAvailable / missingCudaLibraries.
     # 1.3: the extractAudio command.
+    # 1.4: settings.initialPrompt.
     # Keep in step with ProtocolConstants.Version on the C# side.
-    assert protocol.PROTOCOL_VERSION == "1.3"
+    assert protocol.PROTOCOL_VERSION == "1.4"
     assert protocol.Commands.DETECT_HARDWARE == "detectHardware"
     assert protocol.Commands.EXTRACT_AUDIO == "extractAudio"
     assert protocol.Commands.EXTRACT_AUDIO in protocol.Commands.ALL

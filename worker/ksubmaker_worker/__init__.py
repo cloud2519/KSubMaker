@@ -16,5 +16,6 @@ __all__ = ["__version__", "PROTOCOL_VERSION"]
 __version__ = "1.0.0"
 
 # Re-exported for convenience; the authoritative definition lives in protocol.py, which mirrors
-# src/KSubMaker.WorkerProtocol/ProtocolConstants.cs.
-PROTOCOL_VERSION = "1.0"
+# src/KSubMaker.WorkerProtocol/ProtocolConstants.cs. Re-exported rather than restated -- this was
+# a second copy of the string and it sat at "1.0" through three protocol revisions.
+from .protocol import PROTOCOL_VERSION as PROTOCOL_VERSION  # noqa: E402

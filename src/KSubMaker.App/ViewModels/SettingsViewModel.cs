@@ -152,6 +152,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _conditionOnPreviousText;
 
+    /// <summary>Bound to a free-text box, so it is empty rather than null when the user clears it.</summary>
+    [ObservableProperty]
+    private string _initialPrompt = string.Empty;
+
     [ObservableProperty]
     private string _recommendationText = string.Empty;
 
@@ -609,6 +613,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         VadFilter = settings.VadFilter;
         WordTimestamps = settings.WordTimestamps;
         ConditionOnPreviousText = settings.ConditionOnPreviousText;
+        InitialPrompt = settings.InitialPrompt ?? string.Empty;
 
         SelectedTranslationModel = Known(TranslationModels, TranslationChoice.Selected(settings));
         SelectedTranslationStyle = settings.TranslationStyle;
@@ -670,6 +675,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.VadFilter = VadFilter;
         settings.WordTimestamps = WordTimestamps;
         settings.ConditionOnPreviousText = ConditionOnPreviousText;
+
+        // Null, not "", so a cleared box reads the same as one that was never filled in — the two
+        // must not produce different transcription fingerprints.
+        settings.InitialPrompt = string.IsNullOrWhiteSpace(InitialPrompt) ? null : InitialPrompt.Trim();
 
         // Engine and slot together, always. Writing one without the other is the defect this
         // dropdown exists to make unrepresentable.

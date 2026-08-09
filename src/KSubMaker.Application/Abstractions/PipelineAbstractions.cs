@@ -43,6 +43,10 @@ public sealed record TranscriptionRequest
     public bool VadFilter { get; init; } = true;
     public bool WordTimestamps { get; init; } = true;
     public bool ConditionOnPreviousText { get; init; }
+
+    /// <summary>Null keeps the transcriber's built-in per-language hint.</summary>
+    public string? InitialPrompt { get; init; }
+
     public double? DurationSeconds { get; init; }
 }
 

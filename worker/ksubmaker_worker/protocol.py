@@ -27,7 +27,11 @@ from typing import IO, Any, Final
 #: is running. Everything else is serialised because two concurrent CUDA jobs would fight over the
 #: same VRAM; this one only shells out to ffmpeg. A 1.2 worker rejects it with ``PROTOCOL_ERROR``
 #: and the host falls back to extracting inside the job, which is what it always did.
-PROTOCOL_VERSION: Final = "1.3"
+#:
+#: 1.4 added ``settings.initialPrompt``. The worker had read the field since before any host sent
+#: it; null keeps the built-in per-language hint, which is what every 1.3 host effectively asked
+#: for, so the fingerprint recorded by a 1.3 run still matches a 1.4 one.
+PROTOCOL_VERSION: Final = "1.4"
 
 
 class Commands:

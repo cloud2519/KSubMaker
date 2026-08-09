@@ -153,6 +153,18 @@
                                           Margin="0,0,0,4" />
                                 <CheckBox Content="{x:Static res:Strings.ConditionOnPreviousTextLabel}"
                                           IsChecked="{Binding ConditionOnPreviousText}" />
+
+                                <TextBlock Text="{x:Static res:Strings.InitialPromptLabel}"
+                                           Margin="0,12,0,2" />
+                                <TextBox Text="{Binding InitialPrompt, UpdateSourceTrigger=LostFocus}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Height="52" />
+                                <TextBlock Text="{x:Static res:Strings.InitialPromptHint}"
+                                           TextWrapping="Wrap"
+                                           Foreground="#6B7280"
+                                           Margin="0,4,0,0" />
                             </StackPanel>
                         </GroupBox>
 
