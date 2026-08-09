@@ -269,10 +269,53 @@ def test_options_are_forwarded_to_the_model(tmp_path: Path) -> None:
     assert model.options == {
         "beam_size": 3,
         "vad_filter": True,
+        # Padding the VAD segments keeps sentence-final morphemes from being clipped.
+        "vad_parameters": {"speech_pad_ms": 400},
         "word_timestamps": False,
         "condition_on_previous_text": True,
+        # Seeds the decoder with a language-appropriate hint. See the tests below.
+        "initial_prompt": "日本語の字幕です。",
         "language": "ja",
     }
+
+
+def test_a_language_with_a_hint_gets_one_and_the_others_get_none(tmp_path: Path) -> None:
+    """initial_prompt seeds Whisper's decoder, so a hint in the wrong language is worse than none.
+
+    Only the two languages with a written hint may receive one; everything else must stay None so
+    a French or Spanish video is not primed with Korean orthography rules.
+    """
+    for language, expected in (("ko", "한국어"), ("ja", "日本語"), ("en", None), ("fr", None)):
+        model = FakeModel([FakeSegment(0.0, 1.0, "x")])
+        transcriber, audio = _prepared(model, tmp_path)
+
+        transcriber.transcribe(audio, language=language)
+
+        prompt = model.options["initial_prompt"]
+        if expected is None:
+            assert prompt is None, f"{language} must not be primed with another language's hint"
+        else:
+            assert prompt is not None and expected in prompt
+
+
+def test_an_explicit_prompt_wins_over_the_built_in_hint(tmp_path: Path) -> None:
+    model = FakeModel([FakeSegment(0.0, 1.0, "x")])
+    transcriber, audio = _prepared(model, tmp_path)
+
+    transcriber.transcribe(audio, language="ja", initial_prompt="고유명사: 셜록, 베이커가")
+
+    assert model.options["initial_prompt"] == "고유명사: 셜록, 베이커가"
+
+
+def test_vad_parameters_are_omitted_when_the_filter_is_off(tmp_path: Path) -> None:
+    # Padding is a property of the VAD; handing faster-whisper parameters for a filter that is not
+    # running would be meaningless.
+    model = FakeModel([FakeSegment(0.0, 1.0, "x")])
+    transcriber, audio = _prepared(model, tmp_path)
+
+    transcriber.transcribe(audio, language="ja", vad_filter=False)
+
+    assert model.options["vad_parameters"] is None
 
 
 def test_auto_language_becomes_none(tmp_path: Path) -> None:
