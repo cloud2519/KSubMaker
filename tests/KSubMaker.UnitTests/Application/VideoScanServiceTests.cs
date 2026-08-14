@@ -450,4 +450,102 @@ public sealed class VideoScanServiceTests
         report.DirectoriesVisited.Should().Be(4);
         report.Elapsed.Should().BeGreaterThanOrEqualTo(TimeSpan.Zero);
     }
+
+    // -----------------------------------------------------------------------
+    // drag-and-drop resolution
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Dropped_video_files_are_taken_and_everything_else_is_counted_as_ignored()
+    {
+        var fileSystem = new InMemoryFileSystem()
+            .AddDirectory("/videos")
+            .AddFile("/videos/a.mp4")
+            .AddFile("/videos/readme.txt");
+
+        var resolution = NewService(fileSystem).ResolveDropped(
+            ["/videos/a.mp4", "/videos/readme.txt", "/videos/missing.mp4"], Request());
+
+        resolution.Files.Select(f => f.FileName).Should().BeEquivalentTo("a.mp4");
+        resolution.IgnoredPaths.Should().Be(2, "a non-video and a missing path were dropped");
+        resolution.FoldersScanned.Should().Be(0);
+    }
+
+    [Fact]
+    public void A_dropped_folder_is_scanned_with_the_callers_options()
+    {
+        var fileSystem = new InMemoryFileSystem()
+            .AddDirectory("/videos/season1")
+            .AddFile("/videos/season1/e1.mp4")
+            .AddFile("/videos/season1/e2.mkv")
+            .AddDirectory("/videos/season1/extras")
+            .AddFile("/videos/season1/extras/bonus.mp4");
+
+        var flat = NewService(fileSystem).ResolveDropped(
+            ["/videos/season1"], Request(subfolders: false));
+
+        flat.Files.Select(f => f.FileName).Should().BeEquivalentTo("e1.mp4", "e2.mkv");
+        flat.FoldersScanned.Should().Be(1);
+
+        var deep = NewService(fileSystem).ResolveDropped(
+            ["/videos/season1"], Request(subfolders: true));
+
+        deep.Files.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public void Dropping_a_folder_and_a_file_inside_it_does_not_enqueue_the_file_twice()
+    {
+        var fileSystem = new InMemoryFileSystem()
+            .AddDirectory("/videos")
+            .AddFile("/videos/a.mp4")
+            .AddFile("/videos/b.mp4");
+
+        var resolution = NewService(fileSystem).ResolveDropped(
+            ["/videos/a.mp4", "/videos"], Request());
+
+        resolution.Files.Select(f => f.FileName).Should().BeEquivalentTo("a.mp4", "b.mp4");
+    }
+
+    [Fact]
+    public void An_explicitly_dropped_hidden_file_is_accepted()
+    {
+        // The hidden filter exists to keep a folder walk from surfacing files the user cannot see.
+        // A dropped file was pointed at by the user, which is the opposite situation.
+        var fileSystem = new InMemoryFileSystem()
+            .AddDirectory("/videos")
+            .AddFile("/videos/secret.mp4", hidden: true);
+
+        var viaDrop = NewService(fileSystem).ResolveDropped(["/videos/secret.mp4"], Request());
+        var viaScan = NewService(fileSystem).Scan(Request());
+
+        viaDrop.Files.Should().ContainSingle();
+        viaScan.Files.Should().BeEmpty("the walk still honours the hidden filter");
+    }
+
+    [Fact]
+    public void A_dropped_video_still_gets_its_sidecar_subtitles_detected()
+    {
+        // The drop must go through the same per-file construction as the scan, or the
+        // "이미 한국어 자막 있음" skip stops working for dropped files.
+        var fileSystem = new InMemoryFileSystem()
+            .AddDirectory("/videos")
+            .AddFile("/videos/movie.mp4")
+            .AddFile("/videos/movie.ko.srt");
+
+        var resolution = NewService(fileSystem).ResolveDropped(["/videos/movie.mp4"], Request());
+
+        resolution.Files.Should().ContainSingle()
+            .Which.HasKoreanExternalSubtitle.Should().BeTrue();
+    }
+
+    [Fact]
+    public void A_drop_with_nothing_usable_reports_zero_files_rather_than_throwing()
+    {
+        var resolution = NewService(new InMemoryFileSystem()).ResolveDropped(
+            ["", "/nowhere/x.txt"], Request());
+
+        resolution.Files.Should().BeEmpty();
+        resolution.IgnoredPaths.Should().Be(2);
+    }
 }

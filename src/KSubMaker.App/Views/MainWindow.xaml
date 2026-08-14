@@ -195,6 +195,9 @@
         <!-- ======================= job grid ======================= -->
         <DataGrid ItemsSource="{Binding Jobs}"
                   SelectedItem="{Binding SelectedJob, Mode=TwoWay}"
+                  AllowDrop="True"
+                  DragOver="OnQueueDragOver"
+                  Drop="OnQueueDrop"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"

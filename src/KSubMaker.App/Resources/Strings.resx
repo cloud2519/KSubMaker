@@ -509,6 +509,15 @@
   <data name="ConditionOnPreviousTextLabel" xml:space="preserve">
     <value>이전 문맥 참조 (긴 영상에서 자막이 반복될 수 있음)</value>
   </data>
+  <data name="DropResolvingMessage" xml:space="preserve">
+    <value>끌어다 놓은 항목을 확인하는 중...</value>
+  </data>
+  <data name="DropNothingToAddFormat" xml:space="preserve">
+    <value>끌어다 놓은 항목에 처리할 영상이 없습니다. (무시 {0}건)</value>
+  </data>
+  <data name="DropWhileBusyMessage" xml:space="preserve">
+    <value>검색이 진행 중이라 끌어다 놓은 항목을 지금은 추가할 수 없습니다.</value>
+  </data>
   <data name="InitialPromptLabel" xml:space="preserve">
     <value>인식 힌트 (선택)</value>
   </data>

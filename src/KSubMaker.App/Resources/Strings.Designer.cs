@@ -487,6 +487,12 @@ public static partial class Strings
     /// <summary>이전 문맥 참조 (긴 영상에서 자막이 반복될 수 있음)</summary>
     public static string ConditionOnPreviousTextLabel => Get(nameof(ConditionOnPreviousTextLabel));
 
+    public static string DropResolvingMessage => Get(nameof(DropResolvingMessage));
+
+    public static string DropNothingToAddFormat => Get(nameof(DropNothingToAddFormat));
+
+    public static string DropWhileBusyMessage => Get(nameof(DropWhileBusyMessage));
+
     public static string InitialPromptLabel => Get(nameof(InitialPromptLabel));
 
     public static string InitialPromptHint => Get(nameof(InitialPromptHint));
