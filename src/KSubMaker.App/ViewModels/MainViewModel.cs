@@ -421,6 +421,88 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Entry point for files and folders dropped onto the queue grid. Same pipeline as a scan —
+    /// resolve → enqueue → probe → summary — and the same guards, so a drop can do nothing a scan
+    /// could not.
+    /// </summary>
+    public async Task AddDroppedPathsAsync(IReadOnlyList<string> paths)
+    {
+        if (paths.Count == 0)
+        {
+            return;
+        }
+
+        if (IsQueueRunning)
+        {
+            StatusMessage = Strings.QueueBusyCannotScan;
+            _dialogs.ShowWarning(Strings.QueueBusyCannotScan);
+            return;
+        }
+
+        if (IsScanning || IsPreparingModels)
+        {
+            // A scan is already using the status bar and the CTS; a competing drop would race it.
+            StatusMessage = Strings.DropWhileBusyMessage;
+            return;
+        }
+
+        var cts = new CancellationTokenSource();
+        Interlocked.Exchange(ref _scanCts, cts)?.Dispose();
+        IsScanning = true;
+
+        try
+        {
+            // The drop deliberately does not persist scan options or touch TargetFolder: the user
+            // handed us paths, not a new default folder.
+            var settings = _settingsService.Current;
+            _settings = settings;
+
+            StatusMessage = Strings.DropResolvingMessage;
+
+            var options = new ScanRequest
+            {
+                RootFolder = string.Empty, // per-item; ResolveDropped substitutes each folder
+                IncludeSubfolders = IncludeSubfolders,
+                IncludeHiddenFolders = IncludeHiddenFolders
+            };
+
+            var resolution = await _scanService.ResolveDroppedAsync(paths, options, cts.Token).ConfigureAwait(true);
+
+            if (resolution.Files.Count == 0)
+            {
+                StatusMessage = string.Format(
+                    CultureInfo.CurrentCulture, Strings.DropNothingToAddFormat, resolution.IgnoredPaths);
+                return;
+            }
+
+            var results = await _queue.EnqueueAsync(resolution.Files, settings, cts.Token).ConfigureAwait(true);
+
+            await ProbeNewlyQueuedAsync(resolution.Files, results, cts.Token).ConfigureAwait(true);
+
+            ShowEnqueueSummary(results);
+
+            await AskPerFileIfRequestedAsync(settings, cts.Token).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = Strings.ScanCancelledMessage;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "끌어다 놓은 항목을 처리하는 중 오류가 발생했습니다.");
+            var message = string.Format(CultureInfo.CurrentCulture, Strings.ScanFailedFormat, ex.Message);
+            StatusMessage = message;
+            _dialogs.ShowError(message);
+        }
+        finally
+        {
+            IsScanning = false;
+            Interlocked.CompareExchange(ref _scanCts, null, cts);
+            cts.Dispose();
+        }
+    }
+
     [RelayCommand(CanExecute = nameof(CanCancelScan))]
     private void CancelScan()
     {

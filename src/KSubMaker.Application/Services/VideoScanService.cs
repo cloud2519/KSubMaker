@@ -28,6 +28,18 @@ public sealed record ScanReport
     public TimeSpan Elapsed { get; init; }
 }
 
+/// <summary>What a drag-and-drop of arbitrary shell items resolved to.</summary>
+public sealed record DropResolution
+{
+    public required IReadOnlyList<VideoFile> Files { get; init; }
+
+    /// <summary>Dropped directories, each walked with the caller's scan options.</summary>
+    public int FoldersScanned { get; init; }
+
+    /// <summary>Dropped items that were neither a video file nor a folder — documents, images, links.</summary>
+    public int IgnoredPaths { get; init; }
+}
+
 /// <summary>
 /// Walks a folder tree collecting video files.
 ///
@@ -187,6 +199,93 @@ public sealed class VideoScanService(IFileSystem fileSystem, ILogger<VideoScanSe
             SkippedCycles = skippedCycles,
             InaccessibleDirectories = inaccessible,
             Elapsed = DateTime.UtcNow - started
+        };
+    }
+
+    public Task<DropResolution> ResolveDroppedAsync(
+        IReadOnlyList<string> paths, ScanRequest options, CancellationToken cancellationToken = default) =>
+        Task.Run(() => ResolveDropped(paths, options, cancellationToken), cancellationToken);
+
+    /// <summary>
+    /// Classifies the items of a drag-and-drop: video files are taken as they are, folders are
+    /// walked with <paramref name="options"/> (whose <see cref="ScanRequest.RootFolder"/> is
+    /// ignored), everything else is counted and dropped.
+    ///
+    /// An explicitly dropped file is exempt from the hidden filter — the user pointed at it, which
+    /// answers the question the filter exists to ask. The extension filter still applies: dropping
+    /// a whole desktop selection must not enqueue the .txt sitting in it.
+    /// </summary>
+    public DropResolution ResolveDropped(
+        IReadOnlyList<string> paths, ScanRequest options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(paths);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var extensions = options.Extensions ?? VideoExtensions.Default;
+
+        // Dropping a folder together with a file inside it must not enqueue the file twice.
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var results = new List<VideoFile>();
+        var foldersScanned = 0;
+        var ignored = 0;
+
+        foreach (var path in paths)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                ignored++;
+                continue;
+            }
+
+            if (_fileSystem.DirectoryExists(path))
+            {
+                foldersScanned++;
+                var report = Scan(options with { RootFolder = path }, cancellationToken);
+                foreach (var video in report.Files)
+                {
+                    if (seen.Add(video.FullPath))
+                    {
+                        results.Add(video);
+                    }
+                }
+
+                continue;
+            }
+
+            if (!_fileSystem.FileExists(path) || !VideoExtensions.IsVideo(path, extensions))
+            {
+                ignored++;
+                continue;
+            }
+
+            var built = BuildVideoFile(path);
+            if (built is null)
+            {
+                ignored++;
+            }
+            else if (seen.Add(built.FullPath))
+            {
+                results.Add(built);
+            }
+        }
+
+        // Same order the scan produces, so a drop and a scan of the same folder list identically.
+        var ordered = results
+            .OrderBy(f => Path.GetDirectoryName(f.FullPath), StringComparer.OrdinalIgnoreCase)
+            .ThenBy(f => f.FileName, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        _logger.LogInformation(
+            "끌어다 놓은 항목 {Dropped}개 확인: 영상 {Files}개, 폴더 {Folders}개, 무시 {Ignored}건",
+            paths.Count, ordered.Length, foldersScanned, ignored);
+
+        return new DropResolution
+        {
+            Files = ordered,
+            FoldersScanned = foldersScanned,
+            IgnoredPaths = ignored
         };
     }
 

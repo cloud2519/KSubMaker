@@ -45,6 +45,36 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Shows the copy cursor for a file drop and blocks everything else. Without this WPF shows
+    /// the "no entry" cursor even for drops the grid accepts, because a read-only DataGrid rejects
+    /// drag events by default.
+    /// </summary>
+    private void OnQueueDragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
+            ? DragDropEffects.Copy
+            : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Hands dropped files and folders to the view model. <c>async void</c> is forced by the event
+    /// signature; the view model wraps its own work in try/catch, so the only thing to guard here
+    /// is the payload extraction.
+    /// </summary>
+    private async void OnQueueDrop(object sender, DragEventArgs e)
+    {
+        e.Handled = true;
+
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths || paths.Length == 0)
+        {
+            return;
+        }
+
+        await _viewModel.AddDroppedPathsAsync(paths);
+    }
+
+    /// <summary>
     /// Cancels the first close, runs the asynchronous teardown, then closes for real.
     ///
     /// <see cref="async void"/> is forced by the event signature; every path is inside the try/catch
