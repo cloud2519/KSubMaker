@@ -3,11 +3,11 @@
 ;
 ;  scripts\build-installer.ps1 이 아래 심볼을 정의해서 ISCC 를 호출합니다.
 ;
-;      /DAppVersion=0.2.0
+;      /DAppVersion=1.0.0
 ;      /DPublishDir=<저장소>\publish\win-x64-Release
 ;      /DOutputDir=<저장소>\artifacts
 ;      /DRepoRoot=<저장소>
-;      /DSetupBaseName=KSubMaker-0.2.0-setup
+;      /DSetupBaseName=KSubMaker-1.0.0-setup
 ;
 ;  직접 컴파일할 때는 아래 기본값이 쓰입니다.
 ;
@@ -25,7 +25,7 @@
 ; ============================================================================
 
 #ifndef AppVersion
-  #define AppVersion "0.2.0"
+  #define AppVersion "1.0.0"
 #endif
 
 #ifndef RepoRoot
@@ -66,6 +66,8 @@ DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 UninstallDisplayName={#AppName} {#AppVersion}
 UninstallDisplayIcon={app}\{#AppExeName}
+; 설치 마법사 자체의 아이콘. 앱 exe 에 박힌 것과 같은 파일입니다 (scripts/make-icon.py 생성).
+SetupIconFile={#RepoRoot}\src\KSubMaker.App\Assets\app.ico
 
 OutputDir={#OutputDir}
 OutputBaseFilename={#SetupBaseName}
