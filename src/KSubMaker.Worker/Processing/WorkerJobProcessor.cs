@@ -692,9 +692,11 @@ public sealed class WorkerJobProcessor : IJobProcessor
     /// </summary>
     private SourceSelection ResolveSource(Job job, AppSettings settings)
     {
+        var wantsExternal = settings.SubtitleSource is SubtitleSourcePreference.PreferExternalFile
+            or SubtitleSourcePreference.PreferAnySubtitle;
+
         if (job.SourceOverride == JobSourceOverride.ExternalSubtitle ||
-            (job.SourceOverride == JobSourceOverride.None &&
-             settings.ExistingSubtitlePolicy == ExistingSubtitlePolicy.UseExternalSubtitle))
+            (job.SourceOverride == JobSourceOverride.None && wantsExternal))
         {
             // Resolved here rather than stored on the job: the sidecars beside a video can change
             // between queueing and running, and re-reading the directory costs one listing.
@@ -708,11 +710,11 @@ public sealed class WorkerJobProcessor : IJobProcessor
                     choice.Path);
             }
 
-            // No usable sidecar. Falling through to ASR is the whole point of the policy being
-            // "use it when it is there" rather than "only ever use it".
+            // No usable sidecar. Falling through is the whole point of every preference being
+            // "prefer" rather than "require" — PreferAnySubtitle lands on the embedded branch
+            // below, the rest on ASR.
             _logger.LogInformation(
-                "{File}: 쓸 수 있는 원본 자막 파일이 없어 음성 인식으로 진행합니다.",
-                Path.GetFileName(job.VideoPath));
+                "{File}: 쓸 수 있는 원본 자막 파일이 없습니다.", Path.GetFileName(job.VideoPath));
         }
 
         if (job.SourceOverride == JobSourceOverride.EmbeddedSubtitle)
@@ -734,7 +736,8 @@ public sealed class WorkerJobProcessor : IJobProcessor
         }
 
         var useEmbedded =
-            settings.ExistingSubtitlePolicy == ExistingSubtitlePolicy.UseEmbeddedTrack &&
+            settings.SubtitleSource is SubtitleSourcePreference.PreferEmbeddedTrack
+                or SubtitleSourcePreference.PreferAnySubtitle &&
             job.HasEmbeddedSubtitle;
 
         return useEmbedded

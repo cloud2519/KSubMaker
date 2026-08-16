@@ -81,8 +81,12 @@ public sealed partial class SettingsViewModel : ObservableObject
             .Select(s => new Option<TranslationStyle>(s, DisplayText.TranslationStyleName(s)))
             .ToArray();
 
-        ExistingSubtitlePolicies = Enum.GetValues<ExistingSubtitlePolicy>()
-            .Select(p => new Option<ExistingSubtitlePolicy>(p, DisplayText.ExistingSubtitlePolicyName(p)))
+        SubtitleSources = Enum.GetValues<SubtitleSourcePreference>()
+            .Select(p => new Option<SubtitleSourcePreference>(p, DisplayText.SubtitleSourceName(p)))
+            .ToArray();
+
+        ExistingSubtitleRules = Enum.GetValues<ExistingSubtitleRule>()
+            .Select(p => new Option<ExistingSubtitleRule>(p, DisplayText.ExistingSubtitleRuleName(p)))
             .ToArray();
 
         OutputConflictPolicies = Enum.GetValues<OutputConflictPolicy>()
@@ -113,7 +117,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     public IReadOnlyList<ModelOption> TranslationModels { get; }
     public IReadOnlyList<Option<ComputeType>> ComputeTypes { get; }
     public IReadOnlyList<Option<TranslationStyle>> TranslationStyles { get; }
-    public IReadOnlyList<Option<ExistingSubtitlePolicy>> ExistingSubtitlePolicies { get; }
+    public IReadOnlyList<Option<SubtitleSourcePreference>> SubtitleSources { get; }
+    public IReadOnlyList<Option<ExistingSubtitleRule>> ExistingSubtitleRules { get; }
     public IReadOnlyList<Option<OutputConflictPolicy>> OutputConflictPolicies { get; }
     public IReadOnlyList<Option<ProcessingStrategy>> ProcessingStrategies { get; }
     public IReadOnlyList<Option<string>> LogLevels { get; }
@@ -215,7 +220,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     // -----------------------------------------------------------------------
 
     [ObservableProperty]
-    private ExistingSubtitlePolicy _selectedExistingSubtitlePolicy = ExistingSubtitlePolicy.AlwaysTranscribe;
+    private SubtitleSourcePreference _selectedSubtitleSource = SubtitleSourcePreference.AudioOnly;
+
+    [ObservableProperty]
+    private ExistingSubtitleRule _selectedExistingSubtitleRule = ExistingSubtitleRule.CompleteIfKoreanExists;
 
     [ObservableProperty]
     private OutputConflictPolicy _selectedOutputConflictPolicy = OutputConflictPolicy.Skip;
@@ -633,7 +641,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         SelectedGlossaryEntry = null;
         GlossaryMessage = string.Empty;
 
-        SelectedExistingSubtitlePolicy = settings.ExistingSubtitlePolicy;
+        SelectedSubtitleSource = settings.SubtitleSource;
+        SelectedExistingSubtitleRule = settings.ExistingSubtitleRule;
         SelectedOutputConflictPolicy = settings.OutputConflictPolicy;
         OutputSuffix = settings.OutputSuffix;
         MaxLinesPerCue = settings.MaxLinesPerCue;
@@ -692,7 +701,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.TranslationContextLines = Math.Clamp(TranslationContextLines, 0, 20);
         settings.Glossary = BuildGlossary();
 
-        settings.ExistingSubtitlePolicy = SelectedExistingSubtitlePolicy;
+        settings.SubtitleSource = SelectedSubtitleSource;
+        settings.ExistingSubtitleRule = SelectedExistingSubtitleRule;
         settings.OutputConflictPolicy = SelectedOutputConflictPolicy;
         settings.OutputSuffix = string.IsNullOrWhiteSpace(OutputSuffix) ? "ko" : OutputSuffix.Trim().Trim('.');
         settings.MaxLinesPerCue = Math.Clamp(MaxLinesPerCue, 1, 4);

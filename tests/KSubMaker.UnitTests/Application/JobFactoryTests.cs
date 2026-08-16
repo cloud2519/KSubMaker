@@ -156,9 +156,9 @@ public sealed class JobFactoryTests
     }
 
     [Fact]
-    public void Switching_the_skip_option_off_queues_the_file_anyway()
+    public void Choosing_process_anyway_queues_a_file_that_already_has_korean()
     {
-        var settings = Settings(s => s.SkipIfKoreanSubtitleExists = false);
+        var settings = Settings(s => s.ExistingSubtitleRule = ExistingSubtitleRule.ProcessAnyway);
 
         var result = JobFactory.Create(File(koreanSidecar: true), null, settings, NothingExists, Clock);
 
@@ -354,13 +354,13 @@ public sealed class JobFactoryTests
     }
 
     // -----------------------------------------------------------------------
-    // ExistingSubtitlePolicy
+    // ExistingSubtitleRule
     // -----------------------------------------------------------------------
 
     [Fact]
     public void AlwaysTranscribe_ignores_a_foreign_sidecar()
     {
-        var settings = Settings(s => s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.AlwaysTranscribe);
+        var settings = Settings(s => s.ExistingSubtitleRule = ExistingSubtitleRule.ProcessAnyway);
 
         JobFactory.Create(File(externalSubtitle: true), null, settings, NothingExists, Clock)
             .Decision.Should().Be(EnqueueDecision.Created);
@@ -369,7 +369,7 @@ public sealed class JobFactoryTests
     [Fact]
     public void SkipIfExternalSubtitleExists_skips_a_new_file_with_any_sidecar()
     {
-        var settings = Settings(s => s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.SkipIfExternalSubtitleExists);
+        var settings = Settings(s => s.ExistingSubtitleRule = ExistingSubtitleRule.SkipIfAnySubtitleExists);
 
         var result = JobFactory.Create(File(externalSubtitle: true), null, settings, NothingExists, Clock);
 
@@ -381,7 +381,7 @@ public sealed class JobFactoryTests
     [Fact]
     public void SkipIfExternalSubtitleExists_leaves_an_existing_job_unchanged()
     {
-        var settings = Settings(s => s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.SkipIfExternalSubtitleExists);
+        var settings = Settings(s => s.ExistingSubtitleRule = ExistingSubtitleRule.SkipIfAnySubtitleExists);
         var existing = ExistingJob(JobStatus.Failed);
 
         var result = JobFactory.Create(File(externalSubtitle: true), existing, settings, NothingExists, Clock);
@@ -395,7 +395,7 @@ public sealed class JobFactoryTests
     {
         var settings = Settings(s =>
         {
-            s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.SkipIfExternalSubtitleExists;
+            s.ExistingSubtitleRule = ExistingSubtitleRule.SkipIfAnySubtitleExists;
             s.ReprocessCompleted = true;
         });
 
@@ -406,7 +406,7 @@ public sealed class JobFactoryTests
     [Fact]
     public void SkipIfExternalSubtitleExists_still_queues_a_file_with_no_sidecar()
     {
-        var settings = Settings(s => s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.SkipIfExternalSubtitleExists);
+        var settings = Settings(s => s.ExistingSubtitleRule = ExistingSubtitleRule.SkipIfAnySubtitleExists);
 
         JobFactory.Create(File(), null, settings, NothingExists, Clock)
             .Decision.Should().Be(EnqueueDecision.Created);
@@ -417,8 +417,7 @@ public sealed class JobFactoryTests
     {
         var settings = Settings(s =>
         {
-            s.SkipIfKoreanSubtitleExists = false;    // otherwise the earlier filter would win
-            s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.CompleteIfKoreanExists;
+            s.ExistingSubtitleRule = ExistingSubtitleRule.CompleteIfKoreanExists;
         });
 
         var result = JobFactory.Create(File(koreanSidecar: true), null, settings, NothingExists, Clock);
@@ -433,8 +432,7 @@ public sealed class JobFactoryTests
     {
         var settings = Settings(s =>
         {
-            s.SkipIfKoreanSubtitleExists = false;
-            s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.CompleteIfKoreanExists;
+            s.ExistingSubtitleRule = ExistingSubtitleRule.CompleteIfKoreanExists;
         });
 
         var existing = ExistingJob(JobStatus.Failed);
@@ -450,8 +448,7 @@ public sealed class JobFactoryTests
     {
         var settings = Settings(s =>
         {
-            s.SkipIfKoreanSubtitleExists = false;
-            s.ExistingSubtitlePolicy = ExistingSubtitlePolicy.CompleteIfKoreanExists;
+            s.ExistingSubtitleRule = ExistingSubtitleRule.CompleteIfKoreanExists;
         });
 
         JobFactory.Create(File(), null, settings, NothingExists, Clock)
@@ -459,11 +456,19 @@ public sealed class JobFactoryTests
     }
 
     [Theory]
-    [InlineData(ExistingSubtitlePolicy.UseEmbeddedTrack)]
-    [InlineData(ExistingSubtitlePolicy.AskPerFile)]
-    public void The_remaining_policies_do_not_filter_the_file_out(ExistingSubtitlePolicy policy)
+    [InlineData(SubtitleSourcePreference.PreferEmbeddedTrack)]
+    [InlineData(SubtitleSourcePreference.PreferExternalFile)]
+    [InlineData(SubtitleSourcePreference.PreferAnySubtitle)]
+    [InlineData(SubtitleSourcePreference.AskPerFile)]
+    public void Choosing_a_subtitle_source_never_filters_the_file_out(SubtitleSourcePreference source)
     {
-        var settings = Settings(s => s.ExistingSubtitlePolicy = policy);
+        // The source preference answers "translate what", not "process whether" — that is the whole
+        // point of the two being separate settings.
+        var settings = Settings(s =>
+        {
+            s.SubtitleSource = source;
+            s.ExistingSubtitleRule = ExistingSubtitleRule.ProcessAnyway;
+        });
 
         JobFactory.Create(File(embeddedSubtitle: true, externalSubtitle: true), null, settings, NothingExists, Clock)
             .Decision.Should().Be(EnqueueDecision.Created);

@@ -39,30 +39,56 @@ public enum ProcessingStrategy
     PipelinedParallel
 }
 
-/// <summary>What to do when the source video already has subtitles.</summary>
-public enum ExistingSubtitlePolicy
+/// <summary>
+/// Where a job's source text comes from when the video has subtitles available.
+///
+/// <para>Split out of the old single <c>ExistingSubtitlePolicy</c>, which answered two unrelated
+/// questions at once — "should this file be processed at all" and "what should be translated" — so
+/// that perfectly reasonable combinations ("translate the sidecar, but skip files that already have
+/// Korean") could not be expressed. That one is now <see cref="ExistingSubtitleRule"/>.</para>
+/// </summary>
+public enum SubtitleSourcePreference
 {
-    /// <summary>Ignore everything that exists and always transcribe the audio. (MVP core path.)</summary>
-    AlwaysTranscribe,
-
-    /// <summary>Skip the file when a sidecar subtitle with the same base name exists.</summary>
-    SkipIfExternalSubtitleExists,
-
-    /// <summary>Extract an embedded subtitle track and translate it instead of running ASR.</summary>
-    UseEmbeddedTrack,
+    /// <summary>Always transcribe the audio, whatever else exists. (MVP core path, and the default.)</summary>
+    AudioOnly,
 
     /// <summary>
-    /// Translate a sidecar file (<c>movie.ja.srt</c>) instead of running ASR, when one exists.
-    /// Which sidecar is decided by <c>ExternalSubtitleSelector</c>; a file with none falls back to
-    /// the audio path rather than being skipped.
+    /// Translate a sidecar file (<c>movie.ja.srt</c>) when there is a usable one, otherwise
+    /// transcribe. Which sidecar is decided by <c>ExternalSubtitleSelector</c>.
     /// </summary>
-    UseExternalSubtitle,
+    PreferExternalFile,
 
-    /// <summary>Treat the file as done when a Korean subtitle already exists.</summary>
+    /// <summary>Translate an embedded subtitle track when there is one, otherwise transcribe.</summary>
+    PreferEmbeddedTrack,
+
+    /// <summary>
+    /// Translate whatever subtitle is available, otherwise transcribe. A sidecar wins over an
+    /// embedded track: it is plain text we can read directly, while a track has to be demuxed and
+    /// may turn out to be a bitmap format we cannot use.
+    /// </summary>
+    PreferAnySubtitle,
+
+    /// <summary>Ask per file, once the queue knows what each file actually contains.</summary>
+    AskPerFile
+}
+
+/// <summary>
+/// What to do with a file that already has a subtitle — the "should we process this at all"
+/// question, kept apart from <see cref="SubtitleSourcePreference"/>.
+/// </summary>
+public enum ExistingSubtitleRule
+{
+    /// <summary>
+    /// A Korean subtitle means the work is done; mark the file complete without processing it.
+    /// The default, and what the old standalone <c>SkipIfKoreanSubtitleExists</c> checkbox did.
+    /// </summary>
     CompleteIfKoreanExists,
 
-    /// <summary>Ask per file in the queue.</summary>
-    AskPerFile
+    /// <summary>Skip the file when any same-named sidecar exists, whatever language it is in.</summary>
+    SkipIfAnySubtitleExists,
+
+    /// <summary>Process the file regardless of what already sits next to it.</summary>
+    ProcessAnyway
 }
 
 /// <summary>What to do when the target <c>*.ko.srt</c> already exists.</summary>

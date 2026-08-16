@@ -68,9 +68,9 @@ public sealed class RetryAndConflictPolicyTests(MediaFixture media) : IAsyncLife
         {
             s.OutputConflictPolicy = policy;
 
-            // Otherwise the "이미 한국어 자막이 있는 파일 건너뛰기" filter would stop the file before
+            // Otherwise the "이미 한국어 자막이 있으면 완료로 표시" rule would stop the file before
             // it ever reaches the writer, and the conflict policy would never be exercised.
-            s.SkipIfKoreanSubtitleExists = false;
+            s.ExistingSubtitleRule = ExistingSubtitleRule.ProcessAnyway;
         });
 
         await EnqueueAsync(settings);

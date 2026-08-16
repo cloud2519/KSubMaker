@@ -107,9 +107,6 @@
                     <CheckBox Content="{x:Static res:Strings.IncludeHiddenFoldersLabel}"
                               IsChecked="{Binding IncludeHiddenFolders}"
                               Style="{StaticResource OptionCheckBox}" />
-                    <CheckBox Content="{x:Static res:Strings.SkipIfKoreanSubtitleLabel}"
-                              IsChecked="{Binding SkipIfKoreanSubtitleExists}"
-                              Style="{StaticResource OptionCheckBox}" />
 
                     <Button Content="{x:Static res:Strings.ScanButton}"
                             Command="{Binding ScanCommand}"

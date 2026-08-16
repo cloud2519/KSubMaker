@@ -489,6 +489,24 @@ public static partial class Strings
 
     public static string ExistingSubtitleUseExternal => Get(nameof(ExistingSubtitleUseExternal));
 
+    public static string ExistingSubtitleProcessAnyway => Get(nameof(ExistingSubtitleProcessAnyway));
+
+    public static string ExistingSubtitleRuleLabel => Get(nameof(ExistingSubtitleRuleLabel));
+
+    public static string SubtitleSourceLabel => Get(nameof(SubtitleSourceLabel));
+
+    public static string SubtitleSourceSettingHint => Get(nameof(SubtitleSourceSettingHint));
+
+    public static string SubtitleSourceAudioOnly => Get(nameof(SubtitleSourceAudioOnly));
+
+    public static string SubtitleSourceExternalFile => Get(nameof(SubtitleSourceExternalFile));
+
+    public static string SubtitleSourceEmbeddedTrack => Get(nameof(SubtitleSourceEmbeddedTrack));
+
+    public static string SubtitleSourceAnySubtitle => Get(nameof(SubtitleSourceAnySubtitle));
+
+    public static string SubtitleSourceAsk => Get(nameof(SubtitleSourceAsk));
+
     public static string DropResolvingMessage => Get(nameof(DropResolvingMessage));
 
     public static string DropNothingToAddFormat => Get(nameof(DropNothingToAddFormat));
