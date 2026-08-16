@@ -19,7 +19,10 @@ public enum JobSourceOverride
     Audio,
 
     /// <summary>Extract an embedded subtitle track and translate that instead of running ASR.</summary>
-    EmbeddedSubtitle
+    EmbeddedSubtitle,
+
+    /// <summary>Translate a sidecar subtitle file instead of running ASR.</summary>
+    ExternalSubtitle
 }
 
 /// <summary>

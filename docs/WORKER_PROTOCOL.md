@@ -1,4 +1,4 @@
-# 워커 프로토콜 (v1.4)
+# 워커 프로토콜 (v1.5)
 
 호스트(.NET)와 AI 워커(Python)가 주고받는 전체 계약입니다.
 
@@ -28,7 +28,7 @@
      경고만 남기고 무시합니다. 단, `command` 필드가 없으면 `PROTOCOL_ERROR` 이벤트를
      돌려줍니다(호스트가 응답을 기다리고 있을 수 있으므로).
 5. **버전 협상: 주 버전이 다르면 치명적, 부 버전이 다르면 경고.**
-   `ProtocolConstants.Version` == `protocol.PROTOCOL_VERSION` == `"1.4"`.
+   `ProtocolConstants.Version` == `protocol.PROTOCOL_VERSION` == `"1.5"`.
 6. **비유한 부동소수는 금지.** `allow_nan=False`. `NaN`/`Infinity`는 JSON이 아니고
    `System.Text.Json`이 거부합니다. `speed` 필드에 `NaN` 하나가 들어가면 그 이벤트 전체가
    파싱 불가능해집니다. 직렬화가 실패하면 워커는 값을 `null`로 정화해 **다시 시도**합니다 —
@@ -67,7 +67,7 @@
 | --- | --- | --- | --- |
 | `command` | string | ✔ | 판별자. 아래 12개 중 하나 |
 | `requestId` | string | ✔ | 상관관계 키. 기본값은 `Guid.NewGuid().ToString("n")` |
-| `protocolVersion` | string | ✔ | 호스트의 프로토콜 버전. 기본 `"1.4"` |
+| `protocolVersion` | string | ✔ | 호스트의 프로토콜 버전. 기본 `"1.5"` |
 
 > **현재 호스트가 실제로 보내는 명령은 `hello`, `detectHardware`, `process`, `extractAudio`,
 > `cancel`, `shutdown` 여섯입니다.** `probe`, `listModels`, `downloadModel`, `cancelDownload`,
@@ -141,9 +141,10 @@ CPU·RAM·디스크는 호스트가 정본입니다. 워커가 답하지 못하�
 | `outputPath` | string | ✔ | 저장할 `*.ko.srt` 절대 경로 |
 | `checkpointDir` | string | ✔ | 이 작업의 체크포인트 디렉터리(`cache/{jobId}`) |
 | `settings` | object | ✔ | 아래 §2.4.1 |
-| `sourceMode` | string | | `"audio"`(기본) 또는 `"embeddedSubtitle"` |
+| `sourceMode` | string | | `"audio"`(기본) / `"embeddedSubtitle"` / `"externalSubtitle"`(**v1.5**) |
 | `audioTrackIndex` | int? | | null이면 FFmpeg 기본 트랙 |
 | `subtitleTrackIndex` | int? | | `sourceMode="embeddedSubtitle"`일 때 쓸 트랙 |
+| `subtitlePath` | string? | | **v1.5.** `sourceMode="externalSubtitle"`일 때 번역할 자막 파일의 절대 경로. **어느 파일을 쓸지는 호스트가 정합니다**(`ExternalSubtitleSelector`) — 워커는 디렉터리를 뒤지지 않으므로 우선순위 규칙이 한 언어에만 존재합니다 |
 | `subtitleLanguage` | string? | | **v1.1.** 그 자막 트랙의 언어(ISO-639-1/2). 없으면 워커가 `en`으로 가정합니다. 컨테이너의 언어 태그는 비어 있거나 틀린 경우가 많아 사용자가 고른 값을 여기로 보냅니다 |
 | `resume` | bool | | 기본 `true`. false면 체크포인트를 지우고 처음부터 |
 | `phase` | string | | `"full"`(기본) / `"transcribe"` / `"translate"` |
@@ -214,7 +215,7 @@ CPU·RAM·디스크는 호스트가 정본입니다. 워커가 답하지 못하�
 | `videoPath` | string | ✔ | 원본 영상 |
 | `checkpointDir` | string | ✔ | 같은 작업의 `process`가 쓸 것과 **동일한** 디렉터리 |
 | `settings` | object | ✔ | `process`와 같은 블록. 워커가 `sourceMode`·`audioTrackIndex`를 지문으로 기록합니다 |
-| `sourceMode` | string | | `audio`(기본) / `embeddedSubtitle`. 후자는 아무것도 하지 않습니다 |
+| `sourceMode` | string | | `audio`(기본) / `embeddedSubtitle` / `externalSubtitle`. 뒤의 둘은 아무것도 하지 않습니다 |
 | `audioTrackIndex` | int? | | null이면 FFmpeg 기본 트랙 |
 
 ```json

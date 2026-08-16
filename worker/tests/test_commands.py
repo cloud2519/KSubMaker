@@ -836,6 +836,138 @@ def test_embedded_subtitle_mode_falls_back_to_english_without_a_language(tmp_pat
 
 
 # ---------------------------------------------------------------------------
+# external subtitle source mode (v1.5)
+# ---------------------------------------------------------------------------
+
+_SIDECAR = "1\n00:00:01,000 --> 00:00:03,000\nこんにちは。\n\n2\n00:00:04,000 --> 00:00:06,000\n元気ですか。\n"
+
+
+def _sidecar(tmp_path: Path, name: str, text: str = _SIDECAR, encoding: str = "utf-8") -> Path:
+    path = tmp_path / name
+    path.write_bytes(text.encode(encoding))
+    return path
+
+
+def test_an_external_subtitle_is_translated_without_running_asr(tmp_path: Path, channel) -> None:
+    handlers, ffmpeg, transcriber, engine = _handlers()
+
+    command = _command(
+        tmp_path,
+        sourceMode="externalSubtitle",
+        subtitlePath=str(_sidecar(tmp_path, "movie.ja.srt")),
+        subtitleLanguage="ja",
+    )
+    handlers.process(command, CancellationToken("t"))
+
+    assert transcriber.calls == [], "ASR must not run"
+    assert ffmpeg.lengths == [], "and neither must audio extraction"
+    assert engine.batches == [[1, 2]]
+    assert Path(command["outputPath"]).is_file()
+    assert channel.first("completed")["sourceLanguage"] == "ja"
+
+
+def test_a_shift_jis_sidecar_is_decoded_rather_than_mangled(tmp_path: Path, channel) -> None:
+    """Sidecars carry no encoding declaration and Japanese ones are routinely CP932.
+
+    Read as UTF-8 this raises rather than yielding replacement characters, which is the point of
+    decoding strictly: mojibake would be translated into confident nonsense instead of failing.
+    """
+    handlers, _, _, engine = _handlers()
+
+    command = _command(
+        tmp_path,
+        sourceMode="externalSubtitle",
+        subtitlePath=str(_sidecar(tmp_path, "movie.ja.srt", encoding="cp932")),
+        subtitleLanguage="ja",
+    )
+    handlers.process(command, CancellationToken("t"))
+
+    assert engine.batches == [[1, 2]]
+
+    # The fake engine echoes the source text back with a prefix, so the written subtitle is proof
+    # the kana survived the decode rather than arriving as U+FFFD.
+    written = Path(command["outputPath"]).read_text(encoding="utf-8")
+    assert "こんにちは" in written
+    assert "�" not in written
+
+
+def test_a_missing_sidecar_reports_its_own_error_code(tmp_path: Path, channel) -> None:
+    handlers, _, _, _ = _handlers()
+
+    handlers.process(
+        _command(
+            tmp_path,
+            sourceMode="externalSubtitle",
+            subtitlePath=str(tmp_path / "movie.ja.srt"),
+        ),
+        CancellationToken("t"),
+    )
+
+    error = channel.first("error")
+    assert error is not None
+    assert error["code"] == errors.SUBTITLE_SOURCE_NOT_FOUND
+    assert error["recoverable"] is False
+
+
+def test_a_sidecar_with_no_cues_is_reported_as_unreadable(tmp_path: Path, channel) -> None:
+    handlers, _, _, _ = _handlers()
+
+    handlers.process(
+        _command(
+            tmp_path,
+            sourceMode="externalSubtitle",
+            subtitlePath=str(_sidecar(tmp_path, "movie.ja.srt", text="이건 자막이 아닙니다\n")),
+        ),
+        CancellationToken("t"),
+    )
+
+    assert channel.first("error")["code"] == errors.SUBTITLE_SOURCE_UNREADABLE
+
+
+def test_swapping_the_sidecar_discards_the_cached_transcription(tmp_path: Path, channel) -> None:
+    """The path is in the transcription fingerprint, so a different file is different text."""
+    handlers, _, _, _ = _handlers()
+
+    base = dict(
+        sourceMode="externalSubtitle",
+        subtitleLanguage="ja",
+    )
+    first = _command(tmp_path, subtitlePath=str(_sidecar(tmp_path, "movie.ja.srt")), **base)
+    handlers.process(first, CancellationToken("t"))
+
+    store = CheckpointStore(tmp_path / "cache" / "job-1")
+    assert store.load_job()["transcriptionSettings"]["subtitlePath"].endswith("movie.ja.srt")
+
+    second = _command(tmp_path, subtitlePath=str(_sidecar(tmp_path, "movie.en.srt")), **base)
+    handlers.process(second, CancellationToken("t"))
+
+    assert store.load_job()["transcriptionSettings"]["subtitlePath"].endswith("movie.en.srt")
+
+
+def test_the_audio_path_fingerprint_is_unchanged_by_the_new_key(tmp_path: Path, channel) -> None:
+    """A 1.4 checkpoint must keep matching, or every finished job re-runs ASR (§6.13).
+
+    The key is therefore conditional — present only when there is a path — unlike every other
+    entry in the fingerprint.
+    """
+    handlers, _, _, _ = _handlers()
+    handlers.process(_command(tmp_path), CancellationToken("t"))
+
+    recorded = CheckpointStore(tmp_path / "cache" / "job-1").load_job()["transcriptionSettings"]
+    assert "subtitlePath" not in recorded
+
+
+def test_prefetch_skips_external_subtitle_jobs(tmp_path: Path, channel) -> None:
+    handlers, ffmpeg, _, _ = _handlers()
+
+    handlers.extract_audio(
+        _extract_command(tmp_path, sourceMode="externalSubtitle"), CancellationToken("t")
+    )
+
+    assert ffmpeg.extracted == []
+
+
+# ---------------------------------------------------------------------------
 # CUDA OOM recovery
 # ---------------------------------------------------------------------------
 

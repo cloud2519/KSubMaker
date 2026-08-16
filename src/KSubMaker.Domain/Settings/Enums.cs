@@ -51,6 +51,13 @@ public enum ExistingSubtitlePolicy
     /// <summary>Extract an embedded subtitle track and translate it instead of running ASR.</summary>
     UseEmbeddedTrack,
 
+    /// <summary>
+    /// Translate a sidecar file (<c>movie.ja.srt</c>) instead of running ASR, when one exists.
+    /// Which sidecar is decided by <c>ExternalSubtitleSelector</c>; a file with none falls back to
+    /// the audio path rather than being skipped.
+    /// </summary>
+    UseExternalSubtitle,
+
     /// <summary>Treat the file as done when a Korean subtitle already exists.</summary>
     CompleteIfKoreanExists,
 

@@ -12,6 +12,12 @@ from typing import Final
 VIDEO_NOT_FOUND: Final = "VIDEO_NOT_FOUND"
 VIDEO_UNREADABLE: Final = "VIDEO_UNREADABLE"
 AUDIO_TRACK_NOT_FOUND: Final = "AUDIO_TRACK_NOT_FOUND"
+#: The sidecar the host chose is gone. Its own code because the fix is different from a missing
+#: video: the file was there when the folder was scanned, so it was moved, renamed or deleted since.
+SUBTITLE_SOURCE_NOT_FOUND: Final = "SUBTITLE_SOURCE_NOT_FOUND"
+#: The sidecar exists but yielded no cues — a bitmap format that slipped through, a truncated file,
+#: or an encoding no candidate could decode into anything sane.
+SUBTITLE_SOURCE_UNREADABLE: Final = "SUBTITLE_SOURCE_UNREADABLE"
 FFMPEG_NOT_FOUND: Final = "FFMPEG_NOT_FOUND"
 FFMPEG_FAILED: Final = "FFMPEG_FAILED"
 CUDA_NOT_AVAILABLE: Final = "CUDA_NOT_AVAILABLE"
@@ -39,6 +45,8 @@ ALL: Final[tuple[str, ...]] = (
     VIDEO_NOT_FOUND,
     VIDEO_UNREADABLE,
     AUDIO_TRACK_NOT_FOUND,
+    SUBTITLE_SOURCE_NOT_FOUND,
+    SUBTITLE_SOURCE_UNREADABLE,
     FFMPEG_NOT_FOUND,
     FFMPEG_FAILED,
     CUDA_NOT_AVAILABLE,

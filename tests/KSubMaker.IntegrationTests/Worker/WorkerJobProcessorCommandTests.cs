@@ -336,6 +336,105 @@ public sealed class WorkerJobProcessorCommandTests : IDisposable
     }
 
     // -----------------------------------------------------------------------
+    // externalSubtitle (v1.5) — the sidecar is read off disk at dispatch time
+    // -----------------------------------------------------------------------
+
+    /// <summary>Lays out a video with the given sidecars and returns the video's path.</summary>
+    private static string StageSidecars(string videoName, params string[] sidecars)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "ksm-sidecar-" + Guid.NewGuid().ToString("n"));
+        Directory.CreateDirectory(directory);
+
+        var video = Path.Combine(directory, videoName);
+        File.WriteAllText(video, "not really a video");
+
+        foreach (var sidecar in sidecars)
+        {
+            File.WriteAllText(Path.Combine(directory, sidecar), "1\n00:00:01,000 --> 00:00:02,000\n대사\n");
+        }
+
+        return video;
+    }
+
+    [Fact]
+    public async Task The_use_external_subtitle_policy_sends_the_ranked_sidecar()
+    {
+        var video = StageSidecars("clip.mkv", "clip.en.srt", "clip.ja.srt", "clip.ko.srt");
+
+        var job = NewJob();
+        job.VideoPath = video;
+
+        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseExternalSubtitle };
+
+        var (command, _) = await RunAsync(job, settings);
+
+        command.SourceMode.Should().Be(SourceModes.ExternalSubtitle);
+        Path.GetFileName(command.SubtitlePath).Should().Be("clip.ja.srt");
+        command.SubtitleLanguage.Should().Be("ja");
+        command.AudioTrackIndex.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task A_video_with_no_usable_sidecar_falls_back_to_speech_recognition()
+    {
+        // "Use the sidecar when there is one" — not "fail when there is not". A ko.srt is the
+        // pipeline's own output and must not count as a source.
+        var video = StageSidecars("clip.mkv", "clip.ko.srt");
+
+        var job = NewJob();
+        job.VideoPath = video;
+
+        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseExternalSubtitle };
+
+        var (command, _) = await RunAsync(job, settings);
+
+        command.SourceMode.Should().Be(SourceModes.Audio);
+        command.SubtitlePath.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task A_missing_directory_degrades_to_speech_recognition_instead_of_failing()
+    {
+        var job = NewJob();
+        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseExternalSubtitle };
+
+        var (command, _) = await RunAsync(job, settings);
+
+        command.SourceMode.Should().Be(SourceModes.Audio);
+    }
+
+    [Fact]
+    public async Task The_per_file_external_subtitle_override_works_without_the_policy()
+    {
+        var video = StageSidecars("clip.mkv", "clip.ja.srt");
+
+        var job = NewJob();
+        job.VideoPath = video;
+        job.SourceOverride = JobSourceOverride.ExternalSubtitle;
+
+        var (command, _) = await RunAsync(job, new AppSettings());
+
+        command.SourceMode.Should().Be(SourceModes.ExternalSubtitle);
+        Path.GetFileName(command.SubtitlePath).Should().Be("clip.ja.srt");
+    }
+
+    [Fact]
+    public async Task An_external_subtitle_job_is_never_prefetched()
+    {
+        // Prefetch demuxes audio. There is no audio in this path, so a prefetch would extract a wav
+        // the job then ignores — the checkpoint directory pays for it and nothing reads it.
+        var video = StageSidecars("clip.mkv", "clip.ja.srt");
+
+        var job = NewJob();
+        job.VideoPath = video;
+        job.SourceOverride = JobSourceOverride.ExternalSubtitle;
+
+        var (command, _) = await RunAsync(job, new AppSettings());
+
+        command.SourceMode.Should().NotBe(SourceModes.Audio);
+    }
+
+    // -----------------------------------------------------------------------
     // subtitleLanguage fallbacks
     // -----------------------------------------------------------------------
 
