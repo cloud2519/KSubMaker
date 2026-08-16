@@ -46,6 +46,15 @@ public static class SourceModes
 
     /// <summary>Extract an embedded subtitle track and translate it instead.</summary>
     public const string EmbeddedSubtitle = "embeddedSubtitle";
+
+    /// <summary>
+    /// <b>v1.5.</b> Translate a sidecar file (<c>movie.ja.srt</c>) instead of running ASR.
+    ///
+    /// <para>The host resolves *which* sidecar and sends it as
+    /// <see cref="ProcessCommand.SubtitlePath"/>; the worker never picks for itself, so the ranking
+    /// rule in <c>ExternalSubtitleSelector</c> stays the single source of truth.</para>
+    /// </summary>
+    public const string ExternalSubtitle = "externalSubtitle";
 }
 
 /// <summary>
@@ -202,6 +211,13 @@ public sealed record ProcessCommand : WorkerCommand
 
     [JsonPropertyName("subtitleTrackIndex")]
     public int? SubtitleTrackIndex { get; init; }
+
+    /// <summary>
+    /// <b>v1.5.</b> Absolute path of the sidecar to translate. Only read when
+    /// <see cref="SourceMode"/> is <see cref="SourceModes.ExternalSubtitle"/>.
+    /// </summary>
+    [JsonPropertyName("subtitlePath")]
+    public string? SubtitlePath { get; init; }
 
     /// <summary>
     /// Language of the embedded subtitle track named by <see cref="SubtitleTrackIndex"/>, as an

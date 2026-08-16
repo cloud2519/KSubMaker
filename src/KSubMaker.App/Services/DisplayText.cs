@@ -79,6 +79,7 @@ public static class DisplayText
     {
         ExistingSubtitlePolicy.SkipIfExternalSubtitleExists => Strings.ExistingSubtitleSkipExternal,
         ExistingSubtitlePolicy.UseEmbeddedTrack => Strings.ExistingSubtitleUseEmbedded,
+        ExistingSubtitlePolicy.UseExternalSubtitle => Strings.ExistingSubtitleUseExternal,
         ExistingSubtitlePolicy.CompleteIfKoreanExists => Strings.ExistingSubtitleCompleteKorean,
         ExistingSubtitlePolicy.AskPerFile => Strings.ExistingSubtitleAsk,
         _ => Strings.ExistingSubtitleAlways

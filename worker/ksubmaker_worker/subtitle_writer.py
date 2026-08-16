@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import os
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Final, Iterable, Sequence
 
 from . import errors
 from .errors import WorkerError
@@ -200,6 +200,32 @@ def write_subtitle_file(
 
     _log.info("wrote %d cues to %s", len(cues), target)
     return str(target), reason
+
+
+#: Tried in order against a sidecar's bytes. UTF-8 first because it is what everything modern
+#: writes; CP932 before CP949 because the files this pipeline is aimed at are Japanese, and the two
+#: overlap enough that the wrong one decodes without error into mojibake. cp1252 catches Western
+#: European subtitles, and latin-1 cannot fail, so decoding always terminates with *something*
+#: rather than dropping the file.
+SUBTITLE_ENCODINGS: Final = ("utf-8-sig", "utf-8", "cp932", "cp949", "cp1252", "latin-1")
+
+
+def decode_subtitle_bytes(raw: bytes) -> tuple[str, str]:
+    """Decode a sidecar subtitle, returning ``(text, encoding used)``.
+
+    Sidecars carry no encoding declaration and predate UTF-8 far more often than video files do, so
+    guessing is unavoidable. Strict decoding is what makes the guess meaningful: a Shift-JIS file
+    read as UTF-8 raises rather than silently producing replacement characters that would then be
+    faithfully translated into nonsense.
+    """
+    for encoding in SUBTITLE_ENCODINGS:
+        try:
+            return raw.decode(encoding), encoding
+        except UnicodeDecodeError:
+            continue
+
+    # Unreachable: latin-1 maps every byte. Kept so a future edit to the tuple cannot return None.
+    return raw.decode("latin-1", "replace"), "latin-1"
 
 
 def parse_srt(text: str) -> list[dict[str, Any]]:

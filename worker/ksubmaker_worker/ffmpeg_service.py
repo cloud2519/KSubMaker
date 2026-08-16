@@ -363,6 +363,72 @@ class FfmpegService:
 
     # -- subtitles ------------------------------------------------------------
 
+    def convert_subtitle_to_srt(
+        self, subtitle_path: str, *, token: CancellationToken | None = None
+    ) -> str:
+        """Convert an ``.ass``/``.ssa``/``.vtt`` sidecar to SRT text.
+
+        The input must already be UTF-8 — the caller decodes it first (sidecars carry no encoding
+        declaration, and ffmpeg's ``-sub_charenc`` guesses no better than we do, but it cannot be
+        told "I already know it is Shift-JIS" for a file we hand it as bytes).
+
+        ``.srt`` never comes through here; it is parsed directly, which keeps the common case free
+        of a subprocess.
+        """
+        source = Path(subtitle_path)
+        if not source.exists():
+            raise WorkerError(
+                errors.SUBTITLE_SOURCE_NOT_FOUND,
+                f"자막 파일을 찾을 수 없습니다: {source.name}",
+                detail=f"missing path {subtitle_path}",
+            )
+
+        argv = [
+            self.ffmpeg_path,
+            "-hide_banner",
+            "-nostdin",
+            "-y",
+            "-i",
+            str(source),
+            "-f",
+            "srt",
+            "pipe:1",
+        ]
+
+        try:
+            process = subprocess.Popen(  # noqa: S603 - list argv, shell=False
+                argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+        except FileNotFoundError as exc:
+            raise WorkerError(
+                errors.FFMPEG_NOT_FOUND, "FFmpeg 실행 파일을 찾을 수 없습니다.", detail=repr(exc)
+            ) from exc
+
+        registered = token.child(process) if token is not None else _NullScope(process)
+        with registered:
+            try:
+                stdout, stderr = process.communicate(timeout=600)
+            except subprocess.TimeoutExpired as exc:
+                kill_process(process)
+                raise WorkerError(
+                    errors.FFMPEG_FAILED,
+                    f"자막 파일 변환이 시간 초과되었습니다: {source.name}",
+                    detail=repr(exc),
+                ) from exc
+
+        if token is not None and token.cancelled:
+            raise errors.CancelledError()
+
+        if process.returncode != 0:
+            tail = stderr.decode("utf-8", "replace").strip()[-1500:]
+            raise WorkerError(
+                errors.SUBTITLE_SOURCE_UNREADABLE,
+                f"자막 파일을 읽지 못했습니다: {source.name}",
+                detail=f"ffmpeg exited with {process.returncode}: {tail}",
+            )
+
+        return stdout.decode("utf-8", "replace")
+
     def extract_subtitle_track(
         self,
         video_path: str,

@@ -10,6 +10,20 @@ public static class ErrorCodes
     public const string VideoNotFound = "VIDEO_NOT_FOUND";
     public const string VideoUnreadable = "VIDEO_UNREADABLE";
     public const string AudioTrackNotFound = "AUDIO_TRACK_NOT_FOUND";
+
+    /// <summary>
+    /// The sidecar subtitle chosen as the job's source is gone. Its own code rather than
+    /// <see cref="VideoNotFound"/> because the remedy differs: the file existed when the folder was
+    /// scanned, so it has been moved, renamed or deleted since.
+    /// </summary>
+    public const string SubtitleSourceNotFound = "SUBTITLE_SOURCE_NOT_FOUND";
+
+    /// <summary>
+    /// The sidecar exists but produced no cues — a bitmap format that got through, a truncated
+    /// file, or an encoding none of the candidates could decode.
+    /// </summary>
+    public const string SubtitleSourceUnreadable = "SUBTITLE_SOURCE_UNREADABLE";
+
     public const string FfmpegNotFound = "FFMPEG_NOT_FOUND";
     public const string FfmpegFailed = "FFMPEG_FAILED";
     public const string CudaNotAvailable = "CUDA_NOT_AVAILABLE";
@@ -39,7 +53,8 @@ public static class ErrorCodes
 
     public static readonly IReadOnlyList<string> All =
     [
-        VideoNotFound, VideoUnreadable, AudioTrackNotFound, FfmpegNotFound, FfmpegFailed,
+        VideoNotFound, VideoUnreadable, AudioTrackNotFound,
+        SubtitleSourceNotFound, SubtitleSourceUnreadable, FfmpegNotFound, FfmpegFailed,
         CudaNotAvailable, CudaLibraryMissing, CudaOutOfMemory, WhisperModelNotFound, WhisperModelLoadFailed,
         TranscriptionFailed, TranslationModelNotFound, TranslationFailed, InvalidTranslationResponse,
         OutputWriteFailed, DiskSpaceLow, WorkerCrashed, OperationCancelled,

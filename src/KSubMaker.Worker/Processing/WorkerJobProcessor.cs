@@ -597,6 +597,7 @@ public sealed class WorkerJobProcessor : IJobProcessor
             AudioTrackIndex = source.AudioTrackIndex,
             SubtitleTrackIndex = source.SubtitleTrackIndex,
             SubtitleLanguage = source.SubtitleLanguage,
+            SubtitlePath = source.SubtitlePath,
 
             // Always resume: the two-pass strategies depend on the translate pass picking up the
             // transcription checkpoint the earlier pass wrote.
@@ -673,12 +674,13 @@ public sealed class WorkerJobProcessor : IJobProcessor
         };
     }
 
-    /// <summary>Wire values for the four source-selection fields of <see cref="ProcessCommand"/>.</summary>
+    /// <summary>Wire values for the source-selection fields of <see cref="ProcessCommand"/>.</summary>
     private readonly record struct SourceSelection(
         string Mode,
         int? AudioTrackIndex,
         int? SubtitleTrackIndex,
-        string? SubtitleLanguage);
+        string? SubtitleLanguage,
+        string? SubtitlePath = null);
 
     /// <summary>
     /// Decides what this job translates from.
@@ -688,8 +690,31 @@ public sealed class WorkerJobProcessor : IJobProcessor
     /// override the application-wide policy applies, and the fallback for everything else is the MVP
     /// core path: 영상 음성 → Whisper → 번역 → ko.srt.
     /// </summary>
-    private static SourceSelection ResolveSource(Job job, AppSettings settings)
+    private SourceSelection ResolveSource(Job job, AppSettings settings)
     {
+        if (job.SourceOverride == JobSourceOverride.ExternalSubtitle ||
+            (job.SourceOverride == JobSourceOverride.None &&
+             settings.ExistingSubtitlePolicy == ExistingSubtitlePolicy.UseExternalSubtitle))
+        {
+            // Resolved here rather than stored on the job: the sidecars beside a video can change
+            // between queueing and running, and re-reading the directory costs one listing.
+            if (ChooseExternalSubtitle(job, settings) is { } choice)
+            {
+                return new SourceSelection(
+                    SourceModes.ExternalSubtitle,
+                    AudioTrackIndex: null,
+                    SubtitleTrackIndex: null,
+                    ResolveSubtitleLanguage(choice.Language, settings),
+                    choice.Path);
+            }
+
+            // No usable sidecar. Falling through to ASR is the whole point of the policy being
+            // "use it when it is there" rather than "only ever use it".
+            _logger.LogInformation(
+                "{File}: 쓸 수 있는 원본 자막 파일이 없어 음성 인식으로 진행합니다.",
+                Path.GetFileName(job.VideoPath));
+        }
+
         if (job.SourceOverride == JobSourceOverride.EmbeddedSubtitle)
         {
             return new SourceSelection(
@@ -719,6 +744,45 @@ public sealed class WorkerJobProcessor : IJobProcessor
                 job.SelectedSubtitleTrackIndex,
                 ResolveSubtitleLanguage(job.SelectedSubtitleLanguage, settings))
             : new SourceSelection(SourceModes.Audio, job.SelectedAudioTrackIndex, null, null);
+    }
+
+    /// <summary>
+    /// Lists the sidecars beside the video and hands them to
+    /// <see cref="ExternalSubtitleSelector"/>, which owns the ranking.
+    ///
+    /// <para>A directory that cannot be read is not an error here — it degrades to "no sidecar",
+    /// and the caller falls back to ASR. Failing the job over a listing would be a worse outcome
+    /// than doing what the app did before this policy existed.</para>
+    /// </summary>
+    private ExternalSubtitleChoice? ChooseExternalSubtitle(Job job, AppSettings settings)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(job.VideoPath);
+            if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+            {
+                return null;
+            }
+
+            var baseName = Path.GetFileNameWithoutExtension(job.VideoPath);
+            var siblings = Directory.EnumerateFiles(directory, baseName + ".*");
+
+            var choice = ExternalSubtitleSelector.Choose(job.VideoPath, siblings, settings.SourceLanguage);
+
+            if (choice is not null)
+            {
+                _logger.LogInformation(
+                    "{File}: 원본 자막으로 {Subtitle} 을(를) 씁니다. ({Reason})",
+                    Path.GetFileName(job.VideoPath), Path.GetFileName(choice.Path), choice.Reason);
+            }
+
+            return choice;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "원본 자막 파일을 확인하지 못했습니다: {Path}", job.VideoPath);
+            return null;
+        }
     }
 
     /// <summary>

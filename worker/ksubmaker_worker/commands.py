@@ -31,7 +31,7 @@ from .logging_setup import get_logger
 from .model_manager import ModelManager, models_root
 from .protocol import Phases, SourceModes, Stages
 from .subtitle_postprocessor import FormattingOptions, build_cues, split_segments
-from .subtitle_writer import parse_srt, write_subtitle_file
+from .subtitle_writer import decode_subtitle_bytes, parse_srt, write_subtitle_file
 from .transcriber import COMPUTE_DOWNGRADE, Transcriber, is_cuda_oom
 from .translator import FakeTranslator, NllbTranslator
 
@@ -76,7 +76,7 @@ def transcription_fingerprint(
     command: Mapping[str, Any], settings: Mapping[str, Any]
 ) -> dict[str, Any]:
     """What ``transcription.json`` depends on."""
-    return {
+    fingerprint = {
         "whisperModel": _or_default(settings.get("whisperModel"), DEFAULT_WHISPER_MODEL),
         "language": str(settings.get("language") or "auto"),
         "beamSize": int(settings.get("beamSize", 5) or 5),
@@ -89,6 +89,20 @@ def transcription_fingerprint(
         "subtitleTrackIndex": _optional_int(command.get("subtitleTrackIndex")),
         "subtitleLanguage": str(command.get("subtitleLanguage") or ""),
     }
+
+    # v1.5. Swapping movie.en.srt for movie.ja.srt replaces the text wholesale, so the cached
+    # "transcription" has to go with it.
+    #
+    # Added **only when there is a path**, unlike every other key here. Comparison is dict equality,
+    # so an unconditional key would be absent from every checkpoint written before 1.5 and would
+    # therefore discard all of them — see §6.13, where doing exactly that re-ran ASR on seven
+    # finished jobs. Nothing that existed before 1.5 uses this mode, so a conditional key costs a
+    # cache miss for no one.
+    subtitle_path = str(command.get("subtitlePath") or "")
+    if subtitle_path:
+        fingerprint["subtitlePath"] = subtitle_path
+
+    return fingerprint
 
 
 def translation_fingerprint(settings: Mapping[str, Any]) -> dict[str, Any]:
@@ -685,6 +699,10 @@ class CommandHandlers:
                 transcription = self._from_embedded_subtitle(
                     command, emit, token, duration=duration
                 )
+            elif source_mode == SourceModes.EXTERNAL_SUBTITLE:
+                transcription = self._from_external_subtitle(
+                    command, emit, token, duration=duration
+                )
             else:
                 transcription = self._transcribe(
                     command,
@@ -1031,6 +1049,78 @@ class CommandHandlers:
             "languageProbability": 1.0,
             "durationSeconds": duration or (segments[-1]["end"] if segments else 0.0),
             "modelId": "embeddedSubtitle",
+            "segments": segments,
+        }
+
+    def _from_external_subtitle(
+        self,
+        command: Mapping[str, Any],
+        emit: "_Emitter",
+        token: CancellationToken,
+        *,
+        duration: float,
+    ) -> dict[str, Any]:
+        """v1.5. Translate a sidecar file instead of running ASR.
+
+        The host has already decided *which* file (ExternalSubtitleSelector) and sends the path, so
+        there is no ranking here — only reading, decoding and parsing.
+        """
+        subtitle_path = str(command.get("subtitlePath") or "")
+        source = Path(subtitle_path)
+
+        emit.progress(Stages.EXTRACTING_AUDIO, 0.0)
+
+        if not subtitle_path or not source.is_file():
+            raise WorkerError(
+                errors.SUBTITLE_SOURCE_NOT_FOUND,
+                f"원본 자막 파일을 찾을 수 없습니다: {source.name or subtitle_path}",
+                detail=f"missing sidecar {subtitle_path!r}",
+            )
+
+        try:
+            raw = source.read_bytes()
+        except OSError as exc:
+            raise WorkerError(
+                errors.SUBTITLE_SOURCE_UNREADABLE,
+                f"원본 자막 파일을 열지 못했습니다: {source.name}",
+                detail=repr(exc),
+            ) from exc
+
+        text, encoding = decode_subtitle_bytes(raw)
+        _log.info("reading the source subtitle %s (%s, %d bytes)", source.name, encoding, len(raw))
+
+        if source.suffix.lower() != ".srt":
+            # .ass/.ssa/.vtt go through ffmpeg. Written back out as UTF-8 first: we have already
+            # worked out the encoding and ffmpeg has no way to be told the answer.
+            converted = source.with_name(source.name + ".utf8" + source.suffix)
+            try:
+                converted.write_text(text, encoding="utf-8")
+                text = self.ffmpeg.convert_subtitle_to_srt(str(converted), token=token)
+            finally:
+                converted.unlink(missing_ok=True)
+
+        segments = parse_srt(text)
+        if not segments:
+            raise WorkerError(
+                errors.SUBTITLE_SOURCE_UNREADABLE,
+                f"원본 자막 파일에서 읽을 수 있는 자막을 찾지 못했습니다: {source.name}",
+                detail=f"parse_srt produced nothing for {subtitle_path} decoded as {encoding}",
+            )
+
+        emit.progress(Stages.EXTRACTING_AUDIO, 100.0)
+        emit.stage_completed(Stages.EXTRACTING_AUDIO)
+        emit.progress(Stages.TRANSCRIBING, 100.0)
+
+        # The host derives this from the file name and is the only one who can — the text itself is
+        # not something this worker language-detects. English matches the NLLB mapper's own default.
+        language = str(command.get("subtitleLanguage") or "en")
+        emit.language(language, 1.0)
+
+        return {
+            "sourceLanguage": language,
+            "languageProbability": 1.0,
+            "durationSeconds": duration or (segments[-1]["end"] if segments else 0.0),
+            "modelId": "externalSubtitle",
             "segments": segments,
         }
 

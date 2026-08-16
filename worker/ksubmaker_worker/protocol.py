@@ -31,7 +31,11 @@ from typing import IO, Any, Final
 #: 1.4 added ``settings.initialPrompt``. The worker had read the field since before any host sent
 #: it; null keeps the built-in per-language hint, which is what every 1.3 host effectively asked
 #: for, so the fingerprint recorded by a 1.3 run still matches a 1.4 one.
-PROTOCOL_VERSION: Final = "1.4"
+#:
+#: 1.5 added ``sourceMode: "externalSubtitle"`` and ``process.subtitlePath``. A 1.4 worker rejects
+#: the mode, and the host's own default policy never selects it, so nothing changes for a host that
+#: does not ask for it.
+PROTOCOL_VERSION: Final = "1.5"
 
 
 class Commands:
@@ -112,6 +116,11 @@ class Stages:
 class SourceModes:
     AUDIO: Final = "audio"
     EMBEDDED_SUBTITLE: Final = "embeddedSubtitle"
+
+    #: 1.5. Translate a sidecar file (``movie.ja.srt``) instead of running ASR. The host picks
+    #: which sidecar and sends its path; the worker never globs the directory itself, so the
+    #: ranking rule lives in exactly one language.
+    EXTERNAL_SUBTITLE: Final = "externalSubtitle"
 
 
 class Phases:

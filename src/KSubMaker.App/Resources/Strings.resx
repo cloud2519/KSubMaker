@@ -680,6 +680,9 @@
   <data name="ExistingSubtitleUseEmbedded" xml:space="preserve">
     <value>내장 자막을 번역해서 사용</value>
   </data>
+  <data name="ExistingSubtitleUseExternal" xml:space="preserve">
+    <value>옆에 있는 자막 파일을 번역해서 사용 (음성 인식 생략)</value>
+  </data>
   <data name="ExistingSubtitleCompleteKorean" xml:space="preserve">
     <value>한국어 자막이 있으면 완료로 처리</value>
   </data>
