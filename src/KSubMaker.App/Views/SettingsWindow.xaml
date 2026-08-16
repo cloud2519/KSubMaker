@@ -310,12 +310,36 @@
                     <StackPanel>
 
                         <GroupBox Header="{x:Static res:Strings.ExistingSubtitleGroup}">
-                            <ComboBox Style="{StaticResource OptionCombo}"
-                                      HorizontalAlignment="Left"
-                                      ItemsSource="{Binding ExistingSubtitlePolicies}"
-                                      DisplayMemberPath="Display"
-                                      SelectedValuePath="Value"
-                                      SelectedValue="{Binding SelectedExistingSubtitlePolicy}" />
+                            <StackPanel>
+                                <!--
+                                    Two questions, two controls. They used to share one dropdown,
+                                    which made "translate the sidecar, but skip files that already
+                                    have Korean" impossible to express.
+                                -->
+                                <StackPanel Style="{StaticResource FieldRow}">
+                                    <TextBlock Text="{x:Static res:Strings.SubtitleSourceLabel}"
+                                               Style="{StaticResource FieldLabel}" />
+                                    <ComboBox Style="{StaticResource OptionCombo}"
+                                              ItemsSource="{Binding SubtitleSources}"
+                                              DisplayMemberPath="Display"
+                                              SelectedValuePath="Value"
+                                              SelectedValue="{Binding SelectedSubtitleSource}" />
+                                </StackPanel>
+                                <TextBlock Text="{x:Static res:Strings.SubtitleSourceSettingHint}"
+                                           TextWrapping="Wrap"
+                                           Foreground="#6B7280"
+                                           Margin="0,2,0,10" />
+
+                                <StackPanel Style="{StaticResource FieldRow}">
+                                    <TextBlock Text="{x:Static res:Strings.ExistingSubtitleRuleLabel}"
+                                               Style="{StaticResource FieldLabel}" />
+                                    <ComboBox Style="{StaticResource OptionCombo}"
+                                              ItemsSource="{Binding ExistingSubtitleRules}"
+                                              DisplayMemberPath="Display"
+                                              SelectedValuePath="Value"
+                                              SelectedValue="{Binding SelectedExistingSubtitleRule}" />
+                                </StackPanel>
+                            </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{x:Static res:Strings.OutputConflictGroup}">

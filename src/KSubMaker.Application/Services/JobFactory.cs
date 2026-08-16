@@ -56,7 +56,16 @@ public static class JobFactory
             return new EnqueueResult(EnqueueDecision.Skipped, existing, "실패한 작업만 다시 처리하도록 설정되어 있습니다.");
         }
 
-        if (settings.SkipIfKoreanSubtitleExists && koreanExists && !settings.ReprocessCompleted)
+        if (settings.ExistingSubtitleRule == ExistingSubtitleRule.SkipIfAnySubtitleExists &&
+            file.HasExternalSubtitle && !settings.ReprocessCompleted)
+        {
+            return existing is null
+                ? new EnqueueResult(EnqueueDecision.Skipped, null, "동일 이름의 외부 자막이 있어 건너뜁니다.")
+                : new EnqueueResult(EnqueueDecision.Unchanged, existing, "동일 이름의 외부 자막이 있어 건너뜁니다.");
+        }
+
+        if (settings.ExistingSubtitleRule == ExistingSubtitleRule.CompleteIfKoreanExists &&
+            koreanExists && !settings.ReprocessCompleted)
         {
             if (existing is not null)
             {
@@ -70,30 +79,6 @@ public static class JobFactory
             done.StageProgress = 100d;
             done.CompletedAtUtc = now;
             done.OutputPath = outputPath;
-            return new EnqueueResult(EnqueueDecision.AlreadyDone, done, "이미 한국어 자막이 있어 완료로 표시했습니다.");
-        }
-
-        if (settings.ExistingSubtitlePolicy == ExistingSubtitlePolicy.SkipIfExternalSubtitleExists &&
-            file.HasExternalSubtitle && !settings.ReprocessCompleted)
-        {
-            return existing is null
-                ? new EnqueueResult(EnqueueDecision.Skipped, null, "동일 이름의 외부 자막이 있어 건너뜁니다.")
-                : new EnqueueResult(EnqueueDecision.Unchanged, existing, "동일 이름의 외부 자막이 있어 건너뜁니다.");
-        }
-
-        if (settings.ExistingSubtitlePolicy == ExistingSubtitlePolicy.CompleteIfKoreanExists && koreanExists)
-        {
-            if (existing is not null)
-            {
-                return new EnqueueResult(EnqueueDecision.Unchanged, existing, "이미 한국어 자막이 있습니다.");
-            }
-
-            var done = Build(file, settings, outputPath, now);
-            done.Status = JobStatus.Completed;
-            done.CurrentStage = JobStage.Done;
-            done.OverallProgress = 100d;
-            done.OutputPath = outputPath;
-            done.CompletedAtUtc = now;
             return new EnqueueResult(EnqueueDecision.AlreadyDone, done, "이미 한국어 자막이 있어 완료로 표시했습니다.");
         }
 

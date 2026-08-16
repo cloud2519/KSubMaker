@@ -60,7 +60,6 @@ public sealed class SettingsRepository(
         settings.LastFolder = GetString(rows, nameof(settings.LastFolder), settings.LastFolder);
         settings.IncludeSubfolders = GetBool(rows, nameof(settings.IncludeSubfolders), settings.IncludeSubfolders);
         settings.IncludeHiddenFolders = GetBool(rows, nameof(settings.IncludeHiddenFolders), settings.IncludeHiddenFolders);
-        settings.SkipIfKoreanSubtitleExists = GetBool(rows, nameof(settings.SkipIfKoreanSubtitleExists), settings.SkipIfKoreanSubtitleExists);
         settings.ReprocessCompleted = GetBool(rows, nameof(settings.ReprocessCompleted), settings.ReprocessCompleted);
         settings.RetryFailedOnly = GetBool(rows, nameof(settings.RetryFailedOnly), settings.RetryFailedOnly);
 
@@ -88,7 +87,27 @@ public sealed class SettingsRepository(
         settings.Glossary = GetGlossary(rows, nameof(settings.Glossary), settings.Glossary);
 
         // ---- subtitles / output ---------------------------------------------
-        settings.ExistingSubtitlePolicy = GetEnum(rows, nameof(settings.ExistingSubtitlePolicy), settings.ExistingSubtitlePolicy);
+        // The pair that replaced ExistingSubtitlePolicy + SkipIfKoreanSubtitleExists. A database
+        // written before the split has neither key, so the old ones are read and translated —
+        // silently changing what happens to a user's whole library would be the worst possible
+        // outcome of a settings refactor.
+        if (rows.ContainsKey(nameof(settings.SubtitleSource)))
+        {
+            settings.SubtitleSource = GetEnum(rows, nameof(settings.SubtitleSource), settings.SubtitleSource);
+            settings.ExistingSubtitleRule = GetEnum(rows, nameof(settings.ExistingSubtitleRule), settings.ExistingSubtitleRule);
+        }
+        else
+        {
+            var (source, rule) = LegacySubtitleSettings.Migrate(
+                GetString(rows, "ExistingSubtitlePolicy", LegacySubtitleSettings.AlwaysTranscribe),
+                GetBool(rows, "SkipIfKoreanSubtitleExists", fallback: true));
+
+            settings.SubtitleSource = source;
+            settings.ExistingSubtitleRule = rule;
+
+            _logger.LogInformation(
+                "이전 자막 설정을 새 설정으로 옮겼습니다: 원본 {Source}, 기존 자막 {Rule}", source, rule);
+        }
         settings.OutputConflictPolicy = GetEnum(rows, nameof(settings.OutputConflictPolicy), settings.OutputConflictPolicy);
         settings.OutputSuffix = GetString(rows, nameof(settings.OutputSuffix), settings.OutputSuffix);
         settings.MaxLinesPerCue = GetInt(rows, nameof(settings.MaxLinesPerCue), settings.MaxLinesPerCue);
@@ -164,7 +183,6 @@ public sealed class SettingsRepository(
             [nameof(s.LastFolder)] = s.LastFolder,
             [nameof(s.IncludeSubfolders)] = Write(s.IncludeSubfolders),
             [nameof(s.IncludeHiddenFolders)] = Write(s.IncludeHiddenFolders),
-            [nameof(s.SkipIfKoreanSubtitleExists)] = Write(s.SkipIfKoreanSubtitleExists),
             [nameof(s.ReprocessCompleted)] = Write(s.ReprocessCompleted),
             [nameof(s.RetryFailedOnly)] = Write(s.RetryFailedOnly),
 
@@ -190,7 +208,8 @@ public sealed class SettingsRepository(
             [nameof(s.TranslationBatchMaxSeconds)] = Write(s.TranslationBatchMaxSeconds),
             [nameof(s.TranslationContextLines)] = Write(s.TranslationContextLines),
 
-            [nameof(s.ExistingSubtitlePolicy)] = s.ExistingSubtitlePolicy.ToString(),
+            [nameof(s.SubtitleSource)] = s.SubtitleSource.ToString(),
+            [nameof(s.ExistingSubtitleRule)] = s.ExistingSubtitleRule.ToString(),
             [nameof(s.OutputConflictPolicy)] = s.OutputConflictPolicy.ToString(),
             [nameof(s.OutputSuffix)] = s.OutputSuffix,
             [nameof(s.MaxLinesPerCue)] = Write(s.MaxLinesPerCue),

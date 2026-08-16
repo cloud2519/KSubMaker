@@ -311,7 +311,7 @@ public sealed class WorkerJobProcessorCommandTests : IDisposable
         job.HasEmbeddedSubtitle = true;
         job.SourceOverride = JobSourceOverride.Audio;
 
-        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseEmbeddedTrack };
+        var settings = new AppSettings { SubtitleSource = SubtitleSourcePreference.PreferEmbeddedTrack };
 
         var (command, _) = await RunAsync(job, settings);
 
@@ -326,7 +326,7 @@ public sealed class WorkerJobProcessorCommandTests : IDisposable
         job.SelectedSubtitleTrackIndex = 1;
         job.SelectedSubtitleLanguage = "fr";
 
-        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseEmbeddedTrack };
+        var settings = new AppSettings { SubtitleSource = SubtitleSourcePreference.PreferEmbeddedTrack };
 
         var (command, _) = await RunAsync(job, settings);
 
@@ -364,7 +364,7 @@ public sealed class WorkerJobProcessorCommandTests : IDisposable
         var job = NewJob();
         job.VideoPath = video;
 
-        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseExternalSubtitle };
+        var settings = new AppSettings { SubtitleSource = SubtitleSourcePreference.PreferExternalFile };
 
         var (command, _) = await RunAsync(job, settings);
 
@@ -384,7 +384,7 @@ public sealed class WorkerJobProcessorCommandTests : IDisposable
         var job = NewJob();
         job.VideoPath = video;
 
-        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseExternalSubtitle };
+        var settings = new AppSettings { SubtitleSource = SubtitleSourcePreference.PreferExternalFile };
 
         var (command, _) = await RunAsync(job, settings);
 
@@ -396,7 +396,7 @@ public sealed class WorkerJobProcessorCommandTests : IDisposable
     public async Task A_missing_directory_degrades_to_speech_recognition_instead_of_failing()
     {
         var job = NewJob();
-        var settings = new AppSettings { ExistingSubtitlePolicy = ExistingSubtitlePolicy.UseExternalSubtitle };
+        var settings = new AppSettings { SubtitleSource = SubtitleSourcePreference.PreferExternalFile };
 
         var (command, _) = await RunAsync(job, settings);
 

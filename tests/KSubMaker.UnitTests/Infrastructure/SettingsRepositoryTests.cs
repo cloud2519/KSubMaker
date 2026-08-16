@@ -29,7 +29,6 @@ public sealed class SettingsRepositoryTests : IDisposable
         LastFolder = "/영상 보관함/2026",
         IncludeSubfolders = false,
         IncludeHiddenFolders = true,
-        SkipIfKoreanSubtitleExists = false,
         ReprocessCompleted = true,
         RetryFailedOnly = true,
 
@@ -57,7 +56,8 @@ public sealed class SettingsRepositoryTests : IDisposable
             ["N Seoul Tower"] = "남산서울타워"
         },
 
-        ExistingSubtitlePolicy = ExistingSubtitlePolicy.CompleteIfKoreanExists,
+        SubtitleSource = SubtitleSourcePreference.PreferAnySubtitle,
+        ExistingSubtitleRule = ExistingSubtitleRule.SkipIfAnySubtitleExists,
         OutputConflictPolicy = OutputConflictPolicy.CreateNumberedCopy,
         OutputSuffix = "kor",
         MaxLinesPerCue = 3,
@@ -150,16 +150,27 @@ public sealed class SettingsRepositoryTests : IDisposable
     }
 
     [Theory]
-    [InlineData(ExistingSubtitlePolicy.AlwaysTranscribe)]
-    [InlineData(ExistingSubtitlePolicy.SkipIfExternalSubtitleExists)]
-    [InlineData(ExistingSubtitlePolicy.UseEmbeddedTrack)]
-    [InlineData(ExistingSubtitlePolicy.CompleteIfKoreanExists)]
-    [InlineData(ExistingSubtitlePolicy.AskPerFile)]
-    public async Task Every_existing_subtitle_policy_round_trips(ExistingSubtitlePolicy policy)
+    [InlineData(SubtitleSourcePreference.AudioOnly)]
+    [InlineData(SubtitleSourcePreference.PreferExternalFile)]
+    [InlineData(SubtitleSourcePreference.PreferEmbeddedTrack)]
+    [InlineData(SubtitleSourcePreference.PreferAnySubtitle)]
+    [InlineData(SubtitleSourcePreference.AskPerFile)]
+    public async Task Every_subtitle_source_round_trips(SubtitleSourcePreference source)
     {
-        await _repository.SaveAsync(new AppSettings { ExistingSubtitlePolicy = policy });
+        await _repository.SaveAsync(new AppSettings { SubtitleSource = source });
 
-        (await _repository.LoadAsync()).ExistingSubtitlePolicy.Should().Be(policy);
+        (await _repository.LoadAsync()).SubtitleSource.Should().Be(source);
+    }
+
+    [Theory]
+    [InlineData(ExistingSubtitleRule.CompleteIfKoreanExists)]
+    [InlineData(ExistingSubtitleRule.SkipIfAnySubtitleExists)]
+    [InlineData(ExistingSubtitleRule.ProcessAnyway)]
+    public async Task Every_existing_subtitle_rule_round_trips(ExistingSubtitleRule rule)
+    {
+        await _repository.SaveAsync(new AppSettings { ExistingSubtitleRule = rule });
+
+        (await _repository.LoadAsync()).ExistingSubtitleRule.Should().Be(rule);
     }
 
     [Theory]

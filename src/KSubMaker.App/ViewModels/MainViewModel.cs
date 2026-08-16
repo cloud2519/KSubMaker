@@ -54,7 +54,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     /// <summary>
     /// Probe results from the most recent scan, keyed by path. Kept only so the
-    /// <see cref="ExistingSubtitlePolicy.AskPerFile"/> prompt can list a file's tracks without
+    /// <see cref="SubtitleSourcePreference.AskPerFile"/> prompt can list a file's tracks without
     /// re-running FFprobe over every file it is about to ask about. Cleared and refilled per scan.
     /// </summary>
     private readonly ConcurrentDictionary<string, VideoFile> _lastScan = new(StringComparer.OrdinalIgnoreCase);
@@ -124,8 +124,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _includeHiddenFolders;
 
-    [ObservableProperty]
-    private bool _skipIfKoreanSubtitleExists = true;
 
     // -----------------------------------------------------------------------
     // Queue / status
@@ -628,7 +626,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         settings.LastFolder = folder;
         settings.IncludeSubfolders = IncludeSubfolders;
         settings.IncludeHiddenFolders = IncludeHiddenFolders;
-        settings.SkipIfKoreanSubtitleExists = SkipIfKoreanSubtitleExists;
 
         try
         {
@@ -1082,7 +1079,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Implements <see cref="ExistingSubtitlePolicy.AskPerFile"/>: after a scan, walk the files that
+    /// Implements <see cref="SubtitleSourcePreference.AskPerFile"/>: after a scan, walk the files that
     /// already have subtitles and ask what to do with each.
     ///
     /// Only files with an existing subtitle are offered. Asking about a file with nothing to choose
@@ -1090,7 +1087,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     private async Task AskPerFileIfRequestedAsync(AppSettings settings, CancellationToken cancellationToken)
     {
-        if (settings.ExistingSubtitlePolicy != ExistingSubtitlePolicy.AskPerFile)
+        if (settings.SubtitleSource != SubtitleSourcePreference.AskPerFile)
         {
             return;
         }
@@ -1524,7 +1521,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         IncludeSubfolders = settings.IncludeSubfolders;
         IncludeHiddenFolders = settings.IncludeHiddenFolders;
-        SkipIfKoreanSubtitleExists = settings.SkipIfKoreanSubtitleExists;
     }
 
     private static string FormatGpuSummary(HardwareProfile profile)

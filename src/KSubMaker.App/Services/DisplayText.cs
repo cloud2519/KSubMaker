@@ -75,14 +75,20 @@ public static class DisplayText
         _ => Strings.TranslationEngineDedicated
     };
 
-    public static string ExistingSubtitlePolicyName(ExistingSubtitlePolicy policy) => policy switch
+    public static string SubtitleSourceName(SubtitleSourcePreference source) => source switch
     {
-        ExistingSubtitlePolicy.SkipIfExternalSubtitleExists => Strings.ExistingSubtitleSkipExternal,
-        ExistingSubtitlePolicy.UseEmbeddedTrack => Strings.ExistingSubtitleUseEmbedded,
-        ExistingSubtitlePolicy.UseExternalSubtitle => Strings.ExistingSubtitleUseExternal,
-        ExistingSubtitlePolicy.CompleteIfKoreanExists => Strings.ExistingSubtitleCompleteKorean,
-        ExistingSubtitlePolicy.AskPerFile => Strings.ExistingSubtitleAsk,
-        _ => Strings.ExistingSubtitleAlways
+        SubtitleSourcePreference.PreferExternalFile => Strings.SubtitleSourceExternalFile,
+        SubtitleSourcePreference.PreferEmbeddedTrack => Strings.SubtitleSourceEmbeddedTrack,
+        SubtitleSourcePreference.PreferAnySubtitle => Strings.SubtitleSourceAnySubtitle,
+        SubtitleSourcePreference.AskPerFile => Strings.SubtitleSourceAsk,
+        _ => Strings.SubtitleSourceAudioOnly
+    };
+
+    public static string ExistingSubtitleRuleName(ExistingSubtitleRule rule) => rule switch
+    {
+        ExistingSubtitleRule.SkipIfAnySubtitleExists => Strings.ExistingSubtitleSkipExternal,
+        ExistingSubtitleRule.ProcessAnyway => Strings.ExistingSubtitleProcessAnyway,
+        _ => Strings.ExistingSubtitleCompleteKorean
     };
 
     public static string OutputConflictPolicyName(OutputConflictPolicy policy) => policy switch

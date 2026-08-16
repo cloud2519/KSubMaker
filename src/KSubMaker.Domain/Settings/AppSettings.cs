@@ -10,7 +10,6 @@ public sealed class AppSettings
     public string LastFolder { get; set; } = string.Empty;
     public bool IncludeSubfolders { get; set; } = true;
     public bool IncludeHiddenFolders { get; set; }
-    public bool SkipIfKoreanSubtitleExists { get; set; } = true;
     public bool ReprocessCompleted { get; set; }
     public bool RetryFailedOnly { get; set; }
 
@@ -60,7 +59,11 @@ public sealed class AppSettings
     public Dictionary<string, string> Glossary { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     // ---- subtitles / output ---------------------------------------------
-    public ExistingSubtitlePolicy ExistingSubtitlePolicy { get; set; } = ExistingSubtitlePolicy.AlwaysTranscribe;
+    /// <summary>What a job translates from. See <see cref="SubtitleSourcePreference"/>.</summary>
+    public SubtitleSourcePreference SubtitleSource { get; set; } = SubtitleSourcePreference.AudioOnly;
+
+    /// <summary>Whether a file that already has a subtitle is processed at all.</summary>
+    public ExistingSubtitleRule ExistingSubtitleRule { get; set; } = ExistingSubtitleRule.CompleteIfKoreanExists;
     public OutputConflictPolicy OutputConflictPolicy { get; set; } = OutputConflictPolicy.Skip;
 
     /// <summary>Suffix inserted before <c>.srt</c>. The resulting name is <c>{video}.ko.srt</c>.</summary>
