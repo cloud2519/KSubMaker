@@ -589,7 +589,8 @@ public sealed class WorkerJobProcessor : IJobProcessor
         {
             JobId = job.Id,
             VideoPath = job.VideoPath,
-            OutputPath = job.OutputPath ?? OutputPathResolver.BuildDefaultPath(job.VideoPath, settings.OutputSuffix),
+            OutputPath = job.OutputPath
+                ?? OutputPathResolver.BuildDefaultPath(job.VideoPath, settings.OutputSuffix, settings.OutputDirectory),
             CheckpointDir = _paths.JobCacheDirectory(job.Id),
             Settings = workerSettings,
             Phase = MapPhase(phase),

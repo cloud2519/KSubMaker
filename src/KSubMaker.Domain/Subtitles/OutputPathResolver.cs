@@ -11,16 +11,59 @@ public sealed record OutputResolution(string Path, bool ShouldWrite, bool WasRen
 /// </summary>
 public static class OutputPathResolver
 {
-    /// <summary>Builds <c>{directory}/{video base name}.{suffix}.srt</c>.</summary>
-    public static string BuildDefaultPath(string videoPath, string suffix = "ko")
+    /// <summary>
+    /// Builds the subtitle path for a video.
+    ///
+    /// <para>With no <paramref name="outputDirectory"/> the SRT goes next to the source:
+    /// <c>{source dir}/{base name}.{suffix}.srt</c>.</para>
+    ///
+    /// <para>With one, the source folder tree (minus its volume root) is recreated beneath it:
+    /// <c>D:\videos\showA\ep1.mkv</c> → <c>{outputDirectory}\videos\showA\ep1.{suffix}.srt</c>.
+    /// Mirroring rather than flattening is what stops <c>ep1.mkv</c> in two different source folders
+    /// from resolving to the same output path.</para>
+    ///
+    /// <para>Grafting the whole source tree under another root can push the result past the classic
+    /// 260-char limit on machines without long-path support enabled. The worker creates the parent
+    /// directories and surfaces a write failure as a recoverable error, so this degrades to a failed
+    /// job with a clear message rather than a crash.</para>
+    /// </summary>
+    public static string BuildDefaultPath(string videoPath, string suffix = "ko", string? outputDirectory = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(videoPath);
 
         var directory = Path.GetDirectoryName(videoPath) ?? string.Empty;
         var baseName = Path.GetFileNameWithoutExtension(videoPath);
-        var cleanSuffix = string.IsNullOrWhiteSpace(suffix) ? "ko" : suffix.Trim().Trim('.');
 
-        return Path.Combine(directory, $"{baseName}.{cleanSuffix}.srt");
+        // A blank suffix is a real choice — "write it as {video}.srt" — not a mistake to correct to
+        // "ko". The user is warned in the settings hint that players will not language-detect it.
+        var cleanSuffix = suffix?.Trim().Trim('.') ?? string.Empty;
+        var fileName = cleanSuffix.Length == 0 ? $"{baseName}.srt" : $"{baseName}.{cleanSuffix}.srt";
+
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+        {
+            return Path.Combine(directory, fileName);
+        }
+
+        return Path.Combine(outputDirectory.Trim(), MirroredSubPath(directory), fileName);
+    }
+
+    /// <summary>
+    /// The source directory with its volume root removed, so it can be grafted under another root.
+    /// <c>D:\videos\showA</c> → <c>videos\showA</c>; <c>\\nas\media\showA</c> → <c>showA</c> (the
+    /// share is part of the root); a relative or rootless path is returned trimmed of leading
+    /// separators.
+    /// </summary>
+    private static string MirroredSubPath(string directory)
+    {
+        if (string.IsNullOrEmpty(directory))
+        {
+            return string.Empty;
+        }
+
+        var root = Path.GetPathRoot(directory) ?? string.Empty;
+        var rest = directory.Length > root.Length ? directory[root.Length..] : string.Empty;
+
+        return rest.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
     /// <summary>
