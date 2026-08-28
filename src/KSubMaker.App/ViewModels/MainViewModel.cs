@@ -116,6 +116,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenSourceFolderCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenOutputFolderCommand))]
     private string _targetFolder = string.Empty;
 
     [ObservableProperty]
@@ -133,6 +135,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(QueueStateText))]
     [NotifyPropertyChangedFor(nameof(IsQueueRunning))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StartTestCommand))]
     [NotifyCanExecuteChangedFor(nameof(PauseCommand))]
     [NotifyCanExecuteChangedFor(nameof(StopCommand))]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
@@ -143,6 +146,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StartTestCommand))]
     private bool _isScanning;
 
     /// <summary>
@@ -152,9 +156,22 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StartTestCommand))]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelModelPreparationCommand))]
     private bool _isPreparingModels;
+
+    /// <summary>
+    /// How many seconds from the start of each video the 테스트 실행 button processes. The dropdown
+    /// beside the button sets it; it is remembered in <see cref="AppSettings.TestDurationSeconds"/>
+    /// but no longer surfaced on the settings screen — it only ever reaches a run through that button,
+    /// and 시작 forces it to zero so a stale value can never truncate a real run.
+    /// </summary>
+    [ObservableProperty]
+    private int _testLengthSeconds = 60;
+
+    private static string DescribeTestLength(int seconds) =>
+        seconds % 60 == 0 ? $"{seconds / 60}분" : $"{seconds}초";
 
     /// <summary>0–100 across the whole set of models being fetched, for the status-bar bar.</summary>
     [ObservableProperty]
@@ -170,7 +187,45 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private int _totalCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StartButtonCaption))]
     private int _pendingCount;
+
+    /// <summary>
+    /// 시작 button label. Spells out what a click will do: the checked rows that can actually run if
+    /// any are checked, otherwise the whole pending queue. Checking a 취소됨 / 완료 row and pressing
+    /// 시작 does nothing (those are finished states — 재시도 puts them back), so it must not be
+    /// counted here.
+    /// </summary>
+    public string StartButtonCaption
+    {
+        get
+        {
+            var runnableChecked = 0;
+            var anyChecked = false;
+            foreach (var row in Jobs)
+            {
+                if (!row.IsSelected)
+                {
+                    continue;
+                }
+
+                anyChecked = true;
+                if (row.IsRunnable)
+                {
+                    runnableChecked++;
+                }
+            }
+
+            if (anyChecked)
+            {
+                return string.Format(CultureInfo.CurrentCulture, "시작 · 선택 {0}", runnableChecked);
+            }
+
+            return PendingCount > 0
+                ? string.Format(CultureInfo.CurrentCulture, "시작 · 전체 {0}", PendingCount)
+                : Strings.StartButton;
+        }
+    }
 
     [ObservableProperty]
     private int _runningCount;
@@ -190,6 +245,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(CancelJobsCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(ChooseSubtitleSourceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenOutputFolderCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenSourceFolderCommand))]
     private JobRowViewModel? _selectedJob;
 
     public string QueueStateText => DisplayText.QueueStateName(QueueStatus);
@@ -649,8 +706,30 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     // Commands: queue control
     // -----------------------------------------------------------------------
 
+    /// <summary>시작: checked rows if any are checked, otherwise the whole runnable queue.</summary>
     [RelayCommand(CanExecute = nameof(CanStart))]
-    private async Task StartAsync()
+    private Task StartAsync() => LaunchQueueAsync(testDurationSeconds: 0);
+
+    /// <summary>
+    /// 테스트 실행: process only the first <see cref="TestLengthSeconds"/> seconds of each file, so a
+    /// setup can be checked end to end without committing to a long queue. The dropdown passes a new
+    /// length as a string; a bare click (no parameter) reuses the remembered one.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanStart))]
+    private Task StartTestAsync(string? seconds)
+    {
+        if (int.TryParse(seconds, NumberStyles.Integer, CultureInfo.InvariantCulture, out var picked)
+            && picked > 0
+            && picked != TestLengthSeconds)
+        {
+            TestLengthSeconds = picked;
+            _ = PersistTestLengthAsync(picked);
+        }
+
+        return LaunchQueueAsync(TestLengthSeconds);
+    }
+
+    private async Task LaunchQueueAsync(int testDurationSeconds)
     {
         var anyChecked = CheckedIds().Count > 0;
 
@@ -660,25 +739,46 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        _settings = _settingsService.Current;
+        // A checked selection is a restriction; null means "the whole pending queue" and is kept
+        // unpinned so a job added between here and the pump still runs.
+        var restrict = anyChecked ? selection.Ids : null;
 
-        if (_settings.TestDurationSeconds > 0)
-        {
-            System.Windows.MessageBox.Show(
-                $"테스트 모드가 활성화되어 있습니다.\n\n영상의 앞부분({_settings.TestDurationSeconds}초)만 자막 작업이 진행되고 완료 처리됩니다.\n영상 전체를 처리하시려면 [설정] ➔ [실행] 탭에서 '테스트용 앞부분만 처리' 값을 0으로 변경해 주세요.",
-                "테스트 실행 안내",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Information);
-        }
+        _settings = _settingsService.Current;
 
         if (await EnsureModelsAsync().ConfigureAwait(true) is not { } runSettings)
         {
             return;
         }
 
-        // Only pass a restriction when the user actually checked rows; null means "everything pending".
-        await _queue.StartAsync(runSettings, anyChecked ? selection.Ids : null).ConfigureAwait(true);
-        StatusMessage = Strings.StartedMessage;
+        // A copy, because EnsureModelsAsync can hand back the live settings object (fake AI, a failed
+        // status probe). 시작 pins the length to zero regardless of what is stored, so a leftover test
+        // length is structurally unable to shorten a real run.
+        runSettings = runSettings.Clone();
+        runSettings.TestDurationSeconds = testDurationSeconds;
+
+        await _queue.StartAsync(runSettings, restrict).ConfigureAwait(true);
+
+        StatusMessage = testDurationSeconds > 0
+            ? string.Format(CultureInfo.CurrentCulture, "테스트 실행을 시작했습니다 (앞 {0}).", DescribeTestLength(testDurationSeconds))
+            : Strings.StartedMessage;
+    }
+
+    /// <summary>
+    /// Remembers the test length across restarts. Best effort: it lands in the same settings row the
+    /// scan options use, so a failure here is no worse than the length reverting to its default.
+    /// </summary>
+    private async Task PersistTestLengthAsync(int seconds)
+    {
+        try
+        {
+            var settings = _settingsService.Current.Clone();
+            settings.TestDurationSeconds = seconds;
+            await _settingsService.SaveAsync(settings, CancellationToken.None).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "테스트 실행 길이를 저장하지 못했습니다.");
+        }
     }
 
     /// <summary>
@@ -1281,41 +1381,54 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
     });
 
-    [RelayCommand]
+    // Opening a folder never needs a selection: with a row highlighted these reveal that one file,
+    // otherwise they open the folder the queue is working with. They are only disabled when there is
+    // genuinely no folder to open — a first run before any scan.
+
+    private bool CanOpenSourceFolder =>
+        PrimaryRow() is not null || !string.IsNullOrWhiteSpace(TargetFolder);
+
+    private bool CanOpenOutputFolder =>
+        PrimaryRow() is not null || !string.IsNullOrWhiteSpace(TargetFolder);
+
+    [RelayCommand(CanExecute = nameof(CanOpenOutputFolder))]
     private void OpenOutputFolder()
     {
         var row = PrimaryRow();
-        if (row is null)
+
+        if (row is not null && !string.IsNullOrWhiteSpace(row.OutputPath))
         {
-            StatusMessage = Strings.NoSelectionMessage;
-            _dialogs.ShowInformation(Strings.NoSelectionMessage);
+            if (!_shell.RevealOrOpenParent(row.OutputPath))
+            {
+                StatusMessage = Strings.OutputNotReadyMessage;
+            }
+
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(row.OutputPath))
-        {
-            StatusMessage = Strings.OutputNotReadyMessage;
-            return;
-        }
-
-        if (!_shell.RevealOrOpenParent(row.OutputPath))
+        // No finished subtitle to point at: open the source folder, where the SRT is written.
+        if (!_shell.OpenFolder(TargetFolder))
         {
             StatusMessage = Strings.OutputNotReadyMessage;
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanOpenSourceFolder))]
     private void OpenSourceFolder()
     {
         var row = PrimaryRow();
-        if (row is null)
+
+        if (row is not null)
         {
-            StatusMessage = Strings.NoSelectionMessage;
-            _dialogs.ShowInformation(Strings.NoSelectionMessage);
+            if (!_shell.RevealOrOpenParent(row.FullPath))
+            {
+                StatusMessage = Strings.SourceNotFoundMessage;
+            }
+
             return;
         }
 
-        if (!_shell.RevealOrOpenParent(row.FullPath))
+        if (!_shell.OpenFolder(TargetFolder))
         {
             StatusMessage = Strings.SourceNotFoundMessage;
         }
@@ -1521,6 +1634,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         IncludeSubfolders = settings.IncludeSubfolders;
         IncludeHiddenFolders = settings.IncludeHiddenFolders;
+
+        // A value the user set before this ran under the old "테스트 모드" setting carries over as the
+        // remembered length; the old "0 = whole video" state just leaves the default in place.
+        if (settings.TestDurationSeconds > 0)
+        {
+            TestLengthSeconds = settings.TestDurationSeconds;
+        }
     }
 
     private static string FormatGpuSummary(HardwareProfile profile)
@@ -1683,6 +1803,12 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         CancelJobsCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ChooseSubtitleSourceCommand.NotifyCanExecuteChanged();
+
+        // 결과/원본 폴더 열기 fall back to the first checked row when nothing is highlighted, and the
+        // 시작 label counts checked rows — both move with the same events the commands do.
+        OpenOutputFolderCommand.NotifyCanExecuteChanged();
+        OpenSourceFolderCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(StartButtonCaption));
     }
 
     /// <summary>

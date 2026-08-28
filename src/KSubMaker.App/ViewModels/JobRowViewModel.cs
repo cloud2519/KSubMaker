@@ -42,10 +42,12 @@ public sealed partial class JobRowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(StatusSummary))]
     private JobStatus _status;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StageText))]
+    [NotifyPropertyChangedFor(nameof(StatusSummary))]
     private JobStage _stage;
 
     [ObservableProperty]
@@ -99,6 +101,18 @@ public sealed partial class JobRowViewModel : ObservableObject
 
     /// <summary>Korean label for <see cref="Stage"/>.</summary>
     public string StageText => DisplayText.StageName(Stage);
+
+    /// <summary>
+    /// What the 상태 column shows. While a job runs, 상태 and 단계 say the same thing, so only the
+    /// status is shown. The one case where they differ is a job that stopped part-way — 실패 or
+    /// 일시정지 — and there the stage it reached is appended (실패 · 한국어 번역까지), which is the
+    /// information the separate 현재 단계 column used to carry.
+    /// </summary>
+    public string StatusSummary =>
+        Status is JobStatus.Failed or JobStatus.Paused
+        && Stage is not (JobStage.None or JobStage.Done)
+            ? $"{StatusText} · {StageText}까지"
+            : StatusText;
 
     /// <summary>Media seconds per wall-clock second, or "-" while nothing is running.</summary>
     public string SpeedText => DisplayText.Speed(ProcessingSpeed);

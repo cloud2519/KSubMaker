@@ -68,19 +68,39 @@
             </StatusBarItem>
         </StatusBar>
 
-        <!-- ======================= folder + scan ======================= -->
-        <Border DockPanel.Dock="Top" Padding="12,10,12,6" Background="#F5F6F8">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <!-- App-level navigation lives in the menu bar, not among the queue buttons: 설정 · 모델 관리 ·
+             로그 보기 are not things you do to the list. Each item runs its command directly. -->
+        <Menu DockPanel.Dock="Top" Padding="4,2">
+            <MenuItem Header="{x:Static res:Strings.SettingsButton}" Command="{Binding OpenSettingsCommand}" />
+            <MenuItem Header="{x:Static res:Strings.ModelsButton}" Command="{Binding OpenModelsCommand}" />
+            <MenuItem Header="{x:Static res:Strings.OpenLogButton}" Command="{Binding OpenLogWindowCommand}" />
+        </Menu>
 
-                <Grid Grid.Row="0">
+        <!-- =======================================================================
+             Top chrome, top to bottom: the target folder + scan options on one row,
+             a scan-progress row that collapses when idle, then the command bar. The
+             command bar used to be a fifteen-button WrapPanel docked to the bottom
+             where it competed with the status bar and gave 시작 no more weight than
+             로그 보기; it now sits above the grid it acts on, split into labelled
+             groups.
+             ======================================================================= -->
+        <Border DockPanel.Dock="Top"
+                Background="{StaticResource ChromeBackground}"
+                BorderBrush="{StaticResource ChromeBorder}"
+                BorderThickness="0,0,0,1">
+            <StackPanel>
+
+                <!-- target folder + scan options: the box takes ~3/5, the trailing star column is
+                     the spacer that stops it stretching the full width -->
+                <Grid Margin="12,9,12,7">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="2*" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0"
@@ -89,104 +109,167 @@
 
                     <TextBox Grid.Column="1"
                              Text="{Binding TargetFolder, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="5,4"
+                             Padding="6,5"
                              VerticalContentAlignment="Center"
                              ToolTip="{Binding TargetFolder}" />
 
                     <Button Grid.Column="2"
                             Content="{x:Static res:Strings.SelectFolderButton}"
                             Command="{Binding BrowseFolderCommand}"
-                            Style="{StaticResource CommandButton}"
+                            Style="{StaticResource ToolButton}"
                             Margin="8,0,0,0" />
-                </Grid>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-                    <CheckBox Content="{x:Static res:Strings.IncludeSubfoldersLabel}"
+                    <Button Grid.Column="3"
+                            Content="{x:Static res:Strings.ScanButton}"
+                            Command="{Binding ScanCommand}"
+                            Style="{StaticResource ToolButton}"
+                            Margin="4,0,10,0"
+                            ToolTip="{x:Static res:Strings.ScanHint}" />
+
+                    <CheckBox Grid.Column="4"
+                              Content="{x:Static res:Strings.IncludeSubfoldersLabel}"
                               IsChecked="{Binding IncludeSubfolders}"
                               Style="{StaticResource OptionCheckBox}" />
-                    <CheckBox Content="{x:Static res:Strings.IncludeHiddenFoldersLabel}"
+                    <CheckBox Grid.Column="5"
+                              Content="{x:Static res:Strings.IncludeHiddenFoldersLabel}"
                               IsChecked="{Binding IncludeHiddenFolders}"
                               Style="{StaticResource OptionCheckBox}" />
+                </Grid>
 
-                    <Button Content="{x:Static res:Strings.ScanButton}"
-                            Command="{Binding ScanCommand}"
-                            Style="{StaticResource CommandButton}" />
-
+                <!-- scan progress: collapses to nothing when no scan is running -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="12,0,12,8"
+                            Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}">
                     <Button Content="{x:Static res:Strings.ScanCancelButton}"
                             Command="{Binding CancelScanCommand}"
-                            Style="{StaticResource CommandButton}"
-                            Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}" />
+                            Style="{StaticResource ToolButton}" />
 
                     <ProgressBar Width="140"
                                  Height="6"
                                  IsIndeterminate="True"
                                  VerticalAlignment="Center"
-                                 Margin="6,0,0,0"
-                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}" />
+                                 Margin="8,0,0,0" />
                 </StackPanel>
-            </Grid>
-        </Border>
 
-        <!-- ======================= command bar ======================= -->
-        <Border DockPanel.Dock="Bottom" Padding="12,8" Background="#F5F6F8">
-            <WrapPanel Orientation="Horizontal">
-                <Button Content="{x:Static res:Strings.StartButton}"
-                        Command="{Binding StartCommand}"
-                        Style="{StaticResource CommandButton}"
-                        FontWeight="SemiBold" />
-                <Button Content="{x:Static res:Strings.PauseButton}"
-                        Command="{Binding PauseCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.StopButton}"
-                        Command="{Binding StopCommand}"
-                        Style="{StaticResource CommandButton}" />
+                <!-- command bar: each group is a card — its label at the top, its buttons below -->
+                <WrapPanel Orientation="Horizontal" Margin="12,4,12,2">
 
-                <Rectangle Width="1" Height="24" Fill="#D5D8DD" Margin="4,0,10,0" VerticalAlignment="Center" />
+                    <!-- 실행 -->
+                    <Border Style="{StaticResource GroupCard}">
+                      <StackPanel>
+                        <TextBlock Text="실행" Style="{StaticResource GroupCaption}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Command="{Binding StartCommand}" Style="{StaticResource PrimaryToolButton}"
+                                    ToolTip="체크한 항목이 있으면 그 항목만, 없으면 대기 중인 전체를 처리합니다.">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconPlay}" Fill="White"
+                                          Width="12" Height="12" Stretch="Uniform"
+                                          Margin="0,0,7,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding StartButtonCaption}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
 
-                <Button Content="{x:Static res:Strings.RetryButton}"
-                        Command="{Binding RetryCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.CancelJobButton}"
-                        Command="{Binding CancelJobsCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.RemoveSelectedButton}"
-                        Command="{Binding RemoveSelectedCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.RemoveCompletedButton}"
-                        Command="{Binding RemoveCompletedCommand}"
-                        Style="{StaticResource CommandButton}" />
+                            <StackPanel Orientation="Horizontal" Margin="0,0,4,4"
+                                        ToolTip="영상 앞부분만 잘라 빠르게 한 번 돌려봅니다. ▾ 에서 길이를 고르세요. '시작'은 항상 전체를 처리합니다.">
+                                <Button Content="테스트"
+                                        Command="{Binding StartTestCommand}"
+                                        Style="{StaticResource ToolButton}"
+                                        Margin="0" />
+                                <Menu Style="{StaticResource CaretMenu}">
+                                    <MenuItem Style="{StaticResource CaretMenuItem}">
+                                        <MenuItem.Header>
+                                            <Path Data="M0,0 L5,5 L10,0 Z" Fill="#242A31"
+                                                  Width="9" Height="5" Stretch="Fill" VerticalAlignment="Center" />
+                                        </MenuItem.Header>
+                                        <MenuItem Header="앞 30초" Command="{Binding StartTestCommand}" CommandParameter="30"
+                                                  IsChecked="{Binding TestLengthSeconds, Mode=OneWay, Converter={StaticResource ValueEqualsParameter}, ConverterParameter=30}" />
+                                        <MenuItem Header="앞 1분" Command="{Binding StartTestCommand}" CommandParameter="60"
+                                                  IsChecked="{Binding TestLengthSeconds, Mode=OneWay, Converter={StaticResource ValueEqualsParameter}, ConverterParameter=60}" />
+                                        <MenuItem Header="앞 3분" Command="{Binding StartTestCommand}" CommandParameter="180"
+                                                  IsChecked="{Binding TestLengthSeconds, Mode=OneWay, Converter={StaticResource ValueEqualsParameter}, ConverterParameter=180}" />
+                                        <MenuItem Header="앞 5분" Command="{Binding StartTestCommand}" CommandParameter="300"
+                                                  IsChecked="{Binding TestLengthSeconds, Mode=OneWay, Converter={StaticResource ValueEqualsParameter}, ConverterParameter=300}" />
+                                        <MenuItem Header="앞 10분" Command="{Binding StartTestCommand}" CommandParameter="600"
+                                                  IsChecked="{Binding TestLengthSeconds, Mode=OneWay, Converter={StaticResource ValueEqualsParameter}, ConverterParameter=600}" />
+                                    </MenuItem>
+                                </Menu>
+                            </StackPanel>
 
-                <Rectangle Width="1" Height="24" Fill="#D5D8DD" Margin="4,0,10,0" VerticalAlignment="Center" />
+                            <Button Command="{Binding PauseCommand}" Style="{StaticResource ToolButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconPause}" Fill="#242A31"
+                                          Width="12" Height="12" Stretch="Uniform"
+                                          Margin="0,0,7,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static res:Strings.PauseButton}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding StopCommand}" Style="{StaticResource ToolButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconStop}" Fill="#242A31"
+                                          Width="10" Height="10" Stretch="Uniform"
+                                          Margin="0,0,7,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static res:Strings.StopButton}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
 
-                <Button Content="{x:Static res:Strings.SelectAllButton}"
-                        Command="{Binding SelectAllCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.ClearSelectionButton}"
-                        Command="{Binding ClearSelectionCommand}"
-                        Style="{StaticResource CommandButton}" />
+                    <!-- 목록 -->
+                    <Border Style="{StaticResource GroupCard}">
+                      <StackPanel>
+                        <TextBlock Text="목록" Style="{StaticResource GroupCaption}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="{x:Static res:Strings.RetryButton}"
+                                    Command="{Binding RetryCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                            <Button Content="{x:Static res:Strings.CancelJobButton}"
+                                    Command="{Binding CancelJobsCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                            <Button Content="{x:Static res:Strings.RemoveSelectedButton}"
+                                    Command="{Binding RemoveSelectedCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                            <Button Content="{x:Static res:Strings.RemoveCompletedButton}"
+                                    Command="{Binding RemoveCompletedCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
 
-                <Button Content="{x:Static res:Strings.SubtitleSourceMenuItem}"
-                        Command="{Binding ChooseSubtitleSourceCommand}"
-                        Style="{StaticResource CommandButton}" />
+                    <!-- 선택 -->
+                    <Border Style="{StaticResource GroupCard}">
+                      <StackPanel>
+                        <TextBlock Text="선택" Style="{StaticResource GroupCaption}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="{x:Static res:Strings.SelectAllButton}"
+                                    Command="{Binding SelectAllCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                            <Button Content="{x:Static res:Strings.ClearSelectionButton}"
+                                    Command="{Binding ClearSelectionCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                            <Button Content="{x:Static res:Strings.SubtitleSourceMenuItem}"
+                                    Command="{Binding ChooseSubtitleSourceCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
 
-                <Rectangle Width="1" Height="24" Fill="#D5D8DD" Margin="4,0,10,0" VerticalAlignment="Center" />
-
-                <Button Content="{x:Static res:Strings.OpenOutputFolderButton}"
-                        Command="{Binding OpenOutputFolderCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.OpenSourceFolderButton}"
-                        Command="{Binding OpenSourceFolderCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.OpenLogButton}"
-                        Command="{Binding OpenLogWindowCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.SettingsButton}"
-                        Command="{Binding OpenSettingsCommand}"
-                        Style="{StaticResource CommandButton}" />
-                <Button Content="{x:Static res:Strings.ModelsButton}"
-                        Command="{Binding OpenModelsCommand}"
-                        Style="{StaticResource CommandButton}" />
-            </WrapPanel>
+                    <!-- 열기 -->
+                    <Border Style="{StaticResource GroupCard}" Margin="0,0,0,6">
+                      <StackPanel>
+                        <TextBlock Text="열기" Style="{StaticResource GroupCaption}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="{x:Static res:Strings.OpenOutputFolderButton}"
+                                    Command="{Binding OpenOutputFolderCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                            <Button Content="{x:Static res:Strings.OpenSourceFolderButton}"
+                                    Command="{Binding OpenSourceFolderCommand}"
+                                    Style="{StaticResource ToolButton}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
         </Border>
 
         <!-- ======================= job grid ======================= -->
@@ -218,6 +301,23 @@
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   Margin="12,6,12,6">
 
+            <!-- Selection is a light tint, not the OS full-saturation blue: the 상태 column paints its
+                 own blue/green/red text and the progress %s ride on top of the bars, all of which
+                 vanish on a solid blue row. -->
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#E4EEFB" />
+                            <Setter Property="BorderBrush" Value="#E4EEFB" />
+                            <Setter Property="Foreground" Value="#1F2328" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+
             <!-- Bound to the window's DataContext, not the row's: a ContextMenu lives in its own
                  visual tree, so {Binding ChooseSubtitleSourceCommand} alone would look for the
                  command on JobRowViewModel and silently disable the item. -->
@@ -239,17 +339,24 @@
                          "자막 원본 선택" acts on whichever row was last left-clicked. -->
                     <EventSetter Event="PreviewMouseRightButtonDown" Handler="OnRowRightClick" />
 
-                    <!-- Full path plus the current state, as a plain string so the tooltip content is
-                         not a shared visual across every virtualised row. -->
+                    <!-- Source path, state, and where the subtitle goes — a plain string so the tooltip
+                         content is not a shared visual across every virtualised row. -->
                     <Setter Property="ToolTip">
                         <Setter.Value>
-                            <MultiBinding StringFormat="{}{0}&#x0a;{1} · {2}">
+                            <MultiBinding StringFormat="{}{0}&#x0a;{1} · {2}&#x0a;→ {3}">
                                 <Binding Path="FullPath" />
                                 <Binding Path="StatusText" />
                                 <Binding Path="StageText" />
+                                <Binding Path="OutputPath" Converter="{StaticResource EmptyToDash}" />
                             </MultiBinding>
                         </Setter.Value>
                     </Setter>
+
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#E4EEFB" />
+                        </Trigger>
+                    </Style.Triggers>
                 </Style>
             </DataGrid.RowStyle>
 
@@ -290,22 +397,18 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- 상태 -->
-                <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnStatus}" SortMemberPath="Status" Width="92">
+                <!-- 상태: 처리 중이면 단계와 같은 말이라 상태만, 실패·일시정지면 "· 번역까지"로 어디서 멈췄는지 -->
+                <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnStatus}" SortMemberPath="Status" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Status, Converter={StaticResource JobStatusToText}}"
+                            <TextBlock Text="{Binding StatusSummary}"
                                        Foreground="{Binding Status, Converter={StaticResource JobStatusToBrush}}"
                                        VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
-                <!-- 현재 단계 -->
-                <DataGridTextColumn Header="{x:Static res:Strings.ColumnStage}"
-                                    Binding="{Binding Stage, Converter={StaticResource JobStageToText}}"
-                                    Width="112" />
 
                 <!-- 진행률 -->
                 <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnProgress}" SortMemberPath="OverallProgress" Width="150">
@@ -385,17 +488,7 @@
                                     Binding="{Binding SubtitleSourceText}"
                                     Width="118" />
 
-                <!-- 결과 경로 -->
-                <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnOutputPath}" Width="240">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding OutputPath, Converter={StaticResource EmptyToDash}}"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"
-                                       ToolTip="{Binding OutputPath}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <!-- 결과 경로는 열 대신 행 툴팁으로: 대개 원본 옆이라 240px를 쓸 값이 아님. "결과 폴더 열기"가 직접 연다. -->
 
                 <!-- 오류 -->
                 <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnError}" Width="260">

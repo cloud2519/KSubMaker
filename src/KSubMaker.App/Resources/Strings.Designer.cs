@@ -127,8 +127,11 @@ public static partial class Strings
     /// <summary>이미 한국어 자막이 있으면 건너뛰기</summary>
     public static string SkipIfKoreanSubtitleLabel => Get(nameof(SkipIfKoreanSubtitleLabel));
 
-    /// <summary>파일 검색</summary>
+    /// <summary>목록 새로고침</summary>
     public static string ScanButton => Get(nameof(ScanButton));
+
+    /// <summary>대상 폴더를 다시 검색해 새 영상은 목록에 넣고 기존 항목의 상태를 갱신합니다.</summary>
+    public static string ScanHint => Get(nameof(ScanHint));
 
     /// <summary>검색 중단</summary>
     public static string ScanCancelButton => Get(nameof(ScanCancelButton));
@@ -190,7 +193,7 @@ public static partial class Strings
     /// <summary>현재 단계</summary>
     public static string ColumnStage => Get(nameof(ColumnStage));
 
-    /// <summary>진행률</summary>
+    /// <summary>전체 진행률</summary>
     public static string ColumnProgress => Get(nameof(ColumnProgress));
 
     /// <summary>단계 진행률</summary>
