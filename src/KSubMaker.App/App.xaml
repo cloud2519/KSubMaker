@@ -17,6 +17,7 @@
             <conv:InverseBooleanConverter x:Key="InverseBoolean" />
             <conv:PercentToTextConverter x:Key="PercentToText" />
             <conv:EmptyToDashConverter x:Key="EmptyToDash" />
+            <conv:ValueEqualsParameterConverter x:Key="ValueEqualsParameter" />
 
             <!-- ================= base styles ================= -->
             <Style TargetType="TextBlock" x:Key="LabelText">
@@ -41,6 +42,134 @@
                 <Setter Property="MinWidth" Value="96" />
                 <Setter Property="Padding" Value="10,5" />
                 <Setter Property="Margin" Value="0,0,6,0" />
+            </Style>
+
+            <!-- ================= command bar palette ================= -->
+            <SolidColorBrush x:Key="ChromeBackground" Color="#F5F6F8" />
+            <SolidColorBrush x:Key="ChromeBorder" Color="#E3E6EB" />
+
+            <!-- ================= toolbar icons (16px canvas, filled) ================= -->
+            <Geometry x:Key="IconPlay">M5,3 L13,8 L5,13 Z</Geometry>
+            <Geometry x:Key="IconPause">M4.5,3 H7 V13 H4.5 Z M9,3 H11.5 V13 H9 Z</Geometry>
+            <Geometry x:Key="IconStop">M4,4 H12 V12 H4 Z</Geometry>
+
+            <!--
+                Ghost toolbar button: quiet by default, background fills on hover. The heavy WrapPanel
+                of identical grey buttons this replaces gave the primary action no more weight than
+                "로그 보기"; hierarchy now comes from PrimaryToolButton + grouping rules, not from
+                fifteen boxes in a row.
+            -->
+            <Style TargetType="Button" x:Key="ToolButton">
+                <Setter Property="Height" Value="32" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Padding" Value="11,0" />
+                <Setter Property="Margin" Value="0,0,4,4" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="#242A31" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="#E1E4E9"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"
+                                                  RecognizesAccessKey="True" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#ECEEF1" />
+                                    <Setter TargetName="Bd" Property="BorderBrush" Value="#CCD2DA" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#DFE3E8" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- The one filled button: 시작. Everything else is ghost. -->
+            <Style TargetType="Button" x:Key="PrimaryToolButton">
+                <Setter Property="Height" Value="32" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Padding" Value="13,0" />
+                <Setter Property="Margin" Value="0,0,4,4" />
+                <Setter Property="Background" Value="#2F6FED" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"
+                                                  RecognizesAccessKey="True" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#2960D6" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#2251B4" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Caret beside 테스트 실행: a bare Menu, stripped of its system chrome, whose one
+                 top-level item drops down the length choices. -->
+            <Style TargetType="Menu" x:Key="CaretMenu">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style TargetType="MenuItem" x:Key="CaretMenuItem">
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Padding" Value="5,0" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <!-- Each command group is a white card on the grey chrome, its label at the top-left. -->
+            <Style TargetType="Border" x:Key="GroupCard">
+                <Setter Property="Background" Value="#FFFFFF" />
+                <Setter Property="BorderBrush" Value="#DDE1E7" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="7" />
+                <Setter Property="Padding" Value="10,6,10,8" />
+                <Setter Property="Margin" Value="0,0,10,6" />
+            </Style>
+
+            <Style TargetType="TextBlock" x:Key="GroupCaption">
+                <Setter Property="Foreground" Value="#4E5967" />
+                <Setter Property="FontSize" Value="10.5" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="1,0,0,5" />
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
             </Style>
 
             <Style TargetType="CheckBox" x:Key="OptionCheckBox">

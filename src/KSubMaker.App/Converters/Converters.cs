@@ -175,3 +175,16 @@ public sealed class EmptyToDashConverter : OneWayConverter
     public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         DisplayText.OrDash(value as string);
 }
+
+/// <summary>
+/// True when the bound value equals the converter parameter, compared as text. Drives the checkmark
+/// on the 테스트 실행 length menu so the remembered choice is visible without a label on the button.
+/// </summary>
+public sealed class ValueEqualsParameterConverter : OneWayConverter
+{
+    public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        string.Equals(
+            value?.ToString(),
+            parameter?.ToString(),
+            StringComparison.Ordinal);
+}

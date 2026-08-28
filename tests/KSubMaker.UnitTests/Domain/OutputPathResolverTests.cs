@@ -48,10 +48,12 @@ public sealed class OutputPathResolverTests
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void BuildDefaultPath_falls_back_to_ko_for_a_blank_suffix(string suffix)
+    [InlineData(null)]
+    public void BuildDefaultPath_writes_a_bare_name_for_a_blank_suffix(string? suffix)
     {
-        OutputPathResolver.BuildDefaultPath(Combine("videos", "movie.mkv"), suffix)
-            .Should().Be(Combine("videos", "movie.ko.srt"));
+        // Blank means "no language tag" — {video}.srt — a deliberate choice, not an error to fix.
+        OutputPathResolver.BuildDefaultPath(Combine("videos", "movie.mkv"), suffix!)
+            .Should().Be(Combine("videos", "movie.srt"));
     }
 
     [Fact]
@@ -77,6 +79,39 @@ public sealed class OutputPathResolverTests
         var act = () => OutputPathResolver.BuildDefaultPath(videoPath!);
 
         act.Should().Throw<ArgumentException>();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void BuildDefaultPath_blank_output_directory_writes_next_to_the_source(string? outputDirectory)
+    {
+        OutputPathResolver.BuildDefaultPath(Combine("videos", "showA", "ep1.mkv"), "ko", outputDirectory)
+            .Should().Be(Combine("videos", "showA", "ep1.ko.srt"));
+    }
+
+    [Fact]
+    public void BuildDefaultPath_mirrors_the_source_folder_tree_under_the_output_directory()
+    {
+        OutputPathResolver.BuildDefaultPath(Combine("videos", "showA", "ep1.mkv"), "ko", Combine("subs"))
+            .Should().Be(Combine("subs", "videos", "showA", "ep1.ko.srt"));
+    }
+
+    [Fact]
+    public void BuildDefaultPath_same_name_in_two_source_folders_never_collides()
+    {
+        var a = OutputPathResolver.BuildDefaultPath(Combine("videos", "showA", "ep1.mkv"), "ko", Combine("subs"));
+        var b = OutputPathResolver.BuildDefaultPath(Combine("videos", "showB", "ep1.mkv"), "ko", Combine("subs"));
+
+        a.Should().NotBe(b);
+    }
+
+    [Fact]
+    public void BuildDefaultPath_mirror_keeps_a_custom_suffix()
+    {
+        OutputPathResolver.BuildDefaultPath(Combine("videos", "ep1.mkv"), "kor", Combine("subs"))
+            .Should().Be(Combine("subs", "videos", "ep1.kor.srt"));
     }
 
     // -----------------------------------------------------------------------

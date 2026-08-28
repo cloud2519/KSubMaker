@@ -354,7 +354,8 @@ public sealed class JobSelectionResolverTests
     public void Start_ignores_the_highlighted_row()
     {
         // Resolve() falls back to the highlighted row; ResolveStart deliberately has no such
-        // fallback, so pressing 시작 with nothing checked cannot collapse onto one file.
+        // fallback, so pressing 시작 with nothing checked cannot collapse onto one file. Running a
+        // single file is the context menu's "이 파일만 실행".
         var selection = JobSelectionResolver.ResolveStart(
             [Row("a", JobStatus.Pending), Row("b", JobStatus.Pending)]);
 

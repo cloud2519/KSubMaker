@@ -69,6 +69,14 @@ public sealed class AppSettings
     /// <summary>Suffix inserted before <c>.srt</c>. The resulting name is <c>{video}.ko.srt</c>.</summary>
     public string OutputSuffix { get; set; } = "ko";
 
+    /// <summary>
+    /// Where finished subtitles go. Empty (the default) writes each SRT next to its source video.
+    /// When set, the source folder structure is mirrored beneath this directory — a file at
+    /// <c>D:\videos\showA\ep1.mkv</c> lands at <c>{OutputDirectory}\videos\showA\ep1.ko.srt</c> —
+    /// so two files with the same name in different source folders never collide.
+    /// </summary>
+    public string OutputDirectory { get; set; } = string.Empty;
+
     public int MaxLinesPerCue { get; set; } = 2;
     public int MaxCharsPerLine { get; set; } = 22;
     public double MinCueDurationSeconds { get; set; } = 1.0;

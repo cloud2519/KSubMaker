@@ -268,7 +268,8 @@ public sealed class InProcessJobProcessor(
                 return JobExecutionResult.Fail(ErrorCodes.TranslationFailed, "번역된 자막이 없습니다.");
             }
 
-            var desiredPath = job.OutputPath ?? OutputPathResolver.BuildDefaultPath(job.VideoPath, settings.OutputSuffix);
+            var desiredPath = job.OutputPath
+                ?? OutputPathResolver.BuildDefaultPath(job.VideoPath, settings.OutputSuffix, settings.OutputDirectory);
 
             var written = await subtitleWriter
                 .WriteAsync(cues, desiredPath, settings.OutputConflictPolicy, cancellationToken)

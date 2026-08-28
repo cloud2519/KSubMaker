@@ -182,9 +182,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     private bool _skipTranslationForSameLanguage = true;
 
     [ObservableProperty]
-    private int _testDurationSeconds = 0;
-
-    [ObservableProperty]
     private int _translationBatchMaxItems = 30;
 
     [ObservableProperty]
@@ -277,6 +274,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     // -----------------------------------------------------------------------
     // 경로 / 로그
     // -----------------------------------------------------------------------
+
+    /// <summary>Empty = each subtitle next to its source video (the default).</summary>
+    [ObservableProperty]
+    private string _outputDirectory = string.Empty;
 
     [ObservableProperty]
     private string _cacheDirectory = string.Empty;
@@ -392,6 +393,16 @@ public sealed partial class SettingsViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void BrowseOutputDirectory()
+    {
+        var picked = _dialogs.PickFolder(Strings.SelectOutputFolderTitle, OutputDirectory);
+        if (picked is not null)
+        {
+            OutputDirectory = picked;
         }
     }
 
@@ -626,7 +637,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         SelectedTranslationModel = Known(TranslationModels, TranslationChoice.Selected(settings));
         SelectedTranslationStyle = settings.TranslationStyle;
         SkipTranslationForSameLanguage = settings.SkipTranslationForSameLanguage;
-        TestDurationSeconds = settings.TestDurationSeconds;
         TranslationBatchMaxItems = settings.TranslationBatchMaxItems;
         TranslationBatchMaxChars = settings.TranslationBatchMaxChars;
         TranslationBatchMaxSeconds = settings.TranslationBatchMaxSeconds;
@@ -660,6 +670,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ReprocessCompleted = settings.ReprocessCompleted;
         RetryFailedOnly = settings.RetryFailedOnly;
 
+        OutputDirectory = settings.OutputDirectory;
         CacheDirectory = settings.CacheDirectory;
         ModelDirectory = settings.ModelDirectory;
         LogDirectory = settings.LogDirectory;
@@ -694,7 +705,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         TranslationChoice.Apply(settings, SelectedTranslationModel, _catalog);
         settings.TranslationStyle = SelectedTranslationStyle;
         settings.SkipTranslationForSameLanguage = SkipTranslationForSameLanguage;
-        settings.TestDurationSeconds = Math.Clamp(TestDurationSeconds, 0, 86400);
+
+        // TestDurationSeconds is deliberately not touched here: it is carried through _working.Clone()
+        // and only ever written by the main window's 테스트 실행 dropdown. It has no settings-screen
+        // field any more — a stray "test mode" left on was too easy to forget.
         settings.TranslationBatchMaxItems = Math.Clamp(TranslationBatchMaxItems, 1, 200);
         settings.TranslationBatchMaxChars = Math.Clamp(TranslationBatchMaxChars, 200, 20_000);
         settings.TranslationBatchMaxSeconds = Math.Clamp(TranslationBatchMaxSeconds, 10, 3_600);
@@ -704,7 +718,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.SubtitleSource = SelectedSubtitleSource;
         settings.ExistingSubtitleRule = SelectedExistingSubtitleRule;
         settings.OutputConflictPolicy = SelectedOutputConflictPolicy;
-        settings.OutputSuffix = string.IsNullOrWhiteSpace(OutputSuffix) ? "ko" : OutputSuffix.Trim().Trim('.');
+        // Empty is kept: it means "no language tag", i.e. {video}.srt.
+        settings.OutputSuffix = OutputSuffix?.Trim().Trim('.') ?? string.Empty;
         settings.MaxLinesPerCue = Math.Clamp(MaxLinesPerCue, 1, 4);
         settings.MaxCharsPerLine = Math.Clamp(MaxCharsPerLine, 8, 60);
         settings.MinCueDurationSeconds = Math.Clamp(MinCueDurationSeconds, 0.2d, 10d);
@@ -724,6 +739,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.ReprocessCompleted = ReprocessCompleted;
         settings.RetryFailedOnly = RetryFailedOnly;
 
+        settings.OutputDirectory = OutputDirectory.Trim();
         settings.CacheDirectory = CacheDirectory.Trim();
         settings.ModelDirectory = ModelDirectory.Trim();
         settings.LogDirectory = LogDirectory.Trim();

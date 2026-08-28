@@ -34,6 +34,7 @@ public sealed class JobConfiguration : IEntityTypeConfiguration<Job>
         builder.Property(j => j.TranslationModel).HasMaxLength(64);
         builder.Property(j => j.ErrorCode).HasMaxLength(64);
         builder.Property(j => j.ErrorMessage).HasMaxLength(2048);
+        builder.Property(j => j.Note).HasMaxLength(2048);
 
         // EstimatedTimeRemaining is transient UI state: it is recomputed from the live stopwatch on
         // every progress tick and is meaningless after a restart (a job that resumes has a different

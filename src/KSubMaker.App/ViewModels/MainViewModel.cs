@@ -15,6 +15,7 @@ using KSubMaker.Domain.Jobs;
 using KSubMaker.Domain.Media;
 using KSubMaker.Domain.Models;
 using KSubMaker.Domain.Settings;
+using KSubMaker.Domain.Subtitles;
 using Microsoft.Extensions.Logging;
 
 namespace KSubMaker.App.ViewModels;
@@ -39,6 +40,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly IMediaProbe _mediaProbe;
     private readonly IDialogService _dialogs;
     private readonly IShellService _shell;
+    private readonly IFileActionService _fileActions;
     private readonly IWindowService _windows;
     private readonly ILogger<MainViewModel> _logger;
     private readonly Dispatcher _dispatcher;
@@ -84,6 +86,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         IMediaProbe mediaProbe,
         IDialogService dialogs,
         IShellService shell,
+        IFileActionService fileActions,
         IWindowService windows,
         ILogger<MainViewModel> logger)
     {
@@ -96,6 +99,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _mediaProbe = mediaProbe;
         _dialogs = dialogs;
         _shell = shell;
+        _fileActions = fileActions;
         _windows = windows;
         _logger = logger;
 
@@ -116,6 +120,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenSourceFolderCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenOutputFolderCommand))]
     private string _targetFolder = string.Empty;
 
     [ObservableProperty]
@@ -133,6 +139,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(QueueStateText))]
     [NotifyPropertyChangedFor(nameof(IsQueueRunning))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StartTestCommand))]
     [NotifyCanExecuteChangedFor(nameof(PauseCommand))]
     [NotifyCanExecuteChangedFor(nameof(StopCommand))]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
@@ -143,6 +150,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StartTestCommand))]
     private bool _isScanning;
 
     /// <summary>
@@ -152,9 +160,22 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StartTestCommand))]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelModelPreparationCommand))]
     private bool _isPreparingModels;
+
+    /// <summary>
+    /// How many seconds from the start of each video the 테스트 실행 button processes. The dropdown
+    /// beside the button sets it; it is remembered in <see cref="AppSettings.TestDurationSeconds"/>
+    /// but no longer surfaced on the settings screen — it only ever reaches a run through that button,
+    /// and 시작 forces it to zero so a stale value can never truncate a real run.
+    /// </summary>
+    [ObservableProperty]
+    private int _testLengthSeconds = 60;
+
+    private static string DescribeTestLength(int seconds) =>
+        seconds % 60 == 0 ? $"{seconds / 60}분" : $"{seconds}초";
 
     /// <summary>0–100 across the whole set of models being fetched, for the status-bar bar.</summary>
     [ObservableProperty]
@@ -170,7 +191,45 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private int _totalCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StartButtonCaption))]
     private int _pendingCount;
+
+    /// <summary>
+    /// 시작 button label. Spells out what a click will do: the checked rows that can actually run if
+    /// any are checked, otherwise the whole pending queue. Checking a 취소됨 / 완료 row and pressing
+    /// 시작 does nothing (those are finished states — 재시도 puts them back), so it must not be
+    /// counted here.
+    /// </summary>
+    public string StartButtonCaption
+    {
+        get
+        {
+            var runnableChecked = 0;
+            var anyChecked = false;
+            foreach (var row in Jobs)
+            {
+                if (!row.IsSelected)
+                {
+                    continue;
+                }
+
+                anyChecked = true;
+                if (row.IsRunnable)
+                {
+                    runnableChecked++;
+                }
+            }
+
+            if (anyChecked)
+            {
+                return string.Format(CultureInfo.CurrentCulture, "시작 · 선택 {0}", runnableChecked);
+            }
+
+            return PendingCount > 0
+                ? string.Format(CultureInfo.CurrentCulture, "시작 · 전체 {0}", PendingCount)
+                : Strings.StartButton;
+        }
+    }
 
     [ObservableProperty]
     private int _runningCount;
@@ -190,6 +249,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(CancelJobsCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(ChooseSubtitleSourceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenOutputFolderCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenSourceFolderCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RunThisJobCommand))]
     private JobRowViewModel? _selectedJob;
 
     public string QueueStateText => DisplayText.QueueStateName(QueueStatus);
@@ -649,36 +711,111 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     // Commands: queue control
     // -----------------------------------------------------------------------
 
+    /// <summary>시작: checked rows if any are checked, otherwise the whole runnable queue.</summary>
     [RelayCommand(CanExecute = nameof(CanStart))]
-    private async Task StartAsync()
-    {
-        var anyChecked = CheckedIds().Count > 0;
+    private Task StartAsync() => LaunchQueueAsync(testDurationSeconds: 0);
 
-        var selection = JobSelectionResolver.ResolveStart(Candidates());
-        if (!Accept(selection, JobAction.Start))
+    /// <summary>
+    /// "이 파일만 실행" from the row's right-click menu: runs exactly that job, regardless of what is
+    /// checked. Explicit, so it does not need the highlight-vs-checkbox precedence that 시작 avoids.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanStart))]
+    private Task RunThisJobAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
         {
-            return;
+            return Task.CompletedTask;
+        }
+
+        if (!row.IsRunnable)
+        {
+            _dialogs.ShowWarning(Strings.SelectionNotStartableMessage, Strings.StartButton);
+            return Task.CompletedTask;
+        }
+
+        return LaunchQueueAsync(testDurationSeconds: 0, explicitIds: [row.Id]);
+    }
+
+    /// <summary>
+    /// 테스트 실행: process only the first <see cref="TestLengthSeconds"/> seconds of each file, so a
+    /// setup can be checked end to end without committing to a long queue. The dropdown passes a new
+    /// length as a string; a bare click (no parameter) reuses the remembered one.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanStart))]
+    private Task StartTestAsync(string? seconds)
+    {
+        if (int.TryParse(seconds, NumberStyles.Integer, CultureInfo.InvariantCulture, out var picked)
+            && picked > 0
+            && picked != TestLengthSeconds)
+        {
+            TestLengthSeconds = picked;
+            _ = PersistTestLengthAsync(picked);
+        }
+
+        return LaunchQueueAsync(TestLengthSeconds);
+    }
+
+    private async Task LaunchQueueAsync(int testDurationSeconds, IReadOnlyList<string>? explicitIds = null)
+    {
+        IReadOnlyList<string>? restrict;
+
+        if (explicitIds is not null)
+        {
+            // "이 파일만 실행": the caller already checked eligibility.
+            restrict = explicitIds;
+        }
+        else
+        {
+            var anyChecked = CheckedIds().Count > 0;
+
+            var selection = JobSelectionResolver.ResolveStart(Candidates());
+            if (!Accept(selection, JobAction.Start))
+            {
+                return;
+            }
+
+            // A checked selection is a restriction; null means "the whole pending queue" and is kept
+            // unpinned so a job added between here and the pump still runs.
+            restrict = anyChecked ? selection.Ids : null;
         }
 
         _settings = _settingsService.Current;
-
-        if (_settings.TestDurationSeconds > 0)
-        {
-            System.Windows.MessageBox.Show(
-                $"테스트 모드가 활성화되어 있습니다.\n\n영상의 앞부분({_settings.TestDurationSeconds}초)만 자막 작업이 진행되고 완료 처리됩니다.\n영상 전체를 처리하시려면 [설정] ➔ [실행] 탭에서 '테스트용 앞부분만 처리' 값을 0으로 변경해 주세요.",
-                "테스트 실행 안내",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Information);
-        }
 
         if (await EnsureModelsAsync().ConfigureAwait(true) is not { } runSettings)
         {
             return;
         }
 
-        // Only pass a restriction when the user actually checked rows; null means "everything pending".
-        await _queue.StartAsync(runSettings, anyChecked ? selection.Ids : null).ConfigureAwait(true);
-        StatusMessage = Strings.StartedMessage;
+        // A copy, because EnsureModelsAsync can hand back the live settings object (fake AI, a failed
+        // status probe). 시작 pins the length to zero regardless of what is stored, so a leftover test
+        // length is structurally unable to shorten a real run.
+        runSettings = runSettings.Clone();
+        runSettings.TestDurationSeconds = testDurationSeconds;
+
+        await _queue.StartAsync(runSettings, restrict).ConfigureAwait(true);
+
+        StatusMessage = testDurationSeconds > 0
+            ? string.Format(CultureInfo.CurrentCulture, "테스트 실행을 시작했습니다 (앞 {0}).", DescribeTestLength(testDurationSeconds))
+            : Strings.StartedMessage;
+    }
+
+    /// <summary>
+    /// Remembers the test length across restarts. Best effort: it lands in the same settings row the
+    /// scan options use, so a failure here is no worse than the length reverting to its default.
+    /// </summary>
+    private async Task PersistTestLengthAsync(int seconds)
+    {
+        try
+        {
+            var settings = _settingsService.Current.Clone();
+            settings.TestDurationSeconds = seconds;
+            await _settingsService.SaveAsync(settings, CancellationToken.None).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "테스트 실행 길이를 저장하지 못했습니다.");
+        }
     }
 
     /// <summary>
@@ -1281,43 +1418,276 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
     });
 
-    [RelayCommand]
+    // Opening a folder never needs a selection: with a row highlighted these reveal that one file,
+    // otherwise they open the folder the queue is working with. They are only disabled when there is
+    // genuinely no folder to open — a first run before any scan.
+
+    private string ConfiguredOutputDirectory => _settings.OutputDirectory?.Trim() ?? string.Empty;
+
+    private bool CanOpenSourceFolder =>
+        PrimaryRow() is not null || !string.IsNullOrWhiteSpace(TargetFolder);
+
+    private bool CanOpenOutputFolder =>
+        PrimaryRow() is not null
+        || !string.IsNullOrWhiteSpace(ConfiguredOutputDirectory)
+        || !string.IsNullOrWhiteSpace(TargetFolder);
+
+    [RelayCommand(CanExecute = nameof(CanOpenOutputFolder))]
     private void OpenOutputFolder()
     {
         var row = PrimaryRow();
-        if (row is null)
+
+        if (row is not null && !string.IsNullOrWhiteSpace(row.OutputPath))
         {
-            StatusMessage = Strings.NoSelectionMessage;
-            _dialogs.ShowInformation(Strings.NoSelectionMessage);
+            if (!_shell.RevealOrOpenParent(row.OutputPath))
+            {
+                StatusMessage = Strings.OutputNotReadyMessage;
+            }
+
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(row.OutputPath))
-        {
-            StatusMessage = Strings.OutputNotReadyMessage;
-            return;
-        }
+        // No finished subtitle to point at: open where subtitles go — the configured output folder,
+        // or the source folder when they are written next to the video.
+        var folder = !string.IsNullOrWhiteSpace(ConfiguredOutputDirectory) ? ConfiguredOutputDirectory : TargetFolder;
 
-        if (!_shell.RevealOrOpenParent(row.OutputPath))
+        if (!_shell.OpenFolder(folder))
         {
             StatusMessage = Strings.OutputNotReadyMessage;
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanOpenSourceFolder))]
     private void OpenSourceFolder()
     {
         var row = PrimaryRow();
-        if (row is null)
+
+        if (row is not null)
         {
-            StatusMessage = Strings.NoSelectionMessage;
-            _dialogs.ShowInformation(Strings.NoSelectionMessage);
+            if (!_shell.RevealOrOpenParent(row.FullPath))
+            {
+                StatusMessage = Strings.SourceNotFoundMessage;
+            }
+
             return;
         }
 
-        if (!_shell.RevealOrOpenParent(row.FullPath))
+        if (!_shell.OpenFolder(TargetFolder))
         {
             StatusMessage = Strings.SourceNotFoundMessage;
+        }
+    }
+
+    /// <summary>Plays a video in the OS default player. Bound to a double-click on the 파일명 cell.</summary>
+    [RelayCommand]
+    private void OpenVideoFile(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (!_shell.OpenFile(row.FullPath))
+        {
+            StatusMessage = Strings.SourceNotFoundMessage;
+        }
+    }
+
+    /// <summary>Windows 속성 대화상자.</summary>
+    [RelayCommand]
+    private void ShowFileProperties(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is not null && !_fileActions.ShowProperties(row.FullPath))
+        {
+            StatusMessage = Strings.SourceNotFoundMessage;
+        }
+    }
+
+    /// <summary>이 작업의 메모를 편집한다. 실행 중이어도 허용 — 파이프라인과 무관한 메타데이터다.</summary>
+    [RelayCommand]
+    private async Task EditNoteAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        var text = _dialogs.PromptText(
+            Strings.NoteDialogTitle,
+            string.Format(CultureInfo.CurrentCulture, Strings.NoteDialogMessageFormat, row.FileName),
+            row.Note,
+            multiline: true);
+
+        if (text is null)
+        {
+            return;
+        }
+
+        await _queue.SetNoteAsync(row.Id, text).ConfigureAwait(true);
+        StatusMessage = string.IsNullOrWhiteSpace(text) ? Strings.NoteClearedMessage : Strings.NoteSavedMessage;
+    }
+
+    /// <summary>
+    /// 파일 이름 바꾸기: renames the source video (and, if the user agrees, the subtitle files sitting
+    /// next to it), then points the job at the new path. Refused while the job is processing.
+    /// </summary>
+    [RelayCommand]
+    private async Task RenameFileAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (JobStateMachine.IsActive(row.Status))
+        {
+            _dialogs.ShowWarning(Strings.FileActionJobRunning, Strings.RenameDialogTitle);
+            return;
+        }
+
+        var currentName = Path.GetFileName(row.FullPath);
+
+        var newName = _dialogs.PromptText(
+            Strings.RenameDialogTitle,
+            string.Format(CultureInfo.CurrentCulture, Strings.RenameDialogMessageFormat, currentName),
+            currentName);
+
+        if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName.Trim(), currentName, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var sidecars = FindSidecarSubtitles(row.FullPath);
+        var renameSidecars = sidecars.Count > 0 && _dialogs.Confirm(
+            string.Format(CultureInfo.CurrentCulture, Strings.RenameSidecarConfirmFormat, sidecars.Count),
+            Strings.RenameDialogTitle);
+
+        var oldBase = Path.GetFileNameWithoutExtension(row.FullPath);
+        var newBase = Path.GetFileNameWithoutExtension(newName.Trim());
+
+        var newVideoPath = _fileActions.Rename(row.FullPath, newName.Trim());
+        if (newVideoPath is null)
+        {
+            StatusMessage = Strings.RenameFailedMessage;
+            _dialogs.ShowWarning(Strings.RenameFailedMessage, Strings.RenameDialogTitle);
+            return;
+        }
+
+        var renamedSidecars = 0;
+        if (renameSidecars)
+        {
+            foreach (var sidecar in sidecars)
+            {
+                var tail = Path.GetFileName(sidecar)[oldBase.Length..]; // ".ko.srt", ".srt", ...
+                if (_fileActions.Rename(sidecar, newBase + tail) is not null)
+                {
+                    renamedSidecars++;
+                }
+            }
+        }
+
+        var newOutputPath = OutputPathResolver.BuildDefaultPath(
+            newVideoPath, _settings.OutputSuffix, _settings.OutputDirectory);
+
+        await _queue.UpdateSourcePathAsync(row.Id, newVideoPath, newOutputPath).ConfigureAwait(true);
+
+        StatusMessage = renameSidecars
+            ? string.Format(CultureInfo.CurrentCulture, Strings.RenameDoneWithSidecarsFormat, renamedSidecars)
+            : Strings.RenameDoneMessage;
+    }
+
+    /// <summary>
+    /// 삭제: sends the source video to the Recycle Bin (optionally its subtitles too) and drops the
+    /// job from the queue. Confirmed first; refused while the job is processing.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteFileAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (JobStateMachine.IsActive(row.Status))
+        {
+            _dialogs.ShowWarning(Strings.FileActionJobRunning, Strings.DeleteDialogTitle);
+            return;
+        }
+
+        if (!_dialogs.Confirm(
+                string.Format(CultureInfo.CurrentCulture, Strings.DeleteConfirmFormat, Path.GetFileName(row.FullPath)),
+                Strings.DeleteDialogTitle))
+        {
+            return;
+        }
+
+        var toDelete = new List<string> { row.FullPath };
+
+        var sidecars = FindSidecarSubtitles(row.FullPath);
+        if (sidecars.Count > 0 && _dialogs.Confirm(
+                string.Format(CultureInfo.CurrentCulture, Strings.DeleteSidecarConfirmFormat, sidecars.Count),
+                Strings.DeleteDialogTitle))
+        {
+            toDelete.AddRange(sidecars);
+        }
+
+        if (!_fileActions.RecycleFiles(toDelete))
+        {
+            StatusMessage = Strings.DeleteFailedMessage;
+            _dialogs.ShowWarning(Strings.DeleteFailedMessage, Strings.DeleteDialogTitle);
+            return;
+        }
+
+        var result = await _queue.RemoveAsync([row.Id]).ConfigureAwait(true);
+        RemoveRows(result.Removed);
+
+        StatusMessage = string.Format(CultureInfo.CurrentCulture, Strings.DeleteDoneFormat, toDelete.Count);
+    }
+
+    /// <summary>
+    /// Subtitle files sitting next to a video and sharing its base name — <c>movie.srt</c>,
+    /// <c>movie.ko.srt</c>, <c>movie.en.ass</c>. Used by 이름 바꾸기 and 삭제 to offer to carry them along.
+    /// </summary>
+    private static IReadOnlyList<string> FindSidecarSubtitles(string videoPath)
+    {
+        var directory = Path.GetDirectoryName(videoPath);
+        var baseName = Path.GetFileNameWithoutExtension(videoPath);
+
+        if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(baseName))
+        {
+            return [];
+        }
+
+        string[] extensions = [".srt", ".ass", ".ssa", ".vtt", ".sub", ".smi", ".sami"];
+
+        try
+        {
+            var found = new List<string>();
+
+            foreach (var path in Directory.EnumerateFiles(directory, baseName + ".*"))
+            {
+                var name = Path.GetFileName(path);
+
+                // "movie.ko.srt" starts with "movie." and ends in a subtitle extension; "movie2.srt"
+                // does not start with "movie." so it is correctly left out.
+                if (name.Length > baseName.Length
+                    && name[baseName.Length] == '.'
+                    && extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
+                {
+                    found.Add(path);
+                }
+            }
+
+            return found;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return [];
         }
     }
 
@@ -1521,6 +1891,16 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         IncludeSubfolders = settings.IncludeSubfolders;
         IncludeHiddenFolders = settings.IncludeHiddenFolders;
+
+        // A value the user set before this ran under the old "테스트 모드" setting carries over as the
+        // remembered length; the old "0 = whole video" state just leaves the default in place.
+        if (settings.TestDurationSeconds > 0)
+        {
+            TestLengthSeconds = settings.TestDurationSeconds;
+        }
+
+        // 결과 폴더 열기 can become available the moment an output directory is configured.
+        OpenOutputFolderCommand.NotifyCanExecuteChanged();
     }
 
     private static string FormatGpuSummary(HardwareProfile profile)
@@ -1683,6 +2063,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         CancelJobsCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ChooseSubtitleSourceCommand.NotifyCanExecuteChanged();
+
+        // 결과/원본 폴더 열기 fall back to the first checked row when nothing is highlighted.
+        OpenOutputFolderCommand.NotifyCanExecuteChanged();
+        OpenSourceFolderCommand.NotifyCanExecuteChanged();
+
+        // The 시작 label counts checked rows, so it moves with the same events the commands do.
+        OnPropertyChanged(nameof(StartButtonCaption));
     }
 
     /// <summary>

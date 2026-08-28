@@ -60,6 +60,20 @@ public sealed class DialogService : IDialogService
         return result == MessageBoxResult.Yes;
     }
 
+    public string? PromptText(string title, string message, string? initialValue = null, bool multiline = false)
+    {
+        var window = new Views.TextPromptWindow(
+            string.IsNullOrWhiteSpace(title) ? Strings.DialogTitleInfo : title,
+            message,
+            initialValue,
+            multiline)
+        {
+            Owner = Owner()
+        };
+
+        return window.ShowDialog() == true ? window.Value : null;
+    }
+
     public SubtitleSourceOption? PickSubtitleSource(
         string title,
         string message,

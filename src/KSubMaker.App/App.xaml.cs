@@ -221,6 +221,7 @@ public partial class App : System.Windows.Application
         // ---- shell services -------------------------------------------------
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IShellService, ShellService>();
+        builder.Services.AddSingleton<IFileActionService, FileActionService>();
         builder.Services.AddSingleton<IWindowService, WindowService>();
 
         // ---- view models ----------------------------------------------------

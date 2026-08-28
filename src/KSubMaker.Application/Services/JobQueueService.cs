@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO;
 using KSubMaker.Application.Abstractions;
 using KSubMaker.Domain.Errors;
 using KSubMaker.Domain.Hardware;
@@ -331,6 +332,67 @@ public sealed class JobQueueService : IAsyncDisposable
             jobId, job.SourceOverride, job.SelectedAudioTrackIndex, job.SelectedSubtitleTrackIndex,
             job.SelectedSubtitleLanguage ?? "-");
 
+        return true;
+    }
+
+    /// <summary>
+    /// Stores the free-text 메모 for a job. Metadata only — allowed at any time, including while the
+    /// job runs, because it has no effect on the pipeline.
+    /// </summary>
+    public async Task SetNoteAsync(string jobId, string? note, CancellationToken cancellationToken = default)
+    {
+        if (!_jobs.TryGetValue(jobId, out var job))
+        {
+            return;
+        }
+
+        var trimmed = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        if (string.Equals(job.Note, trimmed, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        job.Note = trimmed;
+        job.UpdatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
+
+        await _repository.UpdateAsync(job, cancellationToken).ConfigureAwait(false);
+        RaiseJobChanged(job);
+    }
+
+    /// <summary>
+    /// Points a job at a renamed source file. The caller has already moved the file (and any sidecar
+    /// subtitles) on disk; this only updates the queue's bookkeeping so the grid and later scans stay
+    /// consistent. Refused while the job is running — the worker holds a command built from the old
+    /// path. Returns false when the job is gone or active.
+    /// </summary>
+    public async Task<bool> UpdateSourcePathAsync(
+        string jobId,
+        string newVideoPath,
+        string? newOutputPath,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(newVideoPath);
+
+        if (!_jobs.TryGetValue(jobId, out var job))
+        {
+            return false;
+        }
+
+        if (JobStateMachine.IsActive(job.Status))
+        {
+            _logger.LogWarning("실행 중인 작업의 파일 경로는 바꿀 수 없습니다: {JobId}", jobId);
+            return false;
+        }
+
+        job.VideoPath = newVideoPath;
+        job.FileName = Path.GetFileName(newVideoPath);
+        job.OutputPath = string.IsNullOrWhiteSpace(newOutputPath) ? job.OutputPath : newOutputPath;
+        job.UpdatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
+
+        await _repository.UpdateAsync(job, cancellationToken).ConfigureAwait(false);
+        RaiseJobChanged(job);
+
+        _logger.LogInformation("작업의 원본 파일 경로를 변경했습니다: {JobId} → {Path}", jobId, newVideoPath);
         return true;
     }
 

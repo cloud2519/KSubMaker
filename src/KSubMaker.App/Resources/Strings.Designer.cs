@@ -127,8 +127,11 @@ public static partial class Strings
     /// <summary>이미 한국어 자막이 있으면 건너뛰기</summary>
     public static string SkipIfKoreanSubtitleLabel => Get(nameof(SkipIfKoreanSubtitleLabel));
 
-    /// <summary>파일 검색</summary>
+    /// <summary>목록 새로고침</summary>
     public static string ScanButton => Get(nameof(ScanButton));
+
+    /// <summary>대상 폴더를 다시 검색해 새 영상은 목록에 넣고 기존 항목의 상태를 갱신합니다.</summary>
+    public static string ScanHint => Get(nameof(ScanHint));
 
     /// <summary>검색 중단</summary>
     public static string ScanCancelButton => Get(nameof(ScanCancelButton));
@@ -142,16 +145,16 @@ public static partial class Strings
     /// <summary>중단</summary>
     public static string StopButton => Get(nameof(StopButton));
 
-    /// <summary>재시도</summary>
+    /// <summary>다시 넣기</summary>
     public static string RetryButton => Get(nameof(RetryButton));
 
-    /// <summary>취소</summary>
+    /// <summary>건너뛰기</summary>
     public static string CancelJobButton => Get(nameof(CancelJobButton));
 
-    /// <summary>완료 항목 제거</summary>
+    /// <summary>완료 항목 비우기</summary>
     public static string RemoveCompletedButton => Get(nameof(RemoveCompletedButton));
 
-    /// <summary>선택 항목 제거</summary>
+    /// <summary>목록에서 빼기</summary>
     public static string RemoveSelectedButton => Get(nameof(RemoveSelectedButton));
 
     /// <summary>결과 폴더 열기</summary>
@@ -184,13 +187,16 @@ public static partial class Strings
     /// <summary>길이</summary>
     public static string ColumnDuration => Get(nameof(ColumnDuration));
 
+    /// <summary>용량</summary>
+    public static string ColumnFileSize => Get(nameof(ColumnFileSize));
+
     /// <summary>상태</summary>
     public static string ColumnStatus => Get(nameof(ColumnStatus));
 
     /// <summary>현재 단계</summary>
     public static string ColumnStage => Get(nameof(ColumnStage));
 
-    /// <summary>진행률</summary>
+    /// <summary>전체 진행률</summary>
     public static string ColumnProgress => Get(nameof(ColumnProgress));
 
     /// <summary>단계 진행률</summary>
@@ -213,6 +219,75 @@ public static partial class Strings
 
     /// <summary>오류</summary>
     public static string ColumnError => Get(nameof(ColumnError));
+
+    /// <summary>메모</summary>
+    public static string ColumnNote => Get(nameof(ColumnNote));
+
+    /// <summary>이 파일만 실행</summary>
+    public static string RunThisMenuItem => Get(nameof(RunThisMenuItem));
+
+    /// <summary>재생</summary>
+    public static string PlayMenuItem => Get(nameof(PlayMenuItem));
+
+    /// <summary>이름 바꾸기…</summary>
+    public static string RenameMenuItem => Get(nameof(RenameMenuItem));
+
+    /// <summary>삭제…</summary>
+    public static string DeleteMenuItem => Get(nameof(DeleteMenuItem));
+
+    /// <summary>속성</summary>
+    public static string PropertiesMenuItem => Get(nameof(PropertiesMenuItem));
+
+    /// <summary>메모…</summary>
+    public static string NoteMenuItem => Get(nameof(NoteMenuItem));
+
+    /// <summary>메모</summary>
+    public static string NoteDialogTitle => Get(nameof(NoteDialogTitle));
+
+    /// <summary>{0} 에 대한 메모</summary>
+    public static string NoteDialogMessageFormat => Get(nameof(NoteDialogMessageFormat));
+
+    /// <summary>메모를 저장했습니다.</summary>
+    public static string NoteSavedMessage => Get(nameof(NoteSavedMessage));
+
+    /// <summary>메모를 지웠습니다.</summary>
+    public static string NoteClearedMessage => Get(nameof(NoteClearedMessage));
+
+    /// <summary>처리 중인 작업의 파일은 이름을 바꾸거나 삭제할 수 없습니다.</summary>
+    public static string FileActionJobRunning => Get(nameof(FileActionJobRunning));
+
+    /// <summary>이름 바꾸기</summary>
+    public static string RenameDialogTitle => Get(nameof(RenameDialogTitle));
+
+    /// <summary>새 파일 이름을 입력하세요 (현재: {0})</summary>
+    public static string RenameDialogMessageFormat => Get(nameof(RenameDialogMessageFormat));
+
+    /// <summary>옆에 있는 자막 파일 {0}개도 같은 이름으로 바꿀까요?</summary>
+    public static string RenameSidecarConfirmFormat => Get(nameof(RenameSidecarConfirmFormat));
+
+    /// <summary>파일 이름을 바꾸지 못했습니다. 이름이 잘못됐거나 같은 이름의 항목이 이미 있습니다.</summary>
+    public static string RenameFailedMessage => Get(nameof(RenameFailedMessage));
+
+    /// <summary>파일 이름을 바꿨습니다.</summary>
+    public static string RenameDoneMessage => Get(nameof(RenameDoneMessage));
+
+    /// <summary>파일과 자막 {0}개의 이름을 바꿨습니다.</summary>
+    public static string RenameDoneWithSidecarsFormat => Get(nameof(RenameDoneWithSidecarsFormat));
+
+    /// <summary>삭제</summary>
+    public static string DeleteDialogTitle => Get(nameof(DeleteDialogTitle));
+
+    /// <summary>{0} 을(를) 휴지통으로 보낼까요?</summary>
+    public static string DeleteConfirmFormat => Get(nameof(DeleteConfirmFormat));
+
+    /// <summary>옆에 있는 자막 파일 {0}개도 함께 휴지통으로 보낼까요?</summary>
+    public static string DeleteSidecarConfirmFormat => Get(nameof(DeleteSidecarConfirmFormat));
+
+    /// <summary>휴지통으로 보내지 못했습니다.</summary>
+    public static string DeleteFailedMessage => Get(nameof(DeleteFailedMessage));
+
+    /// <summary>{0}개 항목을 휴지통으로 보냈습니다.</summary>
+    public static string DeleteDoneFormat => Get(nameof(DeleteDoneFormat));
 
     /// <summary>경로</summary>
     public static string JobTooltipPathLabel => Get(nameof(JobTooltipPathLabel));
@@ -280,7 +355,7 @@ public static partial class Strings
     /// <summary>실패</summary>
     public static string JobStatusFailed => Get(nameof(JobStatusFailed));
 
-    /// <summary>취소됨</summary>
+    /// <summary>건너뜀</summary>
     public static string JobStatusCancelled => Get(nameof(JobStatusCancelled));
 
     /// <summary>일시정지</summary>
@@ -337,13 +412,13 @@ public static partial class Strings
     /// <summary>작업 추가 결과</summary>
     public static string EnqueueSummaryTitle => Get(nameof(EnqueueSummaryTitle));
 
-    /// <summary>새로 추가 {0}건 · 다시 처리 {1}건 · 이미 완료 {2}건 · 변경 없음 {3}건 · 건너뜀 {4}건</summary>
+    /// <summary>새로 추가 {0}건 · 다시 넣음 {1}건 · 이미 완료 {2}건 · 변경 없음 {3}건 · 건너뜀 {4}건</summary>
     public static string EnqueueSummaryFormat => Get(nameof(EnqueueSummaryFormat));
 
     /// <summary>작업이 실행 중일 때는 파일을 검색할 수 없습니다.</summary>
     public static string QueueBusyCannotScan => Get(nameof(QueueBusyCannotScan));
 
-    /// <summary>시작할 수 있는 작업이 없습니다. 완료·실패·취소된 작업은 [재시도]를 눌러 큐에 다시 넣은 뒤 시작하세요.</summary>
+    /// <summary>시작할 수 있는 작업이 없습니다. 완료·실패·건너뛴 작업은 [다시 넣기]를 눌러 큐에 다시 넣은 뒤 시작하세요.</summary>
     public static string NoRunnableJobs => Get(nameof(NoRunnableJobs));
 
     /// <summary>작업을 시작했습니다.</summary>
@@ -361,13 +436,13 @@ public static partial class Strings
     /// <summary>먼저 목록에서 항목을 선택하세요.</summary>
     public static string NoSelectionMessage => Get(nameof(NoSelectionMessage));
 
-    /// <summary>선택한 작업은 취소할 수 있는 상태가 아닙니다. 이미 완료·실패·취소된 작업은 취소할 수 없습니다.</summary>
+    /// <summary>선택한 작업은 건너뛸 수 있는 상태가 아닙니다. 이미 완료·실패·건너뛴 작업은 건너뛸 수 없습니다.</summary>
     public static string SelectionNotCancellableMessage => Get(nameof(SelectionNotCancellableMessage));
 
-    /// <summary>선택한 작업은 다시 시도할 수 있는 상태가 아닙니다. 완료·실패·취소·일시정지된 작업만 다시 시도할 수 있습니다.</summary>
+    /// <summary>선택한 작업은 다시 넣을 수 있는 상태가 아닙니다. 완료·실패·건너뜀·일시정지된 작업만 큐에 다시 넣을 수 있습니다.</summary>
     public static string SelectionNotRetryableMessage => Get(nameof(SelectionNotRetryableMessage));
 
-    /// <summary>선택한 작업은 시작할 수 있는 상태가 아닙니다. 대기·일시정지된 작업만 시작할 수 있고, 완료·실패·취소된 작업은 [재시도]를 눌러 큐에 다시 넣은 뒤 시작하세요.</summary>
+    /// <summary>선택한 작업은 시작할 수 있는 상태가 아닙니다. 대기·일시정지된 작업만 시작할 수 있고, 완료·실패·건너뛴 작업은 [다시 넣기]를 눌러 큐에 다시 넣은 뒤 시작하세요.</summary>
     public static string SelectionNotStartableMessage => Get(nameof(SelectionNotStartableMessage));
 
     /// <summary>선택한 작업은 지금 이 동작을 수행할 수 있는 상태가 아닙니다.</summary>
@@ -376,7 +451,7 @@ public static partial class Strings
     /// <summary>{0}건을 다시 대기열에 넣었습니다.</summary>
     public static string RetryDoneFormat => Get(nameof(RetryDoneFormat));
 
-    /// <summary>{0}건을 취소했습니다.</summary>
+    /// <summary>{0}건을 건너뜁니다.</summary>
     public static string CancelDoneFormat => Get(nameof(CancelDoneFormat));
 
     /// <summary>완료된 항목을 목록에서 제거할까요? 이미 만들어진 자막 파일은 삭제되지 않습니다.</summary>
@@ -468,6 +543,12 @@ public static partial class Strings
 
     /// <summary>권장 설정</summary>
     public static string RecommendationLabel => Get(nameof(RecommendationLabel));
+
+    /// <summary>정보</summary>
+    public static string AboutGroup => Get(nameof(AboutGroup));
+
+    /// <summary>소스 저장소</summary>
+    public static string AboutRepositoryLabel => Get(nameof(AboutRepositoryLabel));
 
     /// <summary>연산 정밀도 (compute type)</summary>
     public static string ComputeTypeLabel => Get(nameof(ComputeTypeLabel));
@@ -646,7 +727,7 @@ public static partial class Strings
     /// <summary>선택할 수 있는 오디오·자막 트랙이 없습니다.</summary>
     public static string SubtitleSourceNoTracks => Get(nameof(SubtitleSourceNoTracks));
 
-    /// <summary>실행 중인 작업의 자막 원본은 바꿀 수 없습니다. 작업을 취소하거나 끝난 뒤에 다시 선택하세요.</summary>
+    /// <summary>실행 중인 작업의 자막 원본은 바꿀 수 없습니다. 작업을 건너뛰거나 끝난 뒤에 다시 선택하세요.</summary>
     public static string SubtitleSourceJobRunning => Get(nameof(SubtitleSourceJobRunning));
 
     /// <summary>자막 원본을 변경했습니다: {0}</summary>
@@ -682,6 +763,9 @@ public static partial class Strings
     /// <summary>결과 파일 충돌 처리</summary>
     public static string OutputConflictGroup => Get(nameof(OutputConflictGroup));
 
+    /// <summary>같은 이름의 자막 파일이 이미 있을 때</summary>
+    public static string OutputConflictHint => Get(nameof(OutputConflictHint));
+
     /// <summary>건너뛰기</summary>
     public static string OutputConflictSkip => Get(nameof(OutputConflictSkip));
 
@@ -691,10 +775,13 @@ public static partial class Strings
     /// <summary>번호를 붙여 새 파일 만들기</summary>
     public static string OutputConflictNumbered => Get(nameof(OutputConflictNumbered));
 
-    /// <summary>결과 파일 접미사</summary>
+    /// <summary>결과 파일 이름</summary>
+    public static string OutputNameGroup => Get(nameof(OutputNameGroup));
+
+    /// <summary>언어 태그</summary>
     public static string OutputSuffixLabel => Get(nameof(OutputSuffixLabel));
 
-    /// <summary>예: ko → 영상이름.ko.srt</summary>
+    /// <summary>ko → 영상이름.ko.srt · 비우면 영상이름.srt (Plex·Jellyfin은 언어 태그가 있어야 자동으로 불러옵니다)</summary>
     public static string OutputSuffixHint => Get(nameof(OutputSuffixHint));
 
     /// <summary>자막 서식</summary>
@@ -759,6 +846,15 @@ public static partial class Strings
 
     /// <summary>폴더</summary>
     public static string PathsGroup => Get(nameof(PathsGroup));
+
+    /// <summary>결과 자막 위치</summary>
+    public static string OutputDirectoryGroup => Get(nameof(OutputDirectoryGroup));
+
+    /// <summary>결과 폴더</summary>
+    public static string OutputDirectoryLabel => Get(nameof(OutputDirectoryLabel));
+
+    /// <summary>비워 두면 원본 영상과 같은 폴더에 저장합니다. 지정하면 원본 폴더 구조를 그 아래에 그대로 만들어 저장합니다. 위치를 바꾸면 원본 옆에 이미 만들어 둔 자막을 새 위치에 다시 만들 수 있습니다.</summary>
+    public static string OutputDirectoryHint => Get(nameof(OutputDirectoryHint));
 
     /// <summary>캐시 폴더</summary>
     public static string CacheDirectoryLabel => Get(nameof(CacheDirectoryLabel));
@@ -843,6 +939,9 @@ public static partial class Strings
 
     /// <summary>설정을 불러오지 못했습니다. ({0})</summary>
     public static string SettingsLoadFailedFormat => Get(nameof(SettingsLoadFailedFormat));
+
+    /// <summary>결과 폴더 선택</summary>
+    public static string SelectOutputFolderTitle => Get(nameof(SelectOutputFolderTitle));
 
     /// <summary>캐시 폴더 선택</summary>
     public static string SelectCacheFolderTitle => Get(nameof(SelectCacheFolderTitle));

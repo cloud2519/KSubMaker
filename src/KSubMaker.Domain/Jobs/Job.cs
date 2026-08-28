@@ -104,6 +104,9 @@ public sealed class Job
     public string? ErrorMessage { get; set; }
     public int RetryCount { get; set; }
 
+    /// <summary>Free-text note the user attached from the grid. Never touched by the pipeline.</summary>
+    public string? Note { get; set; }
+
     // ---- bookkeeping -----------------------------------------------------
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
