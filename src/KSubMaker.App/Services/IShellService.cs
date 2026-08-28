@@ -9,6 +9,9 @@ public interface IShellService
     /// <summary>Opens <paramref name="folderPath"/> in a new Explorer window.</summary>
     bool OpenFolder(string? folderPath);
 
+    /// <summary>Opens <paramref name="filePath"/> with the OS default application (plays a video).</summary>
+    bool OpenFile(string? filePath);
+
     /// <summary>Opens the containing folder with <paramref name="filePath"/> selected.</summary>
     bool RevealFile(string? filePath);
 

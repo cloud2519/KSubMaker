@@ -184,6 +184,9 @@ public static partial class Strings
     /// <summary>길이</summary>
     public static string ColumnDuration => Get(nameof(ColumnDuration));
 
+    /// <summary>용량</summary>
+    public static string ColumnFileSize => Get(nameof(ColumnFileSize));
+
     /// <summary>상태</summary>
     public static string ColumnStatus => Get(nameof(ColumnStatus));
 
@@ -213,6 +216,75 @@ public static partial class Strings
 
     /// <summary>오류</summary>
     public static string ColumnError => Get(nameof(ColumnError));
+
+    /// <summary>메모</summary>
+    public static string ColumnNote => Get(nameof(ColumnNote));
+
+    /// <summary>이 파일만 실행</summary>
+    public static string RunThisMenuItem => Get(nameof(RunThisMenuItem));
+
+    /// <summary>재생</summary>
+    public static string PlayMenuItem => Get(nameof(PlayMenuItem));
+
+    /// <summary>이름 바꾸기…</summary>
+    public static string RenameMenuItem => Get(nameof(RenameMenuItem));
+
+    /// <summary>삭제…</summary>
+    public static string DeleteMenuItem => Get(nameof(DeleteMenuItem));
+
+    /// <summary>속성</summary>
+    public static string PropertiesMenuItem => Get(nameof(PropertiesMenuItem));
+
+    /// <summary>메모…</summary>
+    public static string NoteMenuItem => Get(nameof(NoteMenuItem));
+
+    /// <summary>메모</summary>
+    public static string NoteDialogTitle => Get(nameof(NoteDialogTitle));
+
+    /// <summary>{0} 에 대한 메모</summary>
+    public static string NoteDialogMessageFormat => Get(nameof(NoteDialogMessageFormat));
+
+    /// <summary>메모를 저장했습니다.</summary>
+    public static string NoteSavedMessage => Get(nameof(NoteSavedMessage));
+
+    /// <summary>메모를 지웠습니다.</summary>
+    public static string NoteClearedMessage => Get(nameof(NoteClearedMessage));
+
+    /// <summary>처리 중인 작업의 파일은 이름을 바꾸거나 삭제할 수 없습니다.</summary>
+    public static string FileActionJobRunning => Get(nameof(FileActionJobRunning));
+
+    /// <summary>이름 바꾸기</summary>
+    public static string RenameDialogTitle => Get(nameof(RenameDialogTitle));
+
+    /// <summary>새 파일 이름을 입력하세요 (현재: {0})</summary>
+    public static string RenameDialogMessageFormat => Get(nameof(RenameDialogMessageFormat));
+
+    /// <summary>옆에 있는 자막 파일 {0}개도 같은 이름으로 바꿀까요?</summary>
+    public static string RenameSidecarConfirmFormat => Get(nameof(RenameSidecarConfirmFormat));
+
+    /// <summary>파일 이름을 바꾸지 못했습니다. 이름이 잘못됐거나 같은 이름의 항목이 이미 있습니다.</summary>
+    public static string RenameFailedMessage => Get(nameof(RenameFailedMessage));
+
+    /// <summary>파일 이름을 바꿨습니다.</summary>
+    public static string RenameDoneMessage => Get(nameof(RenameDoneMessage));
+
+    /// <summary>파일과 자막 {0}개의 이름을 바꿨습니다.</summary>
+    public static string RenameDoneWithSidecarsFormat => Get(nameof(RenameDoneWithSidecarsFormat));
+
+    /// <summary>삭제</summary>
+    public static string DeleteDialogTitle => Get(nameof(DeleteDialogTitle));
+
+    /// <summary>{0} 을(를) 휴지통으로 보낼까요?</summary>
+    public static string DeleteConfirmFormat => Get(nameof(DeleteConfirmFormat));
+
+    /// <summary>옆에 있는 자막 파일 {0}개도 함께 휴지통으로 보낼까요?</summary>
+    public static string DeleteSidecarConfirmFormat => Get(nameof(DeleteSidecarConfirmFormat));
+
+    /// <summary>휴지통으로 보내지 못했습니다.</summary>
+    public static string DeleteFailedMessage => Get(nameof(DeleteFailedMessage));
+
+    /// <summary>{0}개 항목을 휴지통으로 보냈습니다.</summary>
+    public static string DeleteDoneFormat => Get(nameof(DeleteDoneFormat));
 
     /// <summary>경로</summary>
     public static string JobTooltipPathLabel => Get(nameof(JobTooltipPathLabel));

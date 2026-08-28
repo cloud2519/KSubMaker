@@ -40,6 +40,10 @@ public sealed partial class JobRowViewModel : ObservableObject
     [ObservableProperty]
     private double _durationSeconds;
 
+    /// <summary>Source file size in bytes; the 용량 column sorts on this and formats with BytesToString.</summary>
+    [ObservableProperty]
+    private long _fileSizeBytes;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private JobStatus _status;
@@ -72,6 +76,10 @@ public sealed partial class JobRowViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _errorMessage;
+
+    /// <summary>Free-text 메모 column; edited through the row's right-click menu.</summary>
+    [ObservableProperty]
+    private string? _note;
 
     // ---- 자막 원본 --------------------------------------------------------
 
@@ -134,6 +142,7 @@ public sealed partial class JobRowViewModel : ObservableObject
         FileName = job.FileName;
         FullPath = job.VideoPath;
         DurationSeconds = job.DurationSeconds;
+        FileSizeBytes = job.FileSize;
 
         Status = status;
         Stage = stage;
@@ -146,6 +155,7 @@ public sealed partial class JobRowViewModel : ObservableObject
         Model = job.WhisperModel ?? job.TranslationModel;
         OutputPath = job.OutputPath;
         ErrorMessage = job.ErrorMessage;
+        Note = job.Note;
 
         SourceOverride = job.SourceOverride;
         SelectedAudioTrackIndex = job.SelectedAudioTrackIndex;

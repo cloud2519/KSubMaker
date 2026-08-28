@@ -15,6 +15,7 @@ using KSubMaker.Domain.Jobs;
 using KSubMaker.Domain.Media;
 using KSubMaker.Domain.Models;
 using KSubMaker.Domain.Settings;
+using KSubMaker.Domain.Subtitles;
 using Microsoft.Extensions.Logging;
 
 namespace KSubMaker.App.ViewModels;
@@ -39,6 +40,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly IMediaProbe _mediaProbe;
     private readonly IDialogService _dialogs;
     private readonly IShellService _shell;
+    private readonly IFileActionService _fileActions;
     private readonly IWindowService _windows;
     private readonly ILogger<MainViewModel> _logger;
     private readonly Dispatcher _dispatcher;
@@ -84,6 +86,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         IMediaProbe mediaProbe,
         IDialogService dialogs,
         IShellService shell,
+        IFileActionService fileActions,
         IWindowService windows,
         ILogger<MainViewModel> logger)
     {
@@ -96,6 +99,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _mediaProbe = mediaProbe;
         _dialogs = dialogs;
         _shell = shell;
+        _fileActions = fileActions;
         _windows = windows;
         _logger = logger;
 
@@ -190,6 +194,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(CancelJobsCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(ChooseSubtitleSourceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RunThisJobCommand))]
     private JobRowViewModel? _selectedJob;
 
     public string QueueStateText => DisplayText.QueueStateName(QueueStatus);
@@ -678,6 +683,37 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         // Only pass a restriction when the user actually checked rows; null means "everything pending".
         await _queue.StartAsync(runSettings, anyChecked ? selection.Ids : null).ConfigureAwait(true);
+        StatusMessage = Strings.StartedMessage;
+    }
+
+    /// <summary>
+    /// "이 파일만 실행" from the row's right-click menu: runs exactly that job, regardless of what is
+    /// checked. Explicit, so it does not need the highlight-vs-checkbox precedence that 시작 avoids.
+    /// Running a single file is the context menu's job; 시작 is deliberately "run the queue".
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanStart))]
+    private async Task RunThisJobAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (!row.IsRunnable)
+        {
+            _dialogs.ShowWarning(Strings.SelectionNotStartableMessage, Strings.StartButton);
+            return;
+        }
+
+        _settings = _settingsService.Current;
+
+        if (await EnsureModelsAsync().ConfigureAwait(true) is not { } runSettings)
+        {
+            return;
+        }
+
+        await _queue.StartAsync(runSettings, [row.Id]).ConfigureAwait(true);
         StatusMessage = Strings.StartedMessage;
     }
 
@@ -1321,6 +1357,218 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Plays a video in the OS default player. Bound to a double-click on the 파일명 cell.</summary>
+    [RelayCommand]
+    private void OpenVideoFile(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (!_shell.OpenFile(row.FullPath))
+        {
+            StatusMessage = Strings.SourceNotFoundMessage;
+        }
+    }
+
+    /// <summary>Windows 속성 대화상자.</summary>
+    [RelayCommand]
+    private void ShowFileProperties(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is not null && !_fileActions.ShowProperties(row.FullPath))
+        {
+            StatusMessage = Strings.SourceNotFoundMessage;
+        }
+    }
+
+    /// <summary>이 작업의 메모를 편집한다. 실행 중이어도 허용 — 파이프라인과 무관한 메타데이터다.</summary>
+    [RelayCommand]
+    private async Task EditNoteAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        var text = _dialogs.PromptText(
+            Strings.NoteDialogTitle,
+            string.Format(CultureInfo.CurrentCulture, Strings.NoteDialogMessageFormat, row.FileName),
+            row.Note,
+            multiline: true);
+
+        if (text is null)
+        {
+            return;
+        }
+
+        await _queue.SetNoteAsync(row.Id, text).ConfigureAwait(true);
+        StatusMessage = string.IsNullOrWhiteSpace(text) ? Strings.NoteClearedMessage : Strings.NoteSavedMessage;
+    }
+
+    /// <summary>
+    /// 파일 이름 바꾸기: renames the source video (and, if the user agrees, the subtitle files sitting
+    /// next to it), then points the job at the new path. Refused while the job is processing.
+    /// </summary>
+    [RelayCommand]
+    private async Task RenameFileAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (JobStateMachine.IsActive(row.Status))
+        {
+            _dialogs.ShowWarning(Strings.FileActionJobRunning, Strings.RenameDialogTitle);
+            return;
+        }
+
+        var currentName = Path.GetFileName(row.FullPath);
+
+        var newName = _dialogs.PromptText(
+            Strings.RenameDialogTitle,
+            string.Format(CultureInfo.CurrentCulture, Strings.RenameDialogMessageFormat, currentName),
+            currentName);
+
+        if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName.Trim(), currentName, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var sidecars = FindSidecarSubtitles(row.FullPath);
+        var renameSidecars = sidecars.Count > 0 && _dialogs.Confirm(
+            string.Format(CultureInfo.CurrentCulture, Strings.RenameSidecarConfirmFormat, sidecars.Count),
+            Strings.RenameDialogTitle);
+
+        var oldBase = Path.GetFileNameWithoutExtension(row.FullPath);
+        var newBase = Path.GetFileNameWithoutExtension(newName.Trim());
+
+        var newVideoPath = _fileActions.Rename(row.FullPath, newName.Trim());
+        if (newVideoPath is null)
+        {
+            StatusMessage = Strings.RenameFailedMessage;
+            _dialogs.ShowWarning(Strings.RenameFailedMessage, Strings.RenameDialogTitle);
+            return;
+        }
+
+        var renamedSidecars = 0;
+        if (renameSidecars)
+        {
+            foreach (var sidecar in sidecars)
+            {
+                var tail = Path.GetFileName(sidecar)[oldBase.Length..]; // ".ko.srt", ".srt", ...
+                if (_fileActions.Rename(sidecar, newBase + tail) is not null)
+                {
+                    renamedSidecars++;
+                }
+            }
+        }
+
+        var newOutputPath = OutputPathResolver.BuildDefaultPath(newVideoPath, _settings.OutputSuffix);
+
+        await _queue.UpdateSourcePathAsync(row.Id, newVideoPath, newOutputPath).ConfigureAwait(true);
+
+        StatusMessage = renameSidecars
+            ? string.Format(CultureInfo.CurrentCulture, Strings.RenameDoneWithSidecarsFormat, renamedSidecars)
+            : Strings.RenameDoneMessage;
+    }
+
+    /// <summary>
+    /// 삭제: sends the source video to the Recycle Bin (optionally its subtitles too) and drops the
+    /// job from the queue. Confirmed first; refused while the job is processing.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteFileAsync(JobRowViewModel? row)
+    {
+        row ??= PrimaryRow();
+        if (row is null)
+        {
+            return;
+        }
+
+        if (JobStateMachine.IsActive(row.Status))
+        {
+            _dialogs.ShowWarning(Strings.FileActionJobRunning, Strings.DeleteDialogTitle);
+            return;
+        }
+
+        if (!_dialogs.Confirm(
+                string.Format(CultureInfo.CurrentCulture, Strings.DeleteConfirmFormat, Path.GetFileName(row.FullPath)),
+                Strings.DeleteDialogTitle))
+        {
+            return;
+        }
+
+        var toDelete = new List<string> { row.FullPath };
+
+        var sidecars = FindSidecarSubtitles(row.FullPath);
+        if (sidecars.Count > 0 && _dialogs.Confirm(
+                string.Format(CultureInfo.CurrentCulture, Strings.DeleteSidecarConfirmFormat, sidecars.Count),
+                Strings.DeleteDialogTitle))
+        {
+            toDelete.AddRange(sidecars);
+        }
+
+        if (!_fileActions.RecycleFiles(toDelete))
+        {
+            StatusMessage = Strings.DeleteFailedMessage;
+            _dialogs.ShowWarning(Strings.DeleteFailedMessage, Strings.DeleteDialogTitle);
+            return;
+        }
+
+        var result = await _queue.RemoveAsync([row.Id]).ConfigureAwait(true);
+        RemoveRows(result.Removed);
+
+        StatusMessage = string.Format(CultureInfo.CurrentCulture, Strings.DeleteDoneFormat, toDelete.Count);
+    }
+
+    /// <summary>
+    /// Subtitle files sitting next to a video and sharing its base name — <c>movie.srt</c>,
+    /// <c>movie.ko.srt</c>, <c>movie.en.ass</c>. Used by 이름 바꾸기 and 삭제 to offer to carry them along.
+    /// </summary>
+    private static IReadOnlyList<string> FindSidecarSubtitles(string videoPath)
+    {
+        var directory = Path.GetDirectoryName(videoPath);
+        var baseName = Path.GetFileNameWithoutExtension(videoPath);
+
+        if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(baseName))
+        {
+            return [];
+        }
+
+        string[] extensions = [".srt", ".ass", ".ssa", ".vtt", ".sub", ".smi", ".sami"];
+
+        try
+        {
+            var found = new List<string>();
+
+            foreach (var path in Directory.EnumerateFiles(directory, baseName + ".*"))
+            {
+                var name = Path.GetFileName(path);
+
+                // "movie.ko.srt" starts with "movie." and ends in a subtitle extension; "movie2.srt"
+                // does not start with "movie." so it is correctly left out.
+                if (name.Length > baseName.Length
+                    && name[baseName.Length] == '.'
+                    && extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
+                {
+                    found.Add(path);
+                }
+            }
+
+            return found;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return [];
+        }
+    }
+
     [RelayCommand]
     private void OpenLogWindow() => _windows.ShowLogs();
 
@@ -1683,6 +1931,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         CancelJobsCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ChooseSubtitleSourceCommand.NotifyCanExecuteChanged();
+        RunThisJobCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>

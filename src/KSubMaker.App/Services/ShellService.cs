@@ -36,6 +36,26 @@ public sealed class ShellService(ILogger<ShellService> logger) : IShellService
         });
     }
 
+    public bool OpenFile(string? filePath)
+    {
+        if (!TryNormalize(filePath, out var full))
+        {
+            return false;
+        }
+
+        if (!File.Exists(full))
+        {
+            _logger.LogDebug("열려는 파일이 존재하지 않습니다: {Path}", full);
+            return false;
+        }
+
+        return Launch(new ProcessStartInfo
+        {
+            FileName = full,
+            UseShellExecute = true
+        });
+    }
+
     public bool RevealFile(string? filePath)
     {
         if (!TryNormalize(filePath, out var full))
