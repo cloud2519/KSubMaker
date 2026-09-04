@@ -320,6 +320,22 @@ CPU 전용 환경에서는 언제나 방식 B이며, `HardwareRecommendation.Rat
 영영 건너뜁니다. 종료되지 않은 작업을 전부 세면 펌프가 어디까지 갔든 선두는 인덱스 0에
 머뭅니다.
 
+### 6.2 절전 방지와 큐 완료 후 동작 (ADR-031)
+
+`MainViewModel`이 `JobQueueService`의 상태 전이를 구독해 두 가지를 합니다.
+
+- **실행 중 절전 방지.** 큐가 `Running`이면 `ISystemPowerService.PreventSleep()`
+  (`SetThreadExecutionState`), `Idle`/`Paused`로 돌아오면 해제. 디스플레이는 그대로 꺼지게 둡니다.
+- **큐 완료 후 동작.** 큐가 **스스로** 다 처리되면(`QueueDrained` 이벤트) 설정된
+  절전 / 최대 절전 / 시스템 종료를 실행합니다. 30초 취소 카운트다운(`PostQueueActionWindow`)이
+  항상 앞에 옵니다.
+
+`QueueDrained`는 펌프가 실행 토큰 취소 없이, 일시정지 요청 없이 전략 메서드를 끝냈을 때만
+발생합니다 — 즉 직접 누른 중단·일시정지 뒤에는 오지 않습니다. 이벤트 인자에 이번 실행의
+완료·실패·취소 개수가 실립니다. "실행할지 말지"의 규칙은 `PostQueueActionPolicy`(Domain, 순수)에
+있고 App은 카운트다운 창과 P/Invoke만 담당합니다 — §8.1의 지문 판단이나 §6.11의 모델 판단과
+같은 이유로, App은 `net10.0-windows`라 Linux 테스트에서 못 닿습니다.
+
 ---
 
 ## 7. CUDA 메모리 부족 사다리

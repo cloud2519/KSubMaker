@@ -106,6 +106,14 @@ public static class DisplayText
         _ => Strings.StrategyAuto
     };
 
+    public static string PostQueueActionName(PostQueueAction action) => action switch
+    {
+        PostQueueAction.Sleep => Strings.PostQueueActionSleep,
+        PostQueueAction.Hibernate => Strings.PostQueueActionHibernate,
+        PostQueueAction.Shutdown => Strings.PostQueueActionShutdown,
+        _ => Strings.PostQueueActionNone
+    };
+
     public static string LogLevelName(string? level) => (level ?? string.Empty).Trim().ToLowerInvariant() switch
     {
         "verbose" or "trace" => Strings.LogLevelTrace,

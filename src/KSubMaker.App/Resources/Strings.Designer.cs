@@ -748,6 +748,51 @@ public static partial class Strings
     /// <summary>Fake AI 모드 (모델 없이 파이프라인만 점검)</summary>
     public static string FakeAiModeLabel => Get(nameof(FakeAiModeLabel));
 
+    /// <summary>큐 완료 후 동작</summary>
+    public static string PostQueueActionGroup => Get(nameof(PostQueueActionGroup));
+
+    /// <summary>모든 작업이 끝나면</summary>
+    public static string PostQueueActionLabel => Get(nameof(PostQueueActionLabel));
+
+    /// <summary>아무것도 하지 않음</summary>
+    public static string PostQueueActionNone => Get(nameof(PostQueueActionNone));
+
+    /// <summary>절전</summary>
+    public static string PostQueueActionSleep => Get(nameof(PostQueueActionSleep));
+
+    /// <summary>최대 절전</summary>
+    public static string PostQueueActionHibernate => Get(nameof(PostQueueActionHibernate));
+
+    /// <summary>시스템 종료</summary>
+    public static string PostQueueActionShutdown => Get(nameof(PostQueueActionShutdown));
+
+    /// <summary>실패하거나 취소된 작업이 없을 때만</summary>
+    public static string PostQueueActionOnlyWhenAllSucceededLabel => Get(nameof(PostQueueActionOnlyWhenAllSucceededLabel));
+
+    /// <summary>큐가 스스로 다 처리되어 멈췄을 때만 실행됩니다. …</summary>
+    public static string PostQueueActionHint => Get(nameof(PostQueueActionHint));
+
+    /// <summary>큐 작업 완료</summary>
+    public static string PostQueueActionWindowTitle => Get(nameof(PostQueueActionWindowTitle));
+
+    /// <summary>모든 작업이 끝났습니다. 곧 '{0}'을(를) 실행합니다.</summary>
+    public static string PostQueueActionHeadingFormat => Get(nameof(PostQueueActionHeadingFormat));
+
+    /// <summary>{0}초 후 자동 실행</summary>
+    public static string PostQueueActionCountdownFormat => Get(nameof(PostQueueActionCountdownFormat));
+
+    /// <summary>지금 실행</summary>
+    public static string PostQueueActionProceedButton => Get(nameof(PostQueueActionProceedButton));
+
+    /// <summary>취소</summary>
+    public static string PostQueueActionCancelButton => Get(nameof(PostQueueActionCancelButton));
+
+    /// <summary>큐 완료 후 동작을 취소했습니다.</summary>
+    public static string PostQueueActionCancelledMessage => Get(nameof(PostQueueActionCancelledMessage));
+
+    /// <summary>큐 완료 후 동작을 실행하지 못했습니다. 로그를 확인해 주세요.</summary>
+    public static string PostQueueActionFailedMessage => Get(nameof(PostQueueActionFailedMessage));
+
     /// <summary>검색 기본값</summary>
     public static string ScanDefaultsGroup => Get(nameof(ScanDefaultsGroup));
 

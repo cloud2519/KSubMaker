@@ -1,0 +1,45 @@
+<Window x:Class="KSubMaker.App.Views.PostQueueActionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:KSubMaker.App.Resources"
+        Title="{x:Static res:Strings.PostQueueActionWindowTitle}"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Topmost="True"
+        FontFamily="Malgun Gothic"
+        FontSize="13">
+
+    <!-- Cancel is IsCancel, so Esc and the window's close (X) both leave DialogResult false and the
+         pending action is called off. -->
+    <DockPanel LastChildFill="True" MinWidth="380">
+
+        <Border DockPanel.Dock="Bottom" Padding="14,12" Background="#F5F6F8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="ProceedButton"
+                        Content="{x:Static res:Strings.PostQueueActionProceedButton}"
+                        MinWidth="96"
+                        Padding="12,4"
+                        Margin="0,0,8,0"
+                        Click="OnProceedClick" />
+                <Button x:Name="CancelButton"
+                        Content="{x:Static res:Strings.PostQueueActionCancelButton}"
+                        MinWidth="96"
+                        Padding="12,4"
+                        IsCancel="True"
+                        Click="OnCancelClick" />
+            </StackPanel>
+        </Border>
+
+        <StackPanel Margin="18,18,18,14">
+            <TextBlock x:Name="HeadingText"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,8" />
+            <TextBlock x:Name="CountdownText"
+                       Foreground="#555" />
+        </StackPanel>
+
+    </DockPanel>
+</Window>

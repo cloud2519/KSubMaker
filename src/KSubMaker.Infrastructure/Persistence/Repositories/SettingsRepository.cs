@@ -122,6 +122,8 @@ public sealed class SettingsRepository(
         settings.MaxParallelCpuTasks = GetInt(rows, nameof(settings.MaxParallelCpuTasks), settings.MaxParallelCpuTasks);
         settings.AudioPrefetchDepth = GetInt(rows, nameof(settings.AudioPrefetchDepth), settings.AudioPrefetchDepth);
         settings.AutoRetryOnRecoverableError = GetBool(rows, nameof(settings.AutoRetryOnRecoverableError), settings.AutoRetryOnRecoverableError);
+        settings.PostQueueAction = GetEnum(rows, nameof(settings.PostQueueAction), settings.PostQueueAction);
+        settings.PostQueueActionOnlyWhenAllSucceeded = GetBool(rows, nameof(settings.PostQueueActionOnlyWhenAllSucceeded), settings.PostQueueActionOnlyWhenAllSucceeded);
 
         // ---- paths -----------------------------------------------------------
         settings.CacheDirectory = GetString(rows, nameof(settings.CacheDirectory), settings.CacheDirectory);
@@ -223,6 +225,8 @@ public sealed class SettingsRepository(
             [nameof(s.MaxParallelCpuTasks)] = Write(s.MaxParallelCpuTasks),
             [nameof(s.AudioPrefetchDepth)] = Write(s.AudioPrefetchDepth),
             [nameof(s.AutoRetryOnRecoverableError)] = Write(s.AutoRetryOnRecoverableError),
+            [nameof(s.PostQueueAction)] = s.PostQueueAction.ToString(),
+            [nameof(s.PostQueueActionOnlyWhenAllSucceeded)] = Write(s.PostQueueActionOnlyWhenAllSucceeded),
 
             [nameof(s.CacheDirectory)] = s.CacheDirectory,
             [nameof(s.ModelDirectory)] = s.ModelDirectory,

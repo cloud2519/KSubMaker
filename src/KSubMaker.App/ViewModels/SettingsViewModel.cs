@@ -97,6 +97,10 @@ public sealed partial class SettingsViewModel : ObservableObject
             .Select(s => new Option<ProcessingStrategy>(s, DisplayText.ProcessingStrategyName(s)))
             .ToArray();
 
+        PostQueueActions = Enum.GetValues<PostQueueAction>()
+            .Select(a => new Option<PostQueueAction>(a, DisplayText.PostQueueActionName(a)))
+            .ToArray();
+
         LogLevels = DisplayText.LogLevels
             .Select(l => new Option<string>(l, DisplayText.LogLevelName(l)))
             .ToArray();
@@ -121,6 +125,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     public IReadOnlyList<Option<ExistingSubtitleRule>> ExistingSubtitleRules { get; }
     public IReadOnlyList<Option<OutputConflictPolicy>> OutputConflictPolicies { get; }
     public IReadOnlyList<Option<ProcessingStrategy>> ProcessingStrategies { get; }
+    public IReadOnlyList<Option<PostQueueAction>> PostQueueActions { get; }
     public IReadOnlyList<Option<string>> LogLevels { get; }
 
     // -----------------------------------------------------------------------
@@ -264,6 +269,16 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _autoRetryOnRecoverableError = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PostQueueActionSelected))]
+    private PostQueueAction _selectedPostQueueAction = PostQueueAction.None;
+
+    [ObservableProperty]
+    private bool _postQueueActionOnlyWhenAllSucceeded = true;
+
+    /// <summary>Greys out the "실패가 없을 때만" toggle when no action is chosen.</summary>
+    public bool PostQueueActionSelected => SelectedPostQueueAction != PostQueueAction.None;
 
     [ObservableProperty]
     private bool _fakeAiMode;
@@ -656,6 +671,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         MaxParallelCpuTasks = settings.MaxParallelCpuTasks;
         AudioPrefetchDepth = settings.AudioPrefetchDepth;
         AutoRetryOnRecoverableError = settings.AutoRetryOnRecoverableError;
+        SelectedPostQueueAction = settings.PostQueueAction;
+        PostQueueActionOnlyWhenAllSucceeded = settings.PostQueueActionOnlyWhenAllSucceeded;
         FakeAiMode = settings.FakeAiMode;
         ReprocessCompleted = settings.ReprocessCompleted;
         RetryFailedOnly = settings.RetryFailedOnly;
@@ -720,6 +737,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         // lookahead stops buying throughput.
         settings.AudioPrefetchDepth = Math.Clamp(AudioPrefetchDepth, 0, 32);
         settings.AutoRetryOnRecoverableError = AutoRetryOnRecoverableError;
+        settings.PostQueueAction = SelectedPostQueueAction;
+        settings.PostQueueActionOnlyWhenAllSucceeded = PostQueueActionOnlyWhenAllSucceeded;
         settings.FakeAiMode = FakeAiMode;
         settings.ReprocessCompleted = ReprocessCompleted;
         settings.RetryFailedOnly = RetryFailedOnly;

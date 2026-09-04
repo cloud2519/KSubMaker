@@ -222,6 +222,7 @@ public partial class App : System.Windows.Application
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IShellService, ShellService>();
         builder.Services.AddSingleton<IWindowService, WindowService>();
+        builder.Services.AddSingleton<ISystemPowerService, SystemPowerService>();
 
         // ---- view models ----------------------------------------------------
         // MainViewModel is a singleton because it owns the live projection of the queue; the dialog
