@@ -80,6 +80,13 @@ public partial class MainWindow : Window
     /// <see cref="async void"/> is forced by the event signature; every path is inside the try/catch
     /// and the window closes even when teardown fails, so the user can never be trapped in a window
     /// that refuses to shut.
+    ///
+    /// <para>The window is hidden the instant the first close is requested. Teardown is asynchronous
+    /// — stopping the queue and shutting the Python worker down takes a second or three when a worker
+    /// is still alive from an earlier job — and WPF's <see cref="Window.Closing"/> is synchronous, so
+    /// without this the X appears dead until teardown finishes and a user reasonably concludes it
+    /// needs a second click. Hiding first makes the click land immediately; the process exits on its
+    /// own once cleanup is done.</para>
     /// </summary>
     protected override async void OnClosing(CancelEventArgs e)
     {
@@ -97,6 +104,10 @@ public partial class MainWindow : Window
         }
 
         _shutdownStarted = true;
+
+        // ShutdownMode is OnMainWindowClose, which keys on the window being *closed*, not hidden, so
+        // this does not start a second teardown behind our back.
+        Hide();
 
         try
         {
