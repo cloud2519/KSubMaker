@@ -215,6 +215,21 @@
                       </StackPanel>
                     </Border>
 
+                    <!-- 완료 후: 큐가 스스로 끝났을 때의 동작. 설정을 열지 않고 바로 고를 수 있게. -->
+                    <Border Style="{StaticResource GroupCard}">
+                      <StackPanel>
+                        <TextBlock Text="{x:Static res:Strings.PostQueueActionCommandLabel}" Style="{StaticResource GroupCaption}" />
+                        <ComboBox ItemsSource="{Binding PostQueueActions}"
+                                  DisplayMemberPath="Display"
+                                  SelectedValuePath="Value"
+                                  SelectedValue="{Binding SelectedPostQueueAction}"
+                                  MinWidth="128"
+                                  Height="32"
+                                  VerticalContentAlignment="Center"
+                                  ToolTip="{x:Static res:Strings.PostQueueActionHint}" />
+                      </StackPanel>
+                    </Border>
+
                     <!-- 목록 -->
                     <Border Style="{StaticResource GroupCard}">
                       <StackPanel>
