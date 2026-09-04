@@ -108,6 +108,19 @@ public sealed class AppSettings
 
     public bool AutoRetryOnRecoverableError { get; set; } = true;
 
+    /// <summary>
+    /// What to do to the machine once the queue drains on its own. Never acted on after a manual
+    /// 중단 or 일시정지, and always behind a cancellable countdown. See <see cref="PostQueueAction"/>.
+    /// </summary>
+    public PostQueueAction PostQueueAction { get; set; } = PostQueueAction.None;
+
+    /// <summary>
+    /// When true, a failed or cancelled job anywhere in the run calls off
+    /// <see cref="PostQueueAction"/> so the user comes back to a running machine and can see what
+    /// broke. Defaults to the cautious choice.
+    /// </summary>
+    public bool PostQueueActionOnlyWhenAllSucceeded { get; set; } = true;
+
     // ---- paths -----------------------------------------------------------
     /// <summary>Empty means the default under %LOCALAPPDATA%\KSubMaker.</summary>
     public string CacheDirectory { get; set; } = string.Empty;

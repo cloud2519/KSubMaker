@@ -26,6 +26,16 @@ public sealed class JobChangedEventArgs(Job job) : EventArgs
     public Job Job { get; } = job;
 }
 
+/// <summary>
+/// Raised once when the queue has processed everything it was asked to and returned to idle on its
+/// own — not after a 중단 or 일시정지. Carries the run's tallies so a listener can decide whether to
+/// act (a post-run 절전/종료, a notification) without re-counting the grid.
+/// </summary>
+public sealed class QueueDrainedEventArgs(QueueRunOutcome outcome) : EventArgs
+{
+    public QueueRunOutcome Outcome { get; } = outcome;
+}
+
 public sealed class QueueStateChangedEventArgs(QueueState state, string? message) : EventArgs
 {
     public QueueState State { get; } = state;
@@ -85,6 +95,15 @@ public sealed class JobQueueService : IAsyncDisposable
     private HashSet<string> _restrictTo = new(StringComparer.Ordinal);
 
     /// <summary>
+    /// Terminal outcomes tallied within the current run, so <see cref="QueueDrained"/> can report
+    /// what the run actually did. Reset by <see cref="StartAsync"/>; each is bumped once per job from
+    /// the single choke point in <see cref="RunJobAsync"/>'s finally.
+    /// </summary>
+    private int _runCompleted;
+    private int _runFailed;
+    private int _runCancelled;
+
+    /// <summary>
     /// How often the prefetch lane re-checks whether the pump has moved on. Coarse on purpose: the
     /// stages it is pacing against take minutes, so a tighter poll would only burn wake-ups.
     /// </summary>
@@ -115,6 +134,12 @@ public sealed class JobQueueService : IAsyncDisposable
 
     public event EventHandler<JobChangedEventArgs>? JobChanged;
     public event EventHandler<QueueStateChangedEventArgs>? StateChanged;
+
+    /// <summary>
+    /// Fires once after the pump has worked through everything and gone idle on its own. Never fires
+    /// after 중단 or 일시정지. The handler runs on the pump's thread; keep it quick.
+    /// </summary>
+    public event EventHandler<QueueDrainedEventArgs>? QueueDrained;
 
     public QueueState State => _state;
 
@@ -425,6 +450,9 @@ public sealed class JobQueueService : IAsyncDisposable
 
         _restrictTo = jobIds is null ? [] : new HashSet<string>(jobIds, StringComparer.Ordinal);
         _pauseRequested = false;
+        _runCompleted = 0;
+        _runFailed = 0;
+        _runCancelled = 0;
         _runCts = new CancellationTokenSource();
 
         var token = _runCts.Token;
@@ -697,6 +725,11 @@ public sealed class JobQueueService : IAsyncDisposable
             () => RunAudioPrefetchAsync(settings, prefetchStop.Token),
             CancellationToken.None);
 
+        // Set only when a strategy method returned without throwing and without the run token being
+        // cancelled — i.e. the queue emptied on its own. A 중단 cancels the token; a 일시정지 sets
+        // _pauseRequested. Either of those leaves this false and QueueDrained does not fire.
+        var drainedNaturally = false;
+
         try
         {
             var strategy = await ResolveStrategyAsync(settings, token).ConfigureAwait(false);
@@ -716,6 +749,8 @@ public sealed class JobQueueService : IAsyncDisposable
                     await RunSequentialAsync(settings, token).ConfigureAwait(false);
                     break;
             }
+
+            drainedNaturally = !token.IsCancellationRequested && !_pauseRequested;
         }
         catch (OperationCanceledException)
         {
@@ -734,6 +769,24 @@ public sealed class JobQueueService : IAsyncDisposable
             var finalState = _pauseRequested ? QueueState.Paused : QueueState.Idle;
             _pauseRequested = false;
             RaiseState(finalState, null);
+
+            if (drainedNaturally)
+            {
+                var outcome = new QueueRunOutcome(_runCompleted, _runFailed, _runCancelled);
+                _logger.LogInformation(
+                    "작업 큐가 모두 처리되어 대기 상태로 돌아갔습니다. (완료 {Completed} · 실패 {Failed} · 취소 {Cancelled})",
+                    outcome.Completed, outcome.Failed, outcome.Cancelled);
+
+                try
+                {
+                    QueueDrained?.Invoke(this, new QueueDrainedEventArgs(outcome));
+                }
+                catch (Exception ex)
+                {
+                    // A misbehaving handler must not turn a clean finish into a logged pump crash.
+                    _logger.LogWarning(ex, "QueueDrained 처리기에서 오류가 발생했습니다.");
+                }
+            }
         }
     }
 
@@ -1169,6 +1222,28 @@ public sealed class JobQueueService : IAsyncDisposable
             _active.TryRemove(job.Id, out _);
             active.Complete();
             active.Dispose();
+
+            // The one place every terminal outcome funnels through, whichever branch above set it.
+            // Strategies B and C call this method twice per job, but pass 1 leaves an active status
+            // behind, so a job is tallied exactly once — on the pass that finishes it.
+            RecordRunOutcome(job.Status);
+        }
+    }
+
+    /// <summary>Bumps the per-run tally that <see cref="QueueDrained"/> reports.</summary>
+    private void RecordRunOutcome(JobStatus status)
+    {
+        switch (status)
+        {
+            case JobStatus.Completed:
+                Interlocked.Increment(ref _runCompleted);
+                break;
+            case JobStatus.Failed:
+                Interlocked.Increment(ref _runFailed);
+                break;
+            case JobStatus.Cancelled:
+                Interlocked.Increment(ref _runCancelled);
+                break;
         }
     }
 

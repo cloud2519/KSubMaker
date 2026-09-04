@@ -872,6 +872,51 @@
   <data name="FakeAiModeLabel" xml:space="preserve">
     <value>Fake AI 모드 (모델 없이 파이프라인만 점검)</value>
   </data>
+  <data name="PostQueueActionGroup" xml:space="preserve">
+    <value>큐 완료 후 동작</value>
+  </data>
+  <data name="PostQueueActionLabel" xml:space="preserve">
+    <value>모든 작업이 끝나면</value>
+  </data>
+  <data name="PostQueueActionNone" xml:space="preserve">
+    <value>아무것도 하지 않음</value>
+  </data>
+  <data name="PostQueueActionSleep" xml:space="preserve">
+    <value>절전</value>
+  </data>
+  <data name="PostQueueActionHibernate" xml:space="preserve">
+    <value>최대 절전</value>
+  </data>
+  <data name="PostQueueActionShutdown" xml:space="preserve">
+    <value>시스템 종료</value>
+  </data>
+  <data name="PostQueueActionOnlyWhenAllSucceededLabel" xml:space="preserve">
+    <value>실패하거나 취소된 작업이 없을 때만</value>
+  </data>
+  <data name="PostQueueActionHint" xml:space="preserve">
+    <value>큐가 스스로 다 처리되어 멈췄을 때만 실행됩니다. 직접 중단하거나 일시정지한 경우에는 실행되지 않습니다. 실행 직전 30초 동안 취소할 수 있습니다.</value>
+  </data>
+  <data name="PostQueueActionWindowTitle" xml:space="preserve">
+    <value>큐 작업 완료</value>
+  </data>
+  <data name="PostQueueActionHeadingFormat" xml:space="preserve">
+    <value>모든 작업이 끝났습니다. 곧 '{0}'을(를) 실행합니다.</value>
+  </data>
+  <data name="PostQueueActionCountdownFormat" xml:space="preserve">
+    <value>{0}초 후 자동 실행</value>
+  </data>
+  <data name="PostQueueActionProceedButton" xml:space="preserve">
+    <value>지금 실행</value>
+  </data>
+  <data name="PostQueueActionCancelButton" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="PostQueueActionCancelledMessage" xml:space="preserve">
+    <value>큐 완료 후 동작을 취소했습니다.</value>
+  </data>
+  <data name="PostQueueActionFailedMessage" xml:space="preserve">
+    <value>큐 완료 후 동작을 실행하지 못했습니다. 로그를 확인해 주세요.</value>
+  </data>
   <data name="ScanDefaultsGroup" xml:space="preserve">
     <value>검색 기본값</value>
   </data>
