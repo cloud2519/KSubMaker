@@ -788,6 +788,9 @@
   <data name="PostQueueActionGroup" xml:space="preserve">
     <value>큐 완료 후 동작</value>
   </data>
+  <data name="PostQueueActionCommandLabel" xml:space="preserve">
+    <value>완료 후</value>
+  </data>
   <data name="PostQueueActionLabel" xml:space="preserve">
     <value>모든 작업이 끝나면</value>
   </data>

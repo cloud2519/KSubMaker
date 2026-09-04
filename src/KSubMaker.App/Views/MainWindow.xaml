@@ -143,6 +143,20 @@
 
                 <Rectangle Width="1" Height="24" Fill="#D5D8DD" Margin="4,0,10,0" VerticalAlignment="Center" />
 
+                <TextBlock Text="{x:Static res:Strings.PostQueueActionCommandLabel}"
+                           Style="{StaticResource LabelText}"
+                           VerticalAlignment="Center" />
+                <ComboBox ItemsSource="{Binding PostQueueActions}"
+                          DisplayMemberPath="Display"
+                          SelectedValuePath="Value"
+                          SelectedValue="{Binding SelectedPostQueueAction}"
+                          MinWidth="128"
+                          Margin="0,0,10,0"
+                          VerticalAlignment="Center"
+                          ToolTip="{x:Static res:Strings.PostQueueActionHint}" />
+
+                <Rectangle Width="1" Height="24" Fill="#D5D8DD" Margin="4,0,10,0" VerticalAlignment="Center" />
+
                 <Button Content="{x:Static res:Strings.RetryButton}"
                         Command="{Binding RetryCommand}"
                         Style="{StaticResource CommandButton}" />

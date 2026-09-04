@@ -113,6 +113,47 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// <summary>Rows shown in the grid, in queue order.</summary>
     public BulkObservableCollection<JobRowViewModel> Jobs { get; }
 
+    /// <summary>큐 완료 후 동작 choices for the command-bar dropdown, in enum order.</summary>
+    public IReadOnlyList<Option<PostQueueAction>> PostQueueActions { get; } =
+        Enum.GetValues<PostQueueAction>()
+            .Select(a => new Option<PostQueueAction>(a, DisplayText.PostQueueActionName(a)))
+            .ToArray();
+
+    /// <summary>
+    /// The 큐 완료 후 동작, shown on the main screen so it can be set without opening 설정. Bound
+    /// two-way to the command-bar dropdown; a change here is persisted immediately and reaches the
+    /// settings window through <see cref="SettingsService.SettingsChanged"/> like any other save.
+    /// </summary>
+    [ObservableProperty]
+    private PostQueueAction _selectedPostQueueAction;
+
+    partial void OnSelectedPostQueueActionChanged(PostQueueAction value)
+    {
+        // Equal to the live setting means this change came from ApplySettings echoing a save back,
+        // not from the user touching the dropdown — nothing to persist, and re-saving would loop.
+        if (value == _settings.PostQueueAction)
+        {
+            return;
+        }
+
+        var updated = _settingsService.Current;
+        updated.PostQueueAction = value;
+        _ = PersistPostQueueActionAsync(updated);
+    }
+
+    private async Task PersistPostQueueActionAsync(AppSettings updated)
+    {
+        try
+        {
+            await _settingsService.SaveAsync(updated).ConfigureAwait(false);
+            _logger.LogInformation("큐 완료 후 동작을 변경했습니다: {Action}", updated.PostQueueAction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "큐 완료 후 동작 설정을 저장하지 못했습니다.");
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Scan options
     // -----------------------------------------------------------------------
@@ -1578,6 +1619,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         IncludeSubfolders = settings.IncludeSubfolders;
         IncludeHiddenFolders = settings.IncludeHiddenFolders;
+        SelectedPostQueueAction = settings.PostQueueAction;
     }
 
     private static string FormatGpuSummary(HardwareProfile profile)

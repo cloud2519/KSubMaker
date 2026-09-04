@@ -751,6 +751,9 @@ public static partial class Strings
     /// <summary>큐 완료 후 동작</summary>
     public static string PostQueueActionGroup => Get(nameof(PostQueueActionGroup));
 
+    /// <summary>완료 후</summary>
+    public static string PostQueueActionCommandLabel => Get(nameof(PostQueueActionCommandLabel));
+
     /// <summary>모든 작업이 끝나면</summary>
     public static string PostQueueActionLabel => Get(nameof(PostQueueActionLabel));
 
