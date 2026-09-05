@@ -27,6 +27,7 @@ public static class DisplayText
         JobStatus.Completed => Strings.JobStatusCompleted,
         JobStatus.Failed => Strings.JobStatusFailed,
         JobStatus.Cancelled => Strings.JobStatusCancelled,
+        JobStatus.Skipped => Strings.JobStatusSkipped,
         JobStatus.Paused => Strings.JobStatusPaused,
         _ => Strings.Unknown
     };

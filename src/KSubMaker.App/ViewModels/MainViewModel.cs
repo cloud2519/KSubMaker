@@ -1966,6 +1966,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
                     pending++;
                     break;
                 case JobStatus.Cancelled:
+                case JobStatus.Skipped:
                     break;
                 default:
                     running++;

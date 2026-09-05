@@ -87,6 +87,7 @@ public sealed class JobStatusToBrushConverter : OneWayConverter
                 JobStatus.Completed => Success,
                 JobStatus.Failed => Danger,
                 JobStatus.Cancelled => Muted,
+                JobStatus.Skipped => Muted,
                 JobStatus.Paused => Warning,
                 JobStatus.Pending => Neutral,
                 _ => Active
