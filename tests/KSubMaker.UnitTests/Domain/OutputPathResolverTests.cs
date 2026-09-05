@@ -242,4 +242,18 @@ public sealed class OutputPathResolverTests
         OutputPathResolver.LooksKorean(fileName.Length == 0 ? string.Empty : Path.Combine("videos", fileName))
             .Should().BeFalse();
     }
+
+    [Fact]
+    public void A_unc_share_is_kept_so_two_shares_do_not_collide()
+    {
+        // GetPathRoot swallows server and share (\nas\media\ for \nas\media\showA). Dropping the
+        // root whole mapped \nas\media1\showA and \nas\media2\showA onto one output path — the
+        // collision the mirroring exists to prevent.
+        var first = OutputPathResolver.BuildDefaultPath(@"\nas\media1\showA\ep1.mkv", "ko", @"D:\out");
+        var second = OutputPathResolver.BuildDefaultPath(@"\nas\media2\showA\ep1.mkv", "ko", @"D:\out");
+
+        first.Should().NotBe(second);
+        first.Should().Contain("media1");
+        second.Should().Contain("media2");
+    }
 }
