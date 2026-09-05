@@ -150,7 +150,10 @@
     <value>이미 한국어 자막이 있으면 건너뛰기</value>
   </data>
   <data name="ScanButton" xml:space="preserve">
-    <value>파일 검색</value>
+    <value>목록 새로고침</value>
+  </data>
+  <data name="ScanHint" xml:space="preserve">
+    <value>대상 폴더를 다시 검색해 새 영상은 목록에 넣고 기존 항목의 상태를 갱신합니다.</value>
   </data>
   <data name="ScanCancelButton" xml:space="preserve">
     <value>검색 중단</value>
@@ -212,11 +215,8 @@
   <data name="ColumnStatus" xml:space="preserve">
     <value>상태</value>
   </data>
-  <data name="ColumnStage" xml:space="preserve">
-    <value>현재 단계</value>
-  </data>
   <data name="ColumnProgress" xml:space="preserve">
-    <value>진행률</value>
+    <value>전체 진행률</value>
   </data>
   <data name="ColumnStageProgress" xml:space="preserve">
     <value>단계 진행률</value>
@@ -232,9 +232,6 @@
   </data>
   <data name="ColumnModel" xml:space="preserve">
     <value>모델</value>
-  </data>
-  <data name="ColumnOutputPath" xml:space="preserve">
-    <value>결과 경로</value>
   </data>
   <data name="ColumnError" xml:space="preserve">
     <value>오류</value>
