@@ -5,6 +5,7 @@ using System.Windows.Media;
 using KSubMaker.App.Resources;
 using KSubMaker.App.Services;
 using KSubMaker.Domain.Jobs;
+using KSubMaker.Domain.Settings;
 
 namespace KSubMaker.App.Converters;
 
@@ -55,6 +56,20 @@ public sealed class JobStatusToTextConverter : OneWayConverter
 {
     public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         value is JobStatus status ? DisplayText.StatusName(status) : Strings.Dash;
+}
+
+/// <summary><see cref="ModelKind"/> to its Korean category name (모델 관리 group headers).</summary>
+public sealed class ModelKindToNameConverter : OneWayConverter
+{
+    public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is ModelKind kind ? DisplayText.ModelKindName(kind) : Strings.Dash;
+}
+
+/// <summary><see cref="ModelKind"/> to its one-line category blurb (모델 관리 group headers).</summary>
+public sealed class ModelKindToHintConverter : OneWayConverter
+{
+    public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is ModelKind kind ? DisplayText.ModelKindHint(kind) : string.Empty;
 }
 
 /// <summary><see cref="JobStage"/> to its Korean label.</summary>

@@ -12,6 +12,17 @@
         FontFamily="Malgun Gothic"
         FontSize="12">
 
+    <Window.Resources>
+        <!-- Groups the flat model list into 음성 인식 / 번역 / 로컬 LLM sections, in that catalog
+             order, so the three very different roles (§ ModelKind) read as three sections instead of
+             one undifferentiated table. -->
+        <CollectionViewSource x:Key="GroupedModels" Source="{Binding Models}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Kind" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
+
     <DockPanel LastChildFill="True">
 
         <!-- ======================= command bar ======================= -->
@@ -87,7 +98,7 @@
         </Border>
 
         <!-- ======================= model grid ======================= -->
-        <DataGrid ItemsSource="{Binding Models}"
+        <DataGrid ItemsSource="{Binding Source={StaticResource GroupedModels}}"
                   SelectedItem="{Binding SelectedModel, Mode=TwoWay}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
@@ -196,6 +207,25 @@
                 </DataGridTemplateColumn>
 
             </DataGrid.Columns>
+
+            <DataGrid.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="4,10,0,4">
+                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelKindToName}}"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelKindToHint}}"
+                                           Style="{StaticResource HintText}"
+                                           Margin="10,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </DataGrid.GroupStyle>
         </DataGrid>
 
     </DockPanel>

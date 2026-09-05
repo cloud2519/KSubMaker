@@ -60,6 +60,15 @@ public static class DisplayText
         _ => Strings.Unknown
     };
 
+    /// <summary>One-line, honestly-hedged blurb shown under each category header in 모델 관리.</summary>
+    public static string ModelKindHint(ModelKind kind) => kind switch
+    {
+        ModelKind.Whisper => Strings.ModelKindWhisperHint,
+        ModelKind.Translation => Strings.ModelKindTranslationHint,
+        ModelKind.Llm => Strings.ModelKindLlmHint,
+        _ => string.Empty
+    };
+
     public static string TranslationStyleName(TranslationStyle style) => style switch
     {
         TranslationStyle.Literal => Strings.TranslationStyleLiteral,

@@ -1099,6 +1099,15 @@ public static partial class Strings
     /// <summary>로컬 LLM</summary>
     public static string ModelKindLlm => Get(nameof(ModelKindLlm));
 
+    /// <summary>영상 속 말소리를 원어 텍스트로 받아씁니다. 모델이 클수록 정확하지만 느립니다.</summary>
+    public static string ModelKindWhisperHint => Get(nameof(ModelKindWhisperHint));
+
+    /// <summary>받아쓴 원어 텍스트를 한국어로 옮기는 번역 전용 모델입니다. 빠르고 안정적입니다.</summary>
+    public static string ModelKindTranslationHint => Get(nameof(ModelKindTranslationHint));
+
+    /// <summary>번역도 시킬 수 있는 범용 대화형 모델입니다. 문맥·문체 지시에 강하지만 훨씬 느립니다.</summary>
+    public static string ModelKindLlmHint => Get(nameof(ModelKindLlmHint));
+
     /// <summary>설치됨</summary>
     public static string ModelStateInstalled => Get(nameof(ModelStateInstalled));
 
