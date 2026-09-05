@@ -126,3 +126,26 @@ public enum ModelKind
     Translation,
     Llm
 }
+
+/// <summary>
+/// What the application does to the machine once the queue has processed everything and gone idle
+/// on its own.
+///
+/// <para>Only ever acted on after a natural drain — never after a 중단 or 일시정지, because a user
+/// who stopped the queue by hand did not ask for the PC to sleep or power off. A cancellable
+/// countdown always sits between the decision and the action.</para>
+/// </summary>
+public enum PostQueueAction
+{
+    /// <summary>Do nothing. The default.</summary>
+    None,
+
+    /// <summary>Suspend to RAM (S3 / Modern Standby).</summary>
+    Sleep,
+
+    /// <summary>Suspend to disk (S4).</summary>
+    Hibernate,
+
+    /// <summary>Shut the machine down.</summary>
+    Shutdown
+}

@@ -459,6 +459,28 @@
                             </StackPanel>
                         </GroupBox>
 
+                        <GroupBox Header="{x:Static res:Strings.PostQueueActionGroup}">
+                            <StackPanel>
+                                <StackPanel Style="{StaticResource FieldRow}">
+                                    <TextBlock Text="{x:Static res:Strings.PostQueueActionLabel}"
+                                               Style="{StaticResource FieldLabel}" />
+                                    <ComboBox Style="{StaticResource OptionCombo}"
+                                              HorizontalAlignment="Left"
+                                              ItemsSource="{Binding PostQueueActions}"
+                                              DisplayMemberPath="Display"
+                                              SelectedValuePath="Value"
+                                              SelectedValue="{Binding SelectedPostQueueAction}" />
+                                </StackPanel>
+
+                                <CheckBox Content="{x:Static res:Strings.PostQueueActionOnlyWhenAllSucceededLabel}"
+                                          IsChecked="{Binding PostQueueActionOnlyWhenAllSucceeded}"
+                                          IsEnabled="{Binding PostQueueActionSelected}"
+                                          Margin="0,8,0,4" />
+                                <TextBlock Text="{x:Static res:Strings.PostQueueActionHint}"
+                                           Style="{StaticResource HintText}" />
+                            </StackPanel>
+                        </GroupBox>
+
                         <GroupBox Header="{x:Static res:Strings.ScanDefaultsGroup}">
                             <StackPanel>
                                 <CheckBox Content="{x:Static res:Strings.ReprocessCompletedLabel}"

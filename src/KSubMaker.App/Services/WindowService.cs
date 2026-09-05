@@ -1,5 +1,6 @@
 using System.Windows;
 using KSubMaker.App.Views;
+using KSubMaker.Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KSubMaker.App.Services;
@@ -50,6 +51,17 @@ public sealed class WindowService(IServiceProvider services) : IWindowService
         window.Closed += OnLogWindowClosed;
         _logWindow = window;
         window.Show();
+    }
+
+    public bool ConfirmPostQueueAction(PostQueueAction action)
+    {
+        // Created directly: it takes a runtime string and owns nothing that needs the container.
+        var window = new PostQueueActionWindow(DisplayText.PostQueueActionName(action))
+        {
+            Owner = ActiveOwner()
+        };
+
+        return window.ShowDialog() == true;
     }
 
     private void OnLogWindowClosed(object? sender, EventArgs e)

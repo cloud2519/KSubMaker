@@ -75,6 +75,8 @@ public sealed class SettingsRepositoryTests : IDisposable
         // repository ever reading or writing it.
         AudioPrefetchDepth = 5,
         AutoRetryOnRecoverableError = false,
+        PostQueueAction = PostQueueAction.Shutdown,
+        PostQueueActionOnlyWhenAllSucceeded = false,
 
         CacheDirectory = "/tmp/cache",
         ModelDirectory = "/tmp/models",
@@ -194,6 +196,18 @@ public sealed class SettingsRepositoryTests : IDisposable
         await _repository.SaveAsync(new AppSettings { ProcessingStrategy = strategy });
 
         (await _repository.LoadAsync()).ProcessingStrategy.Should().Be(strategy);
+    }
+
+    [Theory]
+    [InlineData(PostQueueAction.None)]
+    [InlineData(PostQueueAction.Sleep)]
+    [InlineData(PostQueueAction.Hibernate)]
+    [InlineData(PostQueueAction.Shutdown)]
+    public async Task Every_post_queue_action_round_trips(PostQueueAction action)
+    {
+        await _repository.SaveAsync(new AppSettings { PostQueueAction = action });
+
+        (await _repository.LoadAsync()).PostQueueAction.Should().Be(action);
     }
 
     [Theory]

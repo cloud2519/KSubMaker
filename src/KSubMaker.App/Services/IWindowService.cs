@@ -1,3 +1,5 @@
+using KSubMaker.Domain.Settings;
+
 namespace KSubMaker.App.Services;
 
 /// <summary>
@@ -14,4 +16,10 @@ public interface IWindowService
 
     /// <summary>Modeless 로그 보기 window; brings the existing one forward when already open.</summary>
     void ShowLogs();
+
+    /// <summary>
+    /// Modal countdown before a 큐 완료 후 동작. Returns true to go ahead (the timer ran out, or the
+    /// user pressed 지금 실행) and false when the user called it off.
+    /// </summary>
+    bool ConfirmPostQueueAction(PostQueueAction action);
 }

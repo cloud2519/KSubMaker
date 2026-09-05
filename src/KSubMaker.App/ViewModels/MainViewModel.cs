@@ -40,6 +40,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly IDialogService _dialogs;
     private readonly IShellService _shell;
     private readonly IWindowService _windows;
+    private readonly ISystemPowerService _power;
     private readonly ILogger<MainViewModel> _logger;
     private readonly Dispatcher _dispatcher;
 
@@ -85,6 +86,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         IDialogService dialogs,
         IShellService shell,
         IWindowService windows,
+        ISystemPowerService power,
         ILogger<MainViewModel> logger)
     {
         _settingsService = settingsService;
@@ -97,6 +99,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _dialogs = dialogs;
         _shell = shell;
         _windows = windows;
+        _power = power;
         _logger = logger;
 
         // Resolved on the UI thread by the composition root, so CurrentDispatcher is the UI one; the
@@ -109,6 +112,47 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     /// <summary>Rows shown in the grid, in queue order.</summary>
     public BulkObservableCollection<JobRowViewModel> Jobs { get; }
+
+    /// <summary>큐 완료 후 동작 choices for the command-bar dropdown, in enum order.</summary>
+    public IReadOnlyList<Option<PostQueueAction>> PostQueueActions { get; } =
+        Enum.GetValues<PostQueueAction>()
+            .Select(a => new Option<PostQueueAction>(a, DisplayText.PostQueueActionName(a)))
+            .ToArray();
+
+    /// <summary>
+    /// The 큐 완료 후 동작, shown on the main screen so it can be set without opening 설정. Bound
+    /// two-way to the command-bar dropdown; a change here is persisted immediately and reaches the
+    /// settings window through <see cref="SettingsService.SettingsChanged"/> like any other save.
+    /// </summary>
+    [ObservableProperty]
+    private PostQueueAction _selectedPostQueueAction;
+
+    partial void OnSelectedPostQueueActionChanged(PostQueueAction value)
+    {
+        // Equal to the live setting means this change came from ApplySettings echoing a save back,
+        // not from the user touching the dropdown — nothing to persist, and re-saving would loop.
+        if (value == _settings.PostQueueAction)
+        {
+            return;
+        }
+
+        var updated = _settingsService.Current;
+        updated.PostQueueAction = value;
+        _ = PersistPostQueueActionAsync(updated);
+    }
+
+    private async Task PersistPostQueueActionAsync(AppSettings updated)
+    {
+        try
+        {
+            await _settingsService.SaveAsync(updated).ConfigureAwait(false);
+            _logger.LogInformation("큐 완료 후 동작을 변경했습니다: {Action}", updated.PostQueueAction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "큐 완료 후 동작 설정을 저장하지 못했습니다.");
+        }
+    }
 
     // -----------------------------------------------------------------------
     // Scan options
@@ -237,6 +281,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         {
             _queue.JobChanged += OnJobChanged;
             _queue.StateChanged += OnQueueStateChanged;
+            _queue.QueueDrained += OnQueueDrained;
             _settingsService.SettingsChanged += OnSettingsChanged;
             _hardwareService.ProfileChanged += OnHardwareProfileChanged;
             _subscribed = true;
@@ -314,6 +359,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _subscribed = false;
         _queue.JobChanged -= OnJobChanged;
         _queue.StateChanged -= OnQueueStateChanged;
+        _queue.QueueDrained -= OnQueueDrained;
         _settingsService.SettingsChanged -= OnSettingsChanged;
         _hardwareService.ProfileChanged -= OnHardwareProfileChanged;
     }
@@ -1360,12 +1406,64 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         {
             QueueStatus = state;
 
+            // Hold sleep off while there is work in flight, and let the idle timers resume the
+            // moment the queue is idle or paused. Called on the dispatcher thread on purpose: the
+            // SetThreadExecutionState hold is tied to the calling thread, and this one lives for the
+            // life of the app.
+            if (state == QueueState.Running)
+            {
+                _power.PreventSleep();
+            }
+            else if (state is QueueState.Idle or QueueState.Paused)
+            {
+                _power.AllowSleep();
+            }
+
             if (!string.IsNullOrWhiteSpace(message))
             {
                 StatusMessage = message;
             }
 
             RecalculateCounters();
+        });
+    }
+
+    /// <summary>
+    /// Runs when the queue has processed everything and gone idle on its own. Carries out the
+    /// configured 큐 완료 후 동작 — behind the policy check and a cancellable countdown. Never reached
+    /// after a manual 중단 or 일시정지: the queue does not raise <see cref="JobQueueService.QueueDrained"/>
+    /// for those.
+    /// </summary>
+    private void OnQueueDrained(object? sender, QueueDrainedEventArgs e)
+    {
+        var outcome = e.Outcome;
+
+        _ = _dispatcher.InvokeAsync(() =>
+        {
+            var settings = _settings;
+            var action = PostQueueActionPolicy.Resolve(
+                settings.PostQueueAction,
+                settings.PostQueueActionOnlyWhenAllSucceeded,
+                outcome);
+
+            if (action == PostQueueAction.None)
+            {
+                return;
+            }
+
+            _logger.LogInformation("큐 완료 후 동작을 실행합니다: {Action}", action);
+
+            if (!_windows.ConfirmPostQueueAction(action))
+            {
+                StatusMessage = Strings.PostQueueActionCancelledMessage;
+                _logger.LogInformation("사용자가 큐 완료 후 동작을 취소했습니다.");
+                return;
+            }
+
+            if (!_power.Execute(action))
+            {
+                StatusMessage = Strings.PostQueueActionFailedMessage;
+            }
         });
     }
 
@@ -1521,6 +1619,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         IncludeSubfolders = settings.IncludeSubfolders;
         IncludeHiddenFolders = settings.IncludeHiddenFolders;
+        SelectedPostQueueAction = settings.PostQueueAction;
     }
 
     private static string FormatGpuSummary(HardwareProfile profile)
