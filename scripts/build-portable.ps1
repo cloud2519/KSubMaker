@@ -315,7 +315,7 @@ try {
     # -----------------------------------------------------------------------
     Write-KsmStep '문서와 라이선스 복사'
 
-    foreach ($name in @('LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md')) {
+    foreach ($name in @('LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md', 'changes.txt')) {
         $source = Join-Path $repoRoot $name
         if (Test-Path -LiteralPath $source) {
             Copy-Item -LiteralPath $source -Destination (Join-Path $publishDir $name) -Force
