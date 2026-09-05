@@ -145,8 +145,8 @@ public sealed partial class StringResourceParityTests
             entries[key].Any(IsHangul).Should().BeTrue($"{key}는 사용자에게 보이는 문장입니다");
         }
 
-        entries["SelectionNotCancellableMessage"].Should().Contain("취소");
-        entries["SelectionNotRetryableMessage"].Should().Contain("다시 시도");
+        entries["SelectionNotCancellableMessage"].Should().Contain("건너뛸");
+        entries["SelectionNotRetryableMessage"].Should().Contain("다시 넣");
     }
 
     /// <summary>

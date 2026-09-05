@@ -165,16 +165,16 @@
     <value>중단</value>
   </data>
   <data name="RetryButton" xml:space="preserve">
-    <value>재시도</value>
+    <value>다시 넣기</value>
   </data>
   <data name="CancelJobButton" xml:space="preserve">
-    <value>취소</value>
+    <value>건너뛰기</value>
   </data>
   <data name="RemoveCompletedButton" xml:space="preserve">
-    <value>완료 항목 제거</value>
+    <value>완료 항목 비우기</value>
   </data>
   <data name="RemoveSelectedButton" xml:space="preserve">
-    <value>선택 항목 제거</value>
+    <value>목록에서 빼기</value>
   </data>
   <data name="OpenOutputFolderButton" xml:space="preserve">
     <value>결과 폴더 열기</value>
@@ -303,7 +303,7 @@
     <value>실패</value>
   </data>
   <data name="JobStatusCancelled" xml:space="preserve">
-    <value>취소됨</value>
+    <value>건너뜀</value>
   </data>
   <data name="JobStatusPaused" xml:space="preserve">
     <value>일시정지</value>
@@ -360,13 +360,13 @@
     <value>작업 추가 결과</value>
   </data>
   <data name="EnqueueSummaryFormat" xml:space="preserve">
-    <value>새로 추가 {0}건 · 다시 처리 {1}건 · 이미 완료 {2}건 · 변경 없음 {3}건 · 건너뜀 {4}건</value>
+    <value>새로 추가 {0}건 · 다시 넣음 {1}건 · 이미 완료 {2}건 · 변경 없음 {3}건 · 건너뜀 {4}건</value>
   </data>
   <data name="QueueBusyCannotScan" xml:space="preserve">
     <value>작업이 실행 중일 때는 파일을 검색할 수 없습니다.</value>
   </data>
   <data name="NoRunnableJobs" xml:space="preserve">
-    <value>시작할 수 있는 작업이 없습니다. 완료·실패·취소된 작업은 [재시도]를 눌러 큐에 다시 넣은 뒤 시작하세요.</value>
+    <value>시작할 수 있는 작업이 없습니다. 완료·실패·건너뛴 작업은 [다시 넣기]를 눌러 큐에 다시 넣은 뒤 시작하세요.</value>
   </data>
   <data name="StartedMessage" xml:space="preserve">
     <value>작업을 시작했습니다.</value>
@@ -384,13 +384,13 @@
     <value>먼저 목록에서 항목을 선택하세요.</value>
   </data>
   <data name="SelectionNotCancellableMessage" xml:space="preserve">
-    <value>선택한 작업은 취소할 수 있는 상태가 아닙니다. 이미 완료·실패·취소된 작업은 취소할 수 없습니다.</value>
+    <value>선택한 작업은 건너뛸 수 있는 상태가 아닙니다. 이미 완료·실패·건너뛴 작업은 건너뛸 수 없습니다.</value>
   </data>
   <data name="SelectionNotRetryableMessage" xml:space="preserve">
-    <value>선택한 작업은 다시 시도할 수 있는 상태가 아닙니다. 완료·실패·취소·일시정지된 작업만 다시 시도할 수 있습니다.</value>
+    <value>선택한 작업은 다시 넣을 수 있는 상태가 아닙니다. 완료·실패·건너뜀·일시정지된 작업만 큐에 다시 넣을 수 있습니다.</value>
   </data>
   <data name="SelectionNotStartableMessage" xml:space="preserve">
-    <value>선택한 작업은 시작할 수 있는 상태가 아닙니다. 대기·일시정지된 작업만 시작할 수 있고, 완료·실패·취소된 작업은 [재시도]를 눌러 큐에 다시 넣은 뒤 시작하세요.</value>
+    <value>선택한 작업은 시작할 수 있는 상태가 아닙니다. 대기·일시정지된 작업만 시작할 수 있고, 완료·실패·건너뛴 작업은 [다시 넣기]를 눌러 큐에 다시 넣은 뒤 시작하세요.</value>
   </data>
   <data name="SelectionNotEligibleMessage" xml:space="preserve">
     <value>선택한 작업은 지금 이 동작을 수행할 수 있는 상태가 아닙니다.</value>
@@ -399,7 +399,7 @@
     <value>{0}건을 다시 대기열에 넣었습니다.</value>
   </data>
   <data name="CancelDoneFormat" xml:space="preserve">
-    <value>{0}건을 취소했습니다.</value>
+    <value>{0}건을 건너뜁니다.</value>
   </data>
   <data name="RemoveCompletedConfirm" xml:space="preserve">
     <value>완료된 항목을 목록에서 제거할까요? 이미 만들어진 자막 파일은 삭제되지 않습니다.</value>
@@ -654,7 +654,7 @@
     <value>선택할 수 있는 오디오·자막 트랙이 없습니다.</value>
   </data>
   <data name="SubtitleSourceJobRunning" xml:space="preserve">
-    <value>실행 중인 작업의 자막 원본은 바꿀 수 없습니다. 작업을 취소하거나 끝난 뒤에 다시 선택하세요.</value>
+    <value>실행 중인 작업의 자막 원본은 바꿀 수 없습니다. 작업을 건너뛰거나 끝난 뒤에 다시 선택하세요.</value>
   </data>
   <data name="SubtitleSourceChangedFormat" xml:space="preserve">
     <value>자막 원본을 변경했습니다: {0}</value>
