@@ -42,16 +42,6 @@ public sealed partial class ModelRowViewModel : ObservableObject, IDisposable
 
     public string KindText => DisplayText.ModelKindName(Kind);
 
-    /// <summary>
-    /// Which pipeline stage this model belongs to. Whisper is 음성 인식's only way to do the job;
-    /// NLLB and 로컬 LLM are two competing ways to do 번역 — so 모델 관리 groups by this first and
-    /// only splits 번역 further by <see cref="Kind"/>, rather than showing three sibling groups that
-    /// would misrepresent NLLB and LLM as unrelated categories instead of alternatives for one step.
-    /// </summary>
-    public ModelPipelineStep Step => Kind == ModelKind.Whisper
-        ? ModelPipelineStep.Recognition
-        : ModelPipelineStep.Translation;
-
     [ObservableProperty]
     private string _displayName;
 

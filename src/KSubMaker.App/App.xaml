@@ -20,9 +20,6 @@
             <conv:ValueEqualsParameterConverter x:Key="ValueEqualsParameter" />
             <conv:ModelKindToNameConverter x:Key="ModelKindToName" />
             <conv:ModelKindToHintConverter x:Key="ModelKindToHint" />
-            <conv:ModelStepToNameConverter x:Key="ModelStepToName" />
-            <conv:ModelStepToHintConverter x:Key="ModelStepToHint" />
-            <conv:HideWhisperSubHeaderConverter x:Key="HideWhisperSubHeader" />
 
             <!-- ================= base styles ================= -->
             <Style TargetType="TextBlock" x:Key="LabelText">

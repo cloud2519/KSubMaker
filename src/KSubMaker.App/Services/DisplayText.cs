@@ -7,17 +7,6 @@ using KSubMaker.Domain.Settings;
 namespace KSubMaker.App.Services;
 
 /// <summary>
-/// The two stages of the 음성 인식 → 번역 pipeline, as far as 모델 관리's grouping cares. A display-only
-/// concept — nothing in Domain or Application keys off this, it exists purely so the model list can
-/// group NLLB and 로컬 LLM together as 번역's two options instead of as unrelated siblings.
-/// </summary>
-public enum ModelPipelineStep
-{
-    Recognition,
-    Translation
-}
-
-/// <summary>
 /// The one place that turns a domain enum or a raw number into the Korean text shown on screen.
 ///
 /// Both the value converters (used from XAML) and the view models (used from C#) call in here, so a
@@ -77,22 +66,6 @@ public static class DisplayText
         ModelKind.Whisper => Strings.ModelKindWhisperHint,
         ModelKind.Translation => Strings.ModelKindTranslationHint,
         ModelKind.Llm => Strings.ModelKindLlmHint,
-        _ => string.Empty
-    };
-
-    /// <summary>Top-level 모델 관리 group name: 음성 인식, or 번역 (NLLB and 로컬 LLM together).</summary>
-    public static string ModelStepName(ModelPipelineStep step) => step switch
-    {
-        ModelPipelineStep.Recognition => Strings.ModelKindWhisper,
-        ModelPipelineStep.Translation => Strings.ModelKindTranslation,
-        _ => Strings.Unknown
-    };
-
-    /// <summary>One-line blurb for the top-level 모델 관리 group.</summary>
-    public static string ModelStepHint(ModelPipelineStep step) => step switch
-    {
-        ModelPipelineStep.Recognition => Strings.ModelKindWhisperHint,
-        ModelPipelineStep.Translation => Strings.ModelStepTranslationHint,
         _ => string.Empty
     };
 
