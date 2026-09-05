@@ -63,6 +63,20 @@ public static class OutputPathResolver
         var root = Path.GetPathRoot(directory) ?? string.Empty;
         var rest = directory.Length > root.Length ? directory[root.Length..] : string.Empty;
 
+        // A UNC root swallows the server and the share (\nas\media\ for \nas\media\showA), so
+        // dropping it whole maps \nas\media1\showA and \nas\media2\showA onto the same output —
+        // the very collision this mirroring exists to prevent. Keep them as folders instead.
+        if (root.StartsWith(@"\\", StringComparison.Ordinal))
+        {
+            var share = root.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (share.Length > 0)
+            {
+                rest = Path.Combine(
+                    share.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar),
+                    rest.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            }
+        }
+
         return rest.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 

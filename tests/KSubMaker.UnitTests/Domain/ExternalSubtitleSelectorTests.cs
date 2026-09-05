@@ -149,4 +149,44 @@ public sealed class ExternalSubtitleSelectorTests
 
         Pick(forwards).Should().Be(Pick(backwards));
     }
+
+    // -----------------------------------------------------------------------
+    // never translate a file onto itself
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void The_file_this_job_is_about_to_write_is_never_its_own_source()
+    {
+        // With a blank output suffix the result is movie.srt — which is also a perfectly ordinary
+        // *source* name. Reading and writing the same path would replace the original subtitle with
+        // a round trip of its own text. 건너뛰기 (the default conflict policy) would stop it, but
+        // 덮어쓰기 is one dropdown away and the loss cannot be undone.
+        string[] candidates = [@"D:ideos\movie.srt"];
+
+        ExternalSubtitleSelector.Choose(Video, candidates, null, @"D:ideos\movie.srt")
+            .Should().BeNull();
+
+        ExternalSubtitleSelector.Choose(Video, candidates, null, @"D:ideos\movie.ko.srt")
+            .Should().NotBeNull("a different output path leaves the sidecar usable");
+    }
+
+    [Fact]
+    public void The_output_path_is_matched_regardless_of_casing_or_separators()
+    {
+        ExternalSubtitleSelector.Choose(
+                Video, [@"D:ideos\movie.srt"], null, @"D:ideos\sub\..\MOVIE.SRT")
+            .Should().BeNull();
+    }
+
+    [Fact]
+    public void A_second_candidate_survives_when_only_one_collides_with_the_output()
+    {
+        var choice = ExternalSubtitleSelector.Choose(
+            Video,
+            [@"D:ideos\movie.srt", @"D:ideos\movie.ja.srt"],
+            null,
+            @"D:ideos\movie.srt");
+
+        choice!.Path.Should().Be(@"D:ideos\movie.ja.srt");
+    }
 }

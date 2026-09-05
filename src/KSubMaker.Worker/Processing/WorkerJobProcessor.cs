@@ -771,7 +771,13 @@ public sealed class WorkerJobProcessor : IJobProcessor
             var baseName = Path.GetFileNameWithoutExtension(job.VideoPath);
             var siblings = Directory.EnumerateFiles(directory, baseName + ".*");
 
-            var choice = ExternalSubtitleSelector.Choose(job.VideoPath, siblings, settings.SourceLanguage);
+            // The output path matters here: a blank suffix makes it movie.srt, which is also a
+            // valid source name, and the selector must not hand us the file we are about to write.
+            var outputPath = job.OutputPath ??
+                OutputPathResolver.BuildDefaultPath(job.VideoPath, settings.OutputSuffix, settings.OutputDirectory);
+
+            var choice = ExternalSubtitleSelector.Choose(
+                job.VideoPath, siblings, settings.SourceLanguage, outputPath);
 
             if (choice is not null)
             {
