@@ -72,6 +72,31 @@ public sealed class ModelKindToHintConverter : OneWayConverter
         value is ModelKind kind ? DisplayText.ModelKindHint(kind) : string.Empty;
 }
 
+/// <summary><see cref="ModelPipelineStep"/> to its Korean name (모델 관리 top-level group headers).</summary>
+public sealed class ModelStepToNameConverter : OneWayConverter
+{
+    public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is ModelPipelineStep step ? DisplayText.ModelStepName(step) : Strings.Dash;
+}
+
+/// <summary><see cref="ModelPipelineStep"/> to its one-line blurb (모델 관리 top-level group headers).</summary>
+public sealed class ModelStepToHintConverter : OneWayConverter
+{
+    public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is ModelPipelineStep step ? DisplayText.ModelStepHint(step) : string.Empty;
+}
+
+/// <summary>
+/// Collapses the second-level 모델 관리 group header for Whisper: 음성 인식 has exactly one way to do
+/// the job, so repeating "음성 인식" as a sub-header under itself would only be noise. NLLB and 로컬
+/// LLM (번역's two options) still get their sub-header.
+/// </summary>
+public sealed class HideWhisperSubHeaderConverter : OneWayConverter
+{
+    public override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is ModelKind.Whisper ? Visibility.Collapsed : Visibility.Visible;
+}
+
 /// <summary><see cref="JobStage"/> to its Korean label.</summary>
 public sealed class JobStageToTextConverter : OneWayConverter
 {

@@ -1108,6 +1108,9 @@ public static partial class Strings
     /// <summary>번역도 시킬 수 있는 범용 대화형 모델입니다. 문맥·문체 지시에 강하지만 훨씬 느립니다.</summary>
     public static string ModelKindLlmHint => Get(nameof(ModelKindLlmHint));
 
+    /// <summary>받아쓴 원어 텍스트를 한국어로 옮기는 단계입니다. 전용 번역기(NLLB)나 로컬 LLM 중 하나를 골라 씁니다.</summary>
+    public static string ModelStepTranslationHint => Get(nameof(ModelStepTranslationHint));
+
     /// <summary>설치됨</summary>
     public static string ModelStateInstalled => Get(nameof(ModelStateInstalled));
 

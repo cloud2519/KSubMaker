@@ -13,11 +13,13 @@
         FontSize="12">
 
     <Window.Resources>
-        <!-- Groups the flat model list into 음성 인식 / 번역 / 로컬 LLM sections, in that catalog
-             order, so the three very different roles (§ ModelKind) read as three sections instead of
-             one undifferentiated table. -->
+        <!-- Two-level grouping that mirrors the actual pipeline: 음성 인식 is one step with one way to
+             do it, 번역 is the other step with two competing ways (NLLB vs 로컬 LLM). A flat three-way
+             split would show NLLB and 로컬 LLM as unrelated siblings instead of alternatives for the
+             same job, so 번역 groups by Step first and only splits into Kind underneath. -->
         <CollectionViewSource x:Key="GroupedModels" Source="{Binding Models}">
             <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Step" />
                 <PropertyGroupDescription PropertyName="Kind" />
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
@@ -209,15 +211,17 @@
             </DataGrid.Columns>
 
             <DataGrid.GroupStyle>
+
+                <!-- level 1: 음성 인식 / 번역 -->
                 <GroupStyle>
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="4,10,0,4">
-                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelKindToName}}"
+                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelStepToName}}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelKindToHint}}"
+                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelStepToHint}}"
                                            Style="{StaticResource HintText}"
                                            Margin="10,0,0,0"
                                            VerticalAlignment="Center" />
@@ -225,6 +229,28 @@
                         </DataTemplate>
                     </GroupStyle.HeaderTemplate>
                 </GroupStyle>
+
+                <!-- level 2: within 번역 only — NLLB vs 로컬 LLM. Hidden under 음성 인식, which has
+                     nothing to sub-split. -->
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="20,6,0,2"
+                                        Visibility="{Binding Name, Converter={StaticResource HideWhisperSubHeader}}">
+                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelKindToName}}"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Name, Converter={StaticResource ModelKindToHint}}"
+                                           Style="{StaticResource HintText}"
+                                           Margin="8,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+
             </DataGrid.GroupStyle>
         </DataGrid>
 
