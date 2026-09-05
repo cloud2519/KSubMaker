@@ -283,6 +283,15 @@ public static partial class Strings
     /// <summary>{0}개 항목을 휴지통으로 보냈습니다.</summary>
     public static string DeleteDoneFormat => Get(nameof(DeleteDoneFormat));
 
+    /// <summary>결과 자막 이동</summary>
+    public static string RelocateOutputsDialogTitle => Get(nameof(RelocateOutputsDialogTitle));
+
+    /// <summary>출력 폴더 설정이 바뀌었습니다. 이미 만들어진 자막 {0}개를 새 위치로 옮길까요?</summary>
+    public static string RelocateOutputsConfirmFormat => Get(nameof(RelocateOutputsConfirmFormat));
+
+    /// <summary>자막 {0}/{1}개를 새 폴더로 옮겼습니다.</summary>
+    public static string RelocateOutputsDoneFormat => Get(nameof(RelocateOutputsDoneFormat));
+
     /// <summary>경로</summary>
     public static string JobTooltipPathLabel => Get(nameof(JobTooltipPathLabel));
 

@@ -1840,11 +1840,73 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void OnSettingsChanged(object? sender, AppSettings e)
     {
         var snapshot = e;
-        _ = _dispatcher.InvokeAsync(() =>
+        _ = _dispatcher.InvokeAsync(async () =>
         {
+            var previous = _settings;
             _settings = snapshot;
             ApplySettings(snapshot);
+            await OfferOutputRelocationAsync(previous, snapshot).ConfigureAwait(true);
         });
+    }
+
+    /// <summary>
+    /// When the output folder setting itself changes, subtitles the old setting already wrote sit at
+    /// paths the new setting will never look at again — the file is not gone, just orphaned from the
+    /// job that made it. Offers to move what is found rather than doing it silently: this runs on
+    /// every settings save, so a confirmation-free move would fire on saves that touch something
+    /// else entirely.
+    ///
+    /// <para>Deliberately does not change what counts as "already done" (§E in the review this came
+    /// from) — moving the file is what makes the existing completion check see it in the new
+    /// location, without touching that check's logic or re-running anything.</para>
+    /// </summary>
+    private async Task OfferOutputRelocationAsync(AppSettings previous, AppSettings current)
+    {
+        var oldDirectory = previous.OutputDirectory?.Trim() ?? string.Empty;
+        var newDirectory = current.OutputDirectory?.Trim() ?? string.Empty;
+
+        if (string.Equals(oldDirectory, newDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var candidates = Jobs.Select(row => (row.FullPath, row.OutputPath));
+        var plan = OutputRelocationPlanner.Plan(candidates, current.OutputSuffix, current.OutputDirectory, File.Exists);
+
+        if (plan.Count == 0)
+        {
+            return;
+        }
+
+        var confirmed = _dialogs.Confirm(
+            string.Format(CultureInfo.CurrentCulture, Strings.RelocateOutputsConfirmFormat, plan.Count),
+            Strings.RelocateOutputsDialogTitle);
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var moved = 0;
+
+        foreach (var relocation in plan)
+        {
+            if (!_fileActions.Move(relocation.OldPath, relocation.NewPath))
+            {
+                continue;
+            }
+
+            moved++;
+
+            var job = Jobs.FirstOrDefault(row => row.OutputPath == relocation.OldPath);
+            if (job is not null)
+            {
+                await _queue.UpdateSourcePathAsync(job.Id, job.FullPath, relocation.NewPath).ConfigureAwait(true);
+            }
+        }
+
+        StatusMessage = string.Format(
+            CultureInfo.CurrentCulture, Strings.RelocateOutputsDoneFormat, moved, plan.Count);
     }
 
     private void OnHardwareProfileChanged(object? sender, HardwareProfile e)
