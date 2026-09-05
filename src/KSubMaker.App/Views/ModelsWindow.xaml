@@ -101,6 +101,18 @@
         </Border>
 
         <!-- ======================= 음성 인식 / 번역 tabs ======================= -->
+        <Border DockPanel.Dock="Top"
+                Margin="12,8,12,0"
+                Padding="10,8"
+                Background="#EEF3FC"
+                BorderBrush="#CFE0F7"
+                BorderThickness="1"
+                CornerRadius="6">
+            <TextBlock Text="{x:Static res:Strings.ModelPipelineOverviewHint}"
+                       TextWrapping="Wrap"
+                       FontSize="12" />
+        </Border>
+
         <TabControl Margin="12,8,12,4" Padding="0" BorderThickness="0" Background="Transparent">
 
             <!-- ─────────────────────── 음성 인식 ─────────────────────── -->

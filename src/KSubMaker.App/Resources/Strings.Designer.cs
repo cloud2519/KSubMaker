@@ -1099,16 +1099,19 @@ public static partial class Strings
     /// <summary>로컬 LLM</summary>
     public static string ModelKindLlm => Get(nameof(ModelKindLlm));
 
-    /// <summary>영상 속 말소리를 원어 텍스트로 받아씁니다. 모델이 클수록 정확하지만 느립니다.</summary>
+    /// <summary>영상 하나를 두 단계로 처리합니다 — 먼저 음성 인식 모델이 말소리를 원어 자막으로 뽑아내고, 그다음 번역 모델이 그 자막을 한국어로 다시 옮깁니다. 아래 탭에서 각 단계에 쓸 모델을 고릅니다.</summary>
+    public static string ModelPipelineOverviewHint => Get(nameof(ModelPipelineOverviewHint));
+
+    /// <summary>1차적으로 음성에서 자막을 추출하는 모델입니다. 영상 속 말소리를 원어 텍스트로 받아쓰며, 모델이 클수록 정확하지만 느립니다.</summary>
     public static string ModelKindWhisperHint => Get(nameof(ModelKindWhisperHint));
 
-    /// <summary>받아쓴 원어 텍스트를 한국어로 옮기는 번역 전용 모델입니다. 빠르고 안정적입니다.</summary>
+    /// <summary>전용 번역 모델(NLLB)입니다. 문장 단위로 빠르고 안정적으로 옮기지만, 앞뒤 문맥이나 말투 지시는 반영하지 못합니다.</summary>
     public static string ModelKindTranslationHint => Get(nameof(ModelKindTranslationHint));
 
-    /// <summary>번역도 시킬 수 있는 범용 대화형 모델입니다. 문맥·문체 지시에 강하지만 훨씬 느립니다.</summary>
+    /// <summary>번역도 시킬 수 있는 범용 대화형 모델(LLM)입니다. 앞뒤 문맥과 말투 지시를 반영할 수 있지만, 토큰을 하나씩 만들어내는 방식이라 NLLB보다 체감상 5~20배 느립니다.</summary>
     public static string ModelKindLlmHint => Get(nameof(ModelKindLlmHint));
 
-    /// <summary>받아쓴 원어 텍스트를 한국어로 옮기는 단계입니다. 전용 번역기(NLLB)나 로컬 LLM 중 하나를 골라 씁니다.</summary>
+    /// <summary>자막을 추출한 뒤, 그것을 각 언어에 맞게 다시 번역하는 2차 과정에서 쓰는 모델입니다. 아래 NLLB(전용 번역기)와 로컬 LLM(범용 대화형 모델) 중 하나를 골라 씁니다.</summary>
     public static string ModelStepTranslationHint => Get(nameof(ModelStepTranslationHint));
 
     /// <summary>설치됨</summary>
