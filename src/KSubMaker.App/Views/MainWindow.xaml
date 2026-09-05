@@ -4,7 +4,7 @@
         xmlns:res="clr-namespace:KSubMaker.App.Resources"
         Title="{x:Static res:Strings.MainWindowTitle}"
         Height="760"
-        Width="1420"
+        Width="1600"
         MinHeight="520"
         MinWidth="960"
         WindowStartupLocation="CenterScreen"
