@@ -267,9 +267,12 @@ begin
   { 0 = 성공, 1638 = 같거나 더 새 버전이 이미 있음, 3010 = 성공하고 재부팅 필요. }
   Result := (ExitCode = 0) or (ExitCode = 1638) or (ExitCode = 3010);
 
+  { 이 줄을 접지 마세요. Inno Setup 은 '[' 로 시작하는 줄을 — 앞에 공백이 몇 칸이든 —
+    섹션 태그로 읽습니다. Pascal 배열 리터럴을 다음 줄로 내리면 컴파일이
+    "Invalid section tag" 로 죽습니다. }
   if not Result then
-    MsgBox(FmtMessage(ExpandConstant('{cm:VcRedistFailed}'),
-                      ['vc_redist.x64.exe -> ' + IntToStr(ExitCode)]), mbError, MB_OK);
+    MsgBox(FmtMessage(ExpandConstant('{cm:VcRedistFailed}'), ['vc_redist.x64.exe -> ' + IntToStr(ExitCode)]),
+      mbError, MB_OK);
 end;
 
 function InitializeSetup(): Boolean;
