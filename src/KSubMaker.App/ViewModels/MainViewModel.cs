@@ -293,9 +293,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(CancelJobsCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(ChooseSubtitleSourceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RunThisJobCommand))]
     [NotifyCanExecuteChangedFor(nameof(OpenOutputFolderCommand))]
     [NotifyCanExecuteChangedFor(nameof(OpenSourceFolderCommand))]
-    [NotifyCanExecuteChangedFor(nameof(RunThisJobCommand))]
     private JobRowViewModel? _selectedJob;
 
     public string QueueStateText => DisplayText.QueueStateName(QueueStatus);
@@ -1989,6 +1989,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
         IncludeSubfolders = settings.IncludeSubfolders;
         IncludeHiddenFolders = settings.IncludeHiddenFolders;
+        SelectedPostQueueAction = settings.PostQueueAction;
 
         // A value the user set before this ran under the old "테스트 모드" setting carries over as the
         // remembered length; the old "0 = whole video" state just leaves the default in place.
@@ -1996,8 +1997,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         {
             TestLengthSeconds = settings.TestDurationSeconds;
         }
-
-        SelectedPostQueueAction = settings.PostQueueAction;
 
         // 결과 폴더 열기 can become available the moment an output directory is configured.
         OpenOutputFolderCommand.NotifyCanExecuteChanged();
@@ -2163,12 +2162,12 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         CancelJobsCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ChooseSubtitleSourceCommand.NotifyCanExecuteChanged();
+        RunThisJobCommand.NotifyCanExecuteChanged();
 
-        // 결과/원본 폴더 열기 fall back to the first checked row when nothing is highlighted.
+        // 결과/원본 폴더 열기 fall back to the first checked row when nothing is highlighted, and the
+        // 시작 label counts checked rows — both move with the same events the commands do.
         OpenOutputFolderCommand.NotifyCanExecuteChanged();
         OpenSourceFolderCommand.NotifyCanExecuteChanged();
-
-        // The 시작 label counts checked rows, so it moves with the same events the commands do.
         OnPropertyChanged(nameof(StartButtonCaption));
     }
 

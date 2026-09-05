@@ -63,8 +63,18 @@ public static class ExternalSubtitleSelector
     /// <param name="videoPath">The video the sidecars belong to.</param>
     /// <param name="candidates">Sidecar paths, typically <c>VideoFile.ExternalSubtitlePaths</c>.</param>
     /// <param name="sourceLanguage">The configured source language; <c>auto</c> or empty disables rule 1.</param>
+    /// <param name="outputPath">
+    /// Where this job's subtitle will be written, when that is already known. A candidate at the
+    /// same path is refused: with a blank output suffix the result is <c>movie.srt</c>, which is
+    /// also a legitimate *source* name, and translating a file onto itself would replace the
+    /// original with a round trip of its own text. The output-conflict policy defaults to 건너뛰기
+    /// and would stop it there, but 덮어쓰기 is one dropdown away and the loss is unrecoverable.
+    /// </param>
     public static ExternalSubtitleChoice? Choose(
-        string videoPath, IEnumerable<string> candidates, string? sourceLanguage = null)
+        string videoPath,
+        IEnumerable<string> candidates,
+        string? sourceLanguage = null,
+        string? outputPath = null)
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
@@ -95,6 +105,11 @@ public static class ExternalSubtitleSelector
                 continue;
             }
 
+            if (outputPath is not null && SamePath(path, outputPath))
+            {
+                continue;
+            }
+
             var language = ExtractLanguage(path, baseName);
             if (string.Equals(language, "ko", StringComparison.Ordinal))
             {
@@ -120,6 +135,21 @@ public static class ExternalSubtitleSelector
         }
 
         return best;
+    }
+
+    /// <summary>Path comparison that survives <c>..</c>, mixed separators and casing.</summary>
+    private static bool SamePath(string left, string right)
+    {
+        try
+        {
+            return string.Equals(
+                Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception)
+        {
+            // An unrooted or malformed path cannot be the output we just built, so it is not a match.
+            return false;
+        }
     }
 
     private static (int Tier, string Reason) Rank(string? language, string? configured)
