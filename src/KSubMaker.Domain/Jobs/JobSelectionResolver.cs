@@ -158,14 +158,11 @@ public static class JobSelectionResolver
     /// <summary>
     /// The rule for 시작, which is deliberately not <see cref="Resolve"/>.
     ///
-    /// <para>Two differences, both of which matter. There is no fallback to the highlighted row:
-    /// pressing 시작 with nothing checked means "run the queue", and collapsing that onto whichever
-    /// row happens to be highlighted would silently run one file out of a hundred. And an empty
-    /// result with nothing checked is not "you selected nothing" — it is "the queue holds nothing
-    /// runnable", which is a different sentence to put in front of the user.</para>
-    ///
-    /// <para><see cref="SelectionOutcome.NothingSelected"/> therefore carries the second meaning for
-    /// this action, and the caller words it accordingly.</para>
+    /// <para>There is no fallback to the highlighted row: pressing 시작 with nothing checked means
+    /// "run the queue", and collapsing that onto whichever row happens to be highlighted would
+    /// silently run one file out of a hundred. Running a single file is the context menu's
+    /// "이 파일만 실행", which is explicit. An empty result with nothing checked is not "you selected
+    /// nothing" — it is "the queue holds nothing runnable".</para>
     /// </summary>
     /// <param name="rows">Every row in the grid, in display order.</param>
     public static JobSelection ResolveStart(IEnumerable<JobSelectionCandidate> rows)

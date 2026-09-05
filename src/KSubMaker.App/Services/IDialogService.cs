@@ -25,6 +25,12 @@ public interface IDialogService
     bool Confirm(string message, string? title = null);
 
     /// <summary>
+    /// One-line (or multi-line) text prompt. Returns the entered string, or null when cancelled —
+    /// which the caller must treat as "do nothing", never as an empty string.
+    /// </summary>
+    string? PromptText(string title, string message, string? initialValue = null, bool multiline = false);
+
+    /// <summary>
     /// Modal 자막 원본 picker. Returns the chosen option, or null when the user cancelled — which the
     /// caller must treat as "change nothing", never as "use the first option".
     /// </summary>

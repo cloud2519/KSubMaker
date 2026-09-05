@@ -237,8 +237,29 @@
                  command on JobRowViewModel and silently disable the item. -->
             <DataGrid.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="{x:Static res:Strings.RunThisMenuItem}"
+                              FontWeight="SemiBold"
+                              Command="{Binding PlacementTarget.DataContext.RunThisJobCommand,
+                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <MenuItem Header="{x:Static res:Strings.PlayMenuItem}"
+                              Command="{Binding PlacementTarget.DataContext.OpenVideoFileCommand,
+                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <Separator />
+                    <MenuItem Header="{x:Static res:Strings.NoteMenuItem}"
+                              Command="{Binding PlacementTarget.DataContext.EditNoteCommand,
+                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                     <MenuItem Header="{x:Static res:Strings.SubtitleSourceMenuItem}"
                               Command="{Binding PlacementTarget.DataContext.ChooseSubtitleSourceCommand,
+                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <Separator />
+                    <MenuItem Header="{x:Static res:Strings.RenameMenuItem}"
+                              Command="{Binding PlacementTarget.DataContext.RenameFileCommand,
+                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <MenuItem Header="{x:Static res:Strings.DeleteMenuItem}"
+                              Command="{Binding PlacementTarget.DataContext.DeleteFileCommand,
+                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <MenuItem Header="{x:Static res:Strings.PropertiesMenuItem}"
+                              Command="{Binding PlacementTarget.DataContext.ShowFilePropertiesCommand,
                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                     <Separator />
                     <MenuItem Header="{x:Static res:Strings.RemoveSelectedButton}"
@@ -280,13 +301,39 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <!-- 파일명 -->
+                <!-- 파일명 — 더블클릭하면 기본 플레이어로 재생 -->
                 <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnFileName}" SortMemberPath="FileName" Width="260">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding FileName}"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis" />
+                            <Border Background="Transparent" ToolTip="{Binding FullPath}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftDoubleClick"
+                                                  Command="{Binding DataContext.OpenVideoFileCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  CommandParameter="{Binding}" />
+                                </Border.InputBindings>
+                                <TextBlock Text="{Binding FileName}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 메모 — 더블클릭하거나 우클릭 메뉴에서 편집 -->
+                <DataGridTemplateColumn Header="{x:Static res:Strings.ColumnNote}" SortMemberPath="Note" Width="160">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="Transparent" ToolTip="{Binding Note}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftDoubleClick"
+                                                  Command="{Binding DataContext.EditNoteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  CommandParameter="{Binding}" />
+                                </Border.InputBindings>
+                                <TextBlock Text="{Binding Note}"
+                                           Foreground="#5C6672"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -295,6 +342,20 @@
                 <DataGridTextColumn Header="{x:Static res:Strings.ColumnDuration}"
                                     Binding="{Binding DurationSeconds, Converter={StaticResource SecondsToTime}}"
                                     Width="80">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="0,0,6,0" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- 용량 — sorts on the raw byte count, not the formatted string -->
+                <DataGridTextColumn Header="{x:Static res:Strings.ColumnFileSize}"
+                                    SortMemberPath="FileSizeBytes"
+                                    Binding="{Binding FileSizeBytes, Converter={StaticResource BytesToString}}"
+                                    Width="84">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Right" />
