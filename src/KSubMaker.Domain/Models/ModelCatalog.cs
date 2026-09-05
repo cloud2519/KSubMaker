@@ -20,11 +20,19 @@ public static class ModelIds
     public const string TranslationNllb600M = "nllb-200-distilled-600M";
     public const string TranslationNllb13B = "nllb-200-distilled-1.3B";
 
+    /// <summary>The undistilled 3.3B. Largest NLLB that still fits a 12GB card.</summary>
+    public const string TranslationNllb33B = "nllb-200-3.3B";
+
     public const string LlmQwen3B = "qwen2.5-3b-instruct-q4km";
     public const string LlmQwen7B = "qwen2.5-7b-instruct-q4km";
 
     public const string LlmGemma3_4B = "gemma-3-4b-it-q4km";
     public const string LlmGemma3_12B = "gemma-3-12b-it-q4km";
+
+    public const string LlmQwen3_4B = "qwen3-4b-instruct-2507-q4km";
+
+    /// <summary>Korean-first model from LG AI Research.</summary>
+    public const string LlmExaone35_78B = "exaone-3.5-7.8b-instruct-q4km";
 }
 
 /// <summary>How the inference stack consumes a downloaded model.</summary>
@@ -391,6 +399,30 @@ public sealed class ModelCatalog
             Description = "600M보다 문맥 처리가 좋습니다. VRAM 12GB 이상에서 권장합니다."
         };
 
+        // The float16 conversion, not the float32 one: same weights at half the download (6.7GB vs
+        // 13.4GB), and CTranslate2 still quantises down to int8 on load, so the compute-type ladder
+        // the OOM recovery walks is unaffected.
+        yield return new ModelDescriptor
+        {
+            Id = ModelIds.TranslationNllb33B,
+            Kind = ModelKind.Translation,
+            DisplayName = "NLLB-200 3.3B (CTranslate2, float16)",
+            RepositoryId = "entai2965/nllb-200-3.3B-ctranslate2-float16",
+            IncludePattern = ModelFileSelector.AnyFile,
+            EssentialFilePattern = ModelFileSelector.Ct2EssentialFile,
+            Layout = ModelPayloadLayout.Directory,
+            FallbackFiles = NllbFiles(),
+            ApproxSizeBytes = 6_722_072_703L, // 6,410 MiB
+            VramGbByComputeType = new Dictionary<ComputeType, double>
+            {
+                [ComputeType.Float16] = 7.5,
+                [ComputeType.Int8Float16] = 4.0,
+                [ComputeType.Int8] = 3.7
+            },
+            License = "CC-BY-NC-4.0 (비상업적 사용)",
+            Description = "distilled 가 아닌 원본 3.3B. 번역 품질은 이 계열에서 가장 좋지만 float16 으로 올리면 VRAM 12GB 에서 음성 인식 모델과 함께 두기 빠듯합니다 — 방식 A 라면 int8 을 고르세요."
+        };
+
         yield return new ModelDescriptor
         {
             Id = ModelIds.LlmQwen3B,
@@ -499,6 +531,53 @@ public sealed class ModelCatalog
             },
             License = "Gemma Terms of Use",
             Description = "품질 우선. 12GB에서는 음성 인식 모델과 동시에 올라가지 않아 처리 방식 B로 내려갑니다. VRAM 16GB 이상 권장."
+        };
+
+        // Qwen 2.5 3B 의 후속. 같은 크기대에서 세대만 올라간 것이라 나란히 둔다 —
+        // 실측 없이 기본값을 바꾸지는 않는다.
+        yield return new ModelDescriptor
+        {
+            Id = ModelIds.LlmQwen3_4B,
+            Kind = ModelKind.Llm,
+            DisplayName = "Qwen3 4B Instruct 2507 (GGUF Q4_K_M)",
+            RepositoryId = "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+            IncludePattern = @"^qwen3-4b-instruct-2507-q4_k_m(?:-\d+-of-\d+)?\.gguf$",
+            EssentialFilePattern = ModelFileSelector.GgufEssentialFile,
+            Layout = ModelPayloadLayout.EntryPointFile,
+            FallbackFiles = ["Qwen3-4B-Instruct-2507-Q4_K_M.gguf"],
+            ApproxSizeBytes = 2_497_281_120L, // 2,382 MiB
+            VramGbByComputeType = new Dictionary<ComputeType, double>
+            {
+                [ComputeType.Float16] = 3.6,
+                [ComputeType.Int8Float16] = 3.2,
+                [ComputeType.Int8] = 3.0
+            },
+            License = "Apache-2.0",
+            Description = "Qwen 2.5 3B 의 후속 세대. 같은 VRAM 대에서 쓸 수 있습니다. 한국어 출력 안정성은 아직 이 저장소에서 측정하지 않았습니다."
+        };
+
+        // 한국어를 1급으로 학습한 모델. 이 저장소가 실측한 LLM 들의 실패는 전부 "한국어가 아닌
+        // 언어로 새는 것"이었으므로(Qwen 7B 57%, Gemma 3 4B 18% 비한국어) 그 축을 정면으로
+        // 겨냥한 후보다. 다만 그 수치와 나란히 놓고 재보기 전까지는 낫다고 단정하지 않는다.
+        yield return new ModelDescriptor
+        {
+            Id = ModelIds.LlmExaone35_78B,
+            Kind = ModelKind.Llm,
+            DisplayName = "EXAONE 3.5 7.8B Instruct (GGUF Q4_K_M)",
+            RepositoryId = "LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct-GGUF",
+            IncludePattern = @"^exaone-3\.5-7\.8b-instruct-q4_k_m(?:-\d+-of-\d+)?\.gguf$",
+            EssentialFilePattern = ModelFileSelector.GgufEssentialFile,
+            Layout = ModelPayloadLayout.EntryPointFile,
+            FallbackFiles = ["EXAONE-3.5-7.8B-Instruct-Q4_K_M.gguf"],
+            ApproxSizeBytes = 4_770_649_728L, // 4,550 MiB
+            VramGbByComputeType = new Dictionary<ComputeType, double>
+            {
+                [ComputeType.Float16] = 5.9,
+                [ComputeType.Int8Float16] = 5.5,
+                [ComputeType.Int8] = 5.3
+            },
+            License = "EXAONE AI Model License (비상업적 사용)",
+            Description = "LG AI Research 의 한국어 중심 모델. 한국어 출력이 목적이라면 가장 유망한 후보이지만, NLLB 대비 품질은 아직 측정하지 않았습니다."
         };
     }
 }
