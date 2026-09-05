@@ -491,6 +491,12 @@
   <data name="RecommendationLabel" xml:space="preserve">
     <value>권장 설정</value>
   </data>
+  <data name="AboutGroup" xml:space="preserve">
+    <value>정보</value>
+  </data>
+  <data name="AboutRepositoryLabel" xml:space="preserve">
+    <value>소스 저장소</value>
+  </data>
   <data name="ComputeTypeLabel" xml:space="preserve">
     <value>연산 정밀도 (compute type)</value>
   </data>
@@ -719,6 +725,9 @@
   <data name="OutputConflictGroup" xml:space="preserve">
     <value>결과 파일 충돌 처리</value>
   </data>
+  <data name="OutputConflictHint" xml:space="preserve">
+    <value>같은 이름의 자막 파일이 이미 있을 때</value>
+  </data>
   <data name="OutputConflictSkip" xml:space="preserve">
     <value>건너뛰기</value>
   </data>
@@ -728,11 +737,14 @@
   <data name="OutputConflictNumbered" xml:space="preserve">
     <value>번호를 붙여 새 파일 만들기</value>
   </data>
+  <data name="OutputNameGroup" xml:space="preserve">
+    <value>결과 파일 이름</value>
+  </data>
   <data name="OutputSuffixLabel" xml:space="preserve">
-    <value>결과 파일 접미사</value>
+    <value>언어 태그</value>
   </data>
   <data name="OutputSuffixHint" xml:space="preserve">
-    <value>예: ko → 영상이름.ko.srt</value>
+    <value>ko → 영상이름.ko.srt · 비우면 영상이름.srt (Plex·Jellyfin은 언어 태그가 있어야 자동으로 불러옵니다)</value>
   </data>
   <data name="SubtitleFormatGroup" xml:space="preserve">
     <value>자막 서식</value>
@@ -793,6 +805,15 @@
   </data>
   <data name="RetryFailedOnlyLabel" xml:space="preserve">
     <value>실패한 파일만 다시 처리</value>
+  </data>
+  <data name="OutputDirectoryGroup" xml:space="preserve">
+    <value>결과 자막 위치</value>
+  </data>
+  <data name="OutputDirectoryLabel" xml:space="preserve">
+    <value>결과 폴더</value>
+  </data>
+  <data name="OutputDirectoryHint" xml:space="preserve">
+    <value>비워 두면 원본 영상과 같은 폴더에 저장합니다. 지정하면 원본 폴더 구조를 그 아래에 그대로 만들어 저장합니다. 위치를 바꾸면 원본 옆에 이미 만들어 둔 자막을 새 위치에 다시 만들 수 있습니다.</value>
   </data>
   <data name="PathsGroup" xml:space="preserve">
     <value>폴더</value>
@@ -880,6 +901,9 @@
   </data>
   <data name="SettingsLoadFailedFormat" xml:space="preserve">
     <value>설정을 불러오지 못했습니다. ({0})</value>
+  </data>
+  <data name="SelectOutputFolderTitle" xml:space="preserve">
+    <value>결과 폴더 선택</value>
   </data>
   <data name="SelectCacheFolderTitle" xml:space="preserve">
     <value>캐시 폴더 선택</value>

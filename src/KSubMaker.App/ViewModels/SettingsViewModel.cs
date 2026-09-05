@@ -278,6 +278,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     // 경로 / 로그
     // -----------------------------------------------------------------------
 
+    /// <summary>Empty = each subtitle next to its source video (the default).</summary>
+    [ObservableProperty]
+    private string _outputDirectory = string.Empty;
+
     [ObservableProperty]
     private string _cacheDirectory = string.Empty;
 
@@ -392,6 +396,16 @@ public sealed partial class SettingsViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void BrowseOutputDirectory()
+    {
+        var picked = _dialogs.PickFolder(Strings.SelectOutputFolderTitle, OutputDirectory);
+        if (picked is not null)
+        {
+            OutputDirectory = picked;
         }
     }
 
@@ -660,6 +674,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ReprocessCompleted = settings.ReprocessCompleted;
         RetryFailedOnly = settings.RetryFailedOnly;
 
+        OutputDirectory = settings.OutputDirectory;
         CacheDirectory = settings.CacheDirectory;
         ModelDirectory = settings.ModelDirectory;
         LogDirectory = settings.LogDirectory;
@@ -704,7 +719,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.SubtitleSource = SelectedSubtitleSource;
         settings.ExistingSubtitleRule = SelectedExistingSubtitleRule;
         settings.OutputConflictPolicy = SelectedOutputConflictPolicy;
-        settings.OutputSuffix = string.IsNullOrWhiteSpace(OutputSuffix) ? "ko" : OutputSuffix.Trim().Trim('.');
+        // Empty is kept: it means "no language tag", i.e. {video}.srt.
+        settings.OutputSuffix = OutputSuffix?.Trim().Trim('.') ?? string.Empty;
         settings.MaxLinesPerCue = Math.Clamp(MaxLinesPerCue, 1, 4);
         settings.MaxCharsPerLine = Math.Clamp(MaxCharsPerLine, 8, 60);
         settings.MinCueDurationSeconds = Math.Clamp(MinCueDurationSeconds, 0.2d, 10d);
@@ -724,6 +740,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.ReprocessCompleted = ReprocessCompleted;
         settings.RetryFailedOnly = RetryFailedOnly;
 
+        settings.OutputDirectory = OutputDirectory.Trim();
         settings.CacheDirectory = CacheDirectory.Trim();
         settings.ModelDirectory = ModelDirectory.Trim();
         settings.LogDirectory = LogDirectory.Trim();

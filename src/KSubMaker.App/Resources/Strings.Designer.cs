@@ -469,6 +469,12 @@ public static partial class Strings
     /// <summary>권장 설정</summary>
     public static string RecommendationLabel => Get(nameof(RecommendationLabel));
 
+    /// <summary>정보</summary>
+    public static string AboutGroup => Get(nameof(AboutGroup));
+
+    /// <summary>소스 저장소</summary>
+    public static string AboutRepositoryLabel => Get(nameof(AboutRepositoryLabel));
+
     /// <summary>연산 정밀도 (compute type)</summary>
     public static string ComputeTypeLabel => Get(nameof(ComputeTypeLabel));
 
@@ -682,6 +688,9 @@ public static partial class Strings
     /// <summary>결과 파일 충돌 처리</summary>
     public static string OutputConflictGroup => Get(nameof(OutputConflictGroup));
 
+    /// <summary>같은 이름의 자막 파일이 이미 있을 때</summary>
+    public static string OutputConflictHint => Get(nameof(OutputConflictHint));
+
     /// <summary>건너뛰기</summary>
     public static string OutputConflictSkip => Get(nameof(OutputConflictSkip));
 
@@ -691,10 +700,13 @@ public static partial class Strings
     /// <summary>번호를 붙여 새 파일 만들기</summary>
     public static string OutputConflictNumbered => Get(nameof(OutputConflictNumbered));
 
-    /// <summary>결과 파일 접미사</summary>
+    /// <summary>결과 파일 이름</summary>
+    public static string OutputNameGroup => Get(nameof(OutputNameGroup));
+
+    /// <summary>언어 태그</summary>
     public static string OutputSuffixLabel => Get(nameof(OutputSuffixLabel));
 
-    /// <summary>예: ko → 영상이름.ko.srt</summary>
+    /// <summary>ko → 영상이름.ko.srt · 비우면 영상이름.srt (Plex·Jellyfin은 언어 태그가 있어야 자동으로 불러옵니다)</summary>
     public static string OutputSuffixHint => Get(nameof(OutputSuffixHint));
 
     /// <summary>자막 서식</summary>
@@ -756,6 +768,15 @@ public static partial class Strings
 
     /// <summary>실패한 파일만 다시 처리</summary>
     public static string RetryFailedOnlyLabel => Get(nameof(RetryFailedOnlyLabel));
+
+    /// <summary>결과 자막 위치</summary>
+    public static string OutputDirectoryGroup => Get(nameof(OutputDirectoryGroup));
+
+    /// <summary>결과 폴더</summary>
+    public static string OutputDirectoryLabel => Get(nameof(OutputDirectoryLabel));
+
+    /// <summary>비워 두면 원본 영상과 같은 폴더에 저장합니다. 지정하면 원본 폴더 구조를 그 아래에 그대로 만들어 저장합니다. 위치를 바꾸면 원본 옆에 이미 만들어 둔 자막을 새 위치에 다시 만들 수 있습니다.</summary>
+    public static string OutputDirectoryHint => Get(nameof(OutputDirectoryHint));
 
     /// <summary>폴더</summary>
     public static string PathsGroup => Get(nameof(PathsGroup));
@@ -843,6 +864,9 @@ public static partial class Strings
 
     /// <summary>설정을 불러오지 못했습니다. ({0})</summary>
     public static string SettingsLoadFailedFormat => Get(nameof(SettingsLoadFailedFormat));
+
+    /// <summary>결과 폴더 선택</summary>
+    public static string SelectOutputFolderTitle => Get(nameof(SelectOutputFolderTitle));
 
     /// <summary>캐시 폴더 선택</summary>
     public static string SelectCacheFolderTitle => Get(nameof(SelectCacheFolderTitle));

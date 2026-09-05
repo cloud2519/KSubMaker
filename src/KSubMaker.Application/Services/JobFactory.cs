@@ -47,7 +47,12 @@ public static class JobFactory
         fileExists ??= File.Exists;
         var now = (timeProvider ?? TimeProvider.System).GetUtcNow().UtcDateTime;
 
-        var outputPath = OutputPathResolver.BuildDefaultPath(file.FullPath, settings.OutputSuffix);
+        var outputPath = OutputPathResolver.BuildDefaultPath(
+            file.FullPath, settings.OutputSuffix, settings.OutputDirectory);
+
+        // "이미 한국어 자막이 있음" now means either the sidecar next to the source or the file at the
+        // configured output location — otherwise pointing OutputDirectory somewhere new would
+        // reprocess a whole library that is already done.
         var koreanExists = file.HasKoreanExternalSubtitle || fileExists(outputPath);
 
         // ---- filters that apply before anything is created -------------------
